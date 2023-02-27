@@ -1,4 +1,4 @@
-from flask import Flask 
+from flask import Flask, redirect, url_for
 from src import config
 
 
@@ -9,7 +9,7 @@ def create_app():
 
 	@app.route("/")
 	def index():
-		return "Hello world"
+		return redirect(url_for("auth_bp.login"))
 
 	from src.auth.routes import auth_bp
 	from src.search.routes import search_bp

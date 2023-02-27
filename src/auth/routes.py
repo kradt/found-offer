@@ -1,12 +1,12 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 
-auth_bp = Blueprint("auth_bp", template_folder="templates", import_name=__name__)
+auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
 
 @auth_bp.route("/login")
 def login():
-	return "Hello my friend"
+	return render_template("base.html")
 
 
 @auth_bp.route("/register")
