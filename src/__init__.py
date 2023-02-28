@@ -1,19 +1,35 @@
-from flask import Flask, redirect, url_for
-from src import config
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+
+from src.config import Config
+
+
+db = SQLAlchemy()
+migrate = Migrate()
+login_manager = LoginManager()
 
 
 def create_app():
 
 	app = Flask(__name__)
-	app.config.from_object(config)
+	app.config.from_object(Config)
+	db.init_app(app)
+	login_manager.init_app(app)
+	login_manager.login_view = "auth_bp.login"
 
-	@app.route("/")
-	def index():
-		return redirect(url_for("auth_bp.login"))
+	with app.app_context():
+		from src.database import models
+		db.create_all()
+
+	migrate.init_app(app, db)
 
 	from src.auth.routes import auth_bp
 	from src.search.routes import search_bp
+	from src.root.routes import root_bp
 
+	app.register_blueprint(root_bp, url_prefix="/")
 	app.register_blueprint(auth_bp, url_prefix="/auth")
 	app.register_blueprint(search_bp, url_prefix="/search")
 
