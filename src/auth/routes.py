@@ -1,17 +1,19 @@
 from flask import Blueprint, render_template
+from .forms import RegisterForm
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
 
-@auth_bp.route("/login")
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
 	return render_template("login.html")
 
 
-@auth_bp.route("/register")
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
-	return render_template("register.html")
+	form = RegisterForm()
+	return render_template("register.html", form=form)
 
 
 @auth_bp.route("/logout")
