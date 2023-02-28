@@ -39,11 +39,10 @@ def register():
 @flask_login.login_required
 def logout():
 	flask_login.logout_user()
-	return "Bye"
+	return redirect(url_for("root_bp.index"))
 
 
 @auth_bp.route("/me")
 @flask_login.login_required
 def home_page():
-	print(dir(flask_login))
 	return f"hello {flask_login.current_user.email}"
