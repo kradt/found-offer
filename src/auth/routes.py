@@ -6,12 +6,12 @@ auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="stati
 
 @auth_bp.route("/login")
 def login():
-	return render_template("base.html")
+	return render_template("login.html")
 
 
 @auth_bp.route("/register")
 def register():
-	return "Hello no name"
+	return render_template("register.html")
 
 
 @auth_bp.route("/logout")

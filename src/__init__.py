@@ -1,11 +1,11 @@
 from flask import Flask, redirect, url_for
-from src import config
+from src.config import Config
 
 
 def create_app():
 
 	app = Flask(__name__)
-	app.config.from_object(config)
+	app.config.from_object(Config)
 
 	@app.route("/")
 	def index():
