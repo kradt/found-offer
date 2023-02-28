@@ -4,6 +4,6 @@ import os
 
 class Config:
 	DEBUG = True
-	SECRET_KEY = secrets.token_hex()
+	SECRET_KEY = os.getenv("SECRET_KEY")
 	SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
 	

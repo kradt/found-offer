@@ -1,3 +1,4 @@
+import flask_login
 from flask import Blueprint, render_template, flash, redirect, url_for, current_app
 
 from src import db
@@ -13,9 +14,9 @@ def login():
 	form = LoginForm()
 	if form.validate_on_submit():
 		user = auth_service.find_user_by_email(db.session, form.email.data)
-		if user and user.check_pasword(form.password):
-			pass
-			# log in user
+		if user and user.check_password(form.password.data):
+			flask_login.login_user(user, remember=form.remember_me.data)
+			return redirect(url_for(".home_page"))
 		else:
 			flash("Wrong email or password")
 
@@ -35,10 +36,14 @@ def register():
 
 
 @auth_bp.route("/logout")
+@flask_login.login_required
 def logout():
+	flask_login.logout_user()
 	return "Bye"
 
 
 @auth_bp.route("/me")
+@flask_login.login_required
 def home_page():
-	return "my home"
+	print(dir(flask_login))
+	return f"hello {flask_login.current_user.email}"

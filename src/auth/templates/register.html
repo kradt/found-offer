@@ -27,7 +27,7 @@
                 {{ form.confirm_password(class="form-control") }}
                 
               </div>
-              {% block errors %}
+              		{% block errors %}
 						{% with messages = get_flashed_messages() %}
 							{% if messages %}
 								{% for message in messages %}
