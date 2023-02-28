@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from .forms import RegisterForm
+from .forms import RegisterForm, LoginForm
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
@@ -7,7 +7,8 @@ auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="stati
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-	return render_template("login.html")
+	form = LoginForm()
+	return render_template("login.html", form=form)
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
