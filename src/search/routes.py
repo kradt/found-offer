@@ -6,4 +6,4 @@ search_bp = Blueprint("search_bp", template_folder="templates", import_name=__na
 
 @search_bp.route("/")
 def find_work():
-	return render_template("bases.html")
+	return render_template("search.html")
