@@ -110,7 +110,7 @@ work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 
 salary = SalaryRange(FROM=Salary.TEN, TO=Salary.THIRTY)
-category = (WorkCategory.it,)
+category = (WorkCategory.it, WorkCategory.design_art)
 
-link = work._create_link_by_filters(city="kyiv", job="backend", type_of_employ=type_of_employ, salary=sal, category=cat)
+link = work._create_link_by_filters(city="kyiv", type_of_employ=type_of_employ, salary=salary, category=category)
 print(link)
