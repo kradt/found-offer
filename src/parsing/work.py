@@ -5,11 +5,21 @@ from typing import Collection
 
 
 class TypeEmployment(Enum):
+	"""
+		Перелічування видів зайнятості
+		Ці дані використовуються сайтом work.ua при формуванні посилання з фільтрами які ввів користувач
+		FUll = Повний Робочий день
+		NOTFULL = Неповний робочий день
+	"""
 	FULL = 74
 	NOTFULL = 75
 
 
 class Salary(Enum):
+	"""
+		Перелічування тисяч гривень
+		Ці дані використовуються сайтом work.ua при формуванні посилання з фільтрами які ввів користувач
+	"""
 	ANY = 0
 	THREE = 2
 	FIVE = 3
@@ -22,11 +32,18 @@ class Salary(Enum):
 
 
 class SalaryRange(BaseModel):
+	"""
+		Структура данних для формування діапазону заробітньої плати необхідної користувачеві.
+	"""
 	FROM: Salary | None
 	TO: Salary | None
 
 
 class WorkCategory(Enum):
+	"""
+		Перелічування всіх можливих категорій роботи
+		Ці дані використовуються сайтом work.ua при формуванні посилання з фільтрами які ввів користувач
+	"""
 	customer_service = 20
 	production_engineering = 14
 	sales = 22
