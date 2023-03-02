@@ -1,6 +1,7 @@
 from requests_html import HTMLSession
 from pydantic import BaseModel
 from enum import Enum
+from typing import Collection
 
 
 class TypeEmployment(Enum):
@@ -25,6 +26,37 @@ class SalaryRange(BaseModel):
 	TO: Salary | None
 
 
+class WorkCategory(Enum):
+	customer_service = 20
+	production_engineering = 14
+	sales = 22
+	retail = 23 
+	jobs_administration = 2
+	logistic_supply_chain = 8
+	hotel_restaurant_tourism = 4
+	it = 1
+	accounting = 3
+	auto_transport = 24
+	healthcare = 10
+	marketing_advertising_pr = 9
+	office_secretarial = 15
+	banking_finance = 26
+	telecommunications = 6792
+	construction_architecture = 19
+	education_scientific = 12
+	beauty_sports = 6
+	design_art = 5
+	publishing_media = 17
+	hr_recruitment = 25
+	security = 13
+	management_executive = 21
+	agriculture = 30
+	legal = 27
+	real_estate = 11
+	culture_music_showbiz = 7
+	insurance = 18
+
+
 class WorkUA:
 	__link = "https://www.work.ua/{}"
 
@@ -36,8 +68,12 @@ class WorkUA:
 								city: str | None = None,
 								job: str | None = None, 
 								type_of_employ: tuple[TypeEmployment] | None = None, 
-								category: list[int] | None = None, 
+								category: tuple[WorkCategory] | None = None, 
 								salary: SalaryRange | None = None) -> str:
+		"""
+		Метод який створює ссилку по потрібним фільтрам 
+
+		"""
 		link = self.__link
 		filter_block = "jobs"
 		if city:
@@ -48,25 +84,33 @@ class WorkUA:
 		# Означає що будуть використувавтися розширені фільтри
 		filter_block += "?advs=1"
 
-		#TODO: category handle
+		# Вибір категорії праці
+		if category:
+			category_block = "+".join((str(i.value) for i in category))
+			filter_block += f"&category={category_block}"
+
+		# Вибір виду зайнятості
 		if type_of_employ:
-			type_ = "+".join([str(i.value) for i in type_of_employ])
-			filter_block += f"&employment={type_}"
+			type_block = "+".join((str(i.value) for i in type_of_employ))
+			filter_block += f"&employment={type_block}"
 
+		# Вибір діапазону заробітньої плати
 		if salary:
-			salary_ = ""
+			salary_block = ""
 			if salary.FROM:
-				salary_ += f"&salaryfrom={salary.FROM.value}"
+				salary_block += f"&salaryfrom={salary.FROM.value}"
 			if salary.TO:
-				salary_ += f"&salaryto={salary.TO.value}"
-			filter_block += salary_
-
+				salary_block += f"&salaryto={salary.TO.value}"
+			filter_block += salary_block
 
 		return link.format(filter_block)
 
 
 work = WorkUA()
-t_o_e = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
-sal = SalaryRange(FROM=Salary.TEN, TO=Salary.FIFTY)
-soup = work._create_link_by_filters("kyiv", "backend", t_o_e, salary=sal)
-print(soup)
+type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
+
+salary = SalaryRange(FROM=Salary.TEN, TO=Salary.THIRTY)
+category = (WorkCategory.it,)
+
+link = work._create_link_by_filters(city="kyiv", job="backend", type_of_employ=type_of_employ, salary=sal, category=cat)
+print(link)
