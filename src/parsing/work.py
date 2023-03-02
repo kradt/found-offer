@@ -1,4 +1,10 @@
 from requests_html import HTMLSession
+from enum import Enum
+
+
+class TypeEmployment(Enum):
+	FULL = 74
+	NOTFULL = 75
 
 
 class WorkUA:
@@ -9,25 +15,29 @@ class WorkUA:
 
 
 	def _create_link_by_filters(self,
-								 city: str | None = None,
-								 job: str | None = None, 
-								 category: list[int] | None = None, 
-								 type_of_employ: list[int] | None = None, 
-								 salary: tuple[int, int] | None = None) -> str:
+								city: str | None = None,
+								job: str | None = None, 
+								type_of_employ: tuple[TypeEmployment] | None = None, 
+								category: list[int] | None = None, 
+								salary: tuple[int, int] | None = None) -> str:
 		link = self.__link
-		job_block = "jobs"
+		filter_block = "jobs"
 		if city:
-			job_block += f"-{city}"
+			filter_block += f"-{city}"
 		if job:
-			job_block += f"-{job}"
+			filter_block += f"-{job}/"
 
-		return link.format(job_block)
+		filter_block += "?advs=1"
 
+		#TODO: category handle
+		if type_of_employ:
+			type_ = "+".join([str(i.value) for i in type_of_employ])
+			filter_block += f"&employment={type_}"
 
-	
-
+		return link.format(filter_block)
 
 
 work = WorkUA()
-soup = work._create_link_by_filters("kiev", "backend")
+t_o_e = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
+soup = work._create_link_by_filters("kyiv", "backend", t_o_e)
 print(soup)
