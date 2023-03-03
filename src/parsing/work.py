@@ -1,7 +1,6 @@
 from requests_html import HTMLSession
 from pydantic import BaseModel
 from enum import Enum
-from typing import Collection
 
 
 class TypeEmployment(Enum):
@@ -93,6 +92,7 @@ class WorkUA:
 		"""
 		link = self.__link
 		filter_block = "jobs"
+
 		if city:
 			filter_block += f"-{city}"
 		if job:
@@ -122,6 +122,30 @@ class WorkUA:
 
 		return link.format(filter_block)
 
+	def get_count_of_pages(self, link: str) -> int:
+		"""
+		Method for find count of pages
+		"""
+		page = self.session.get(link).html
+		pagination_block = page.find(".pagination", first=True)
+		count_of_pages = pagination_block.find("a")[-2].text
+		return int(count_of_pages)
+		
+	def get_offers(self,
+				   city: str | None = None,
+				   job: str | None = None, 
+				   type_of_employ: tuple[TypeEmployment] | None = None, 
+				   category: tuple[WorkCategory] | None = None, 
+				   salary: SalaryRange | None = None) -> str:
+
+		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
+		page = self.session.get(link)
+		offers = page.html.find(".card-visited")
+		for i in offers:
+			title = i.find("h2")[0].text
+			salary = i.find("b")[0].text
+			company = i.find("b")[1].text
+			desc = i.find("p")[0].text
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
@@ -129,5 +153,5 @@ type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.TEN, TO=Salary.THIRTY)
 category = (WorkCategory.it, WorkCategory.design_art)
 
-link = work._create_link_by_filters(city="kyiv", type_of_employ=type_of_employ, salary=salary, category=category)
-print(link)
+link = work.get_offers(city="kyiv", type_of_employ=type_of_employ, salary=salary, category=category)
+
