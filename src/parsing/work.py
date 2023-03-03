@@ -73,6 +73,16 @@ class WorkCategory(Enum):
 	insurance = 18
 
 
+
+class Offer(BaseModel):
+	title: str
+	city: str
+	salary: str | None
+	company: str
+	description: str
+	link: str
+
+
 class WorkUA:
 	__link = "https://www.work.ua/{}"
 
@@ -124,34 +134,81 @@ class WorkUA:
 
 	def get_count_of_pages(self, link: str) -> int:
 		"""
-		Method for find count of pages
+		 Метод який повертає кількість сторінок в пагінації
 		"""
+		#TODO: ЗРобить щоб якщо немає сторінок повертало False
 		page = self.session.get(link).html
 		pagination_block = page.find(".pagination", first=True)
 		count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
 		
+
+	def _get_pages(self,
+				   city: str | None = None,
+				   job: str | None = None, 
+				   type_of_employ: tuple[TypeEmployment] | None = None, 
+				   category: tuple[WorkCategory] | None = None, 
+				   salary: SalaryRange | None = None) -> list[str]:
+		"""
+		Метод який генерує ссилки на всі сторінки з вакансіями.
+		"""
+
+		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
+		count_of_pages = self.get_count_of_pages(link)
+	
+		return [link + f"page={i}" for i in range(count_of_pages)]
+
 	def get_offers(self,
 				   city: str | None = None,
 				   job: str | None = None, 
 				   type_of_employ: tuple[TypeEmployment] | None = None, 
 				   category: tuple[WorkCategory] | None = None, 
-				   salary: SalaryRange | None = None) -> str:
+				   salary: SalaryRange | None = None) -> list[Offer]:
 
-		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		page = self.session.get(link)
-		offers = page.html.find(".card-visited")
-		for i in offers:
-			title = i.find("h2")[0].text
-			salary = i.find("b")[0].text
-			company = i.find("b")[1].text
-			desc = i.find("p")[0].text
+		links = self._get_pages(city, job, type_of_employ, category, salary)
+		offers: list[Offer] = []
+
+		for link in links:
+			page = self.session.get(link)
+			for i in page.html.find(".card-visited"):
+				# Отримуємо блок з Заголовком в якому міститься також і ссилка
+				block_title = i.find("h2")[0]
+				title = block_title.text
+				# Отримуємо ссилку на вакансію зрізаючи перший символ "/" оскільки в змінній __link він уже присутній
+				link = self.__link.format(block_title.find("a", first=True).attrs["href"][1:-1])
+				# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
+				about_block = i.find("b")
+				salary = about_block[0].text
+				company = about_block[1].text
+				# Отримуємо опис вакансії
+				desc = i.find("p")[0].text
+				# Отримуємо місто на яке розрахована ця ваканція
+				city = i.find('div.add-top-xs > span:nth-child(6)', first=True)
+				# ---- TODO: Зробить по людьські ----
+				if not city or city.attrs:
+					city = i.find('div.add-top-xs > span:nth-child(4)', first=True)
+					if not city or city.attrs:
+						city = i.find('div.add-top-xs > span:nth-child(5)', first=True)
+					if not city or city.attrs:
+						city = i.find('div.add-top-xs > span:nth-child(3)', first=True)
+				#------------------------------------
+		
+				offers.append(Offer(title=title,
+							  		city=city.text, 
+							  		salary=salary, 
+							  		company=company, 
+							 		description=desc,
+							 	 	link=link))
+		return offers
+		
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
-
-salary = SalaryRange(FROM=Salary.TEN, TO=Salary.THIRTY)
-category = (WorkCategory.it, WorkCategory.design_art)
-
-link = work.get_offers(city="kyiv", type_of_employ=type_of_employ, salary=salary, category=category)
+salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
+category = (WorkCategory.it,)
+import datetime
+start = datetime.datetime.now()
+offers = work.get_offers(city="kyiv", type_of_employ=type_of_employ, salary=salary, category=category)
+print("time: ", datetime.datetime.now()-start)
+print(len(offers))
 
