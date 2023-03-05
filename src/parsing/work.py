@@ -95,7 +95,39 @@ class PageQuery(HTML):
 		pass
 
 	def get_offers(self):
-		pass
+		offers: list[OfferModel] = []
+
+		for i in self.find(".card-visited"):
+			# Отримуємо блок з Заголовком в якому міститься також і ссилка
+			block_title = i.find("h2")[0]
+			title = block_title.text
+			# Отримуємо ссилку на вакансію зрізаючи перший символ "/" оскільки в змінній __link він уже присутній
+			link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs["href"]
+			# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
+			about_block = i.find("b")
+			salary = about_block[0].text
+			company = about_block[1].text
+			# Отримуємо опис вакансії
+			desc = i.find("p")[0].text
+			# Отримуємо місто на яке розрахована ця ваканція
+			city = i.find('div.add-top-xs > span:nth-child(6)', first=True)
+			# ---- TODO: Зробить по людьські ----
+			if not city or city.attrs:
+				city = i.find('div.add-top-xs > span:nth-child(4)', first=True)
+				if not city or city.attrs:
+					city = i.find('div.add-top-xs > span:nth-child(5)', first=True)
+				if not city or city.attrs:
+					city = i.find('div.add-top-xs > span:nth-child(3)', first=True)
+			# ------------------------------------
+	
+			offers.append(OfferModel(title=title,
+							  		 city=city.text, 
+							  		 salary=salary, 
+							  		 company=company, 
+							 		 description=desc,
+							 	 	 link=link))
+		return offers
+		
 
 	def get_count_of_pages(self, url: str) -> int:
 		"""
@@ -159,63 +191,6 @@ class WorkUA:
 
 		return link.format(filter_block)		
 
-	def _get_pages(self,
-				   city: str | None = None,
-				   job: str | None = None, 
-				   type_of_employ: tuple[TypeEmployment] | None = None, 
-				   category: tuple[WorkCategory] | None = None, 
-				   salary: SalaryRange | None = None) -> list[str]:
-		"""
-		Метод який генерує ссилки на всі сторінки з вакансіями.
-		"""
-
-		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		count_of_pages = self.get_count_of_pages(link)
-	
-		return [link + f"page={i}" for i in range(count_of_pages)]
-
-	def get_offers(self,
-				   city: str | None = None,
-				   job: str | None = None, 
-				   type_of_employ: tuple[TypeEmployment] | None = None, 
-				   category: tuple[WorkCategory] | None = None, 
-				   salary: SalaryRange | None = None) -> list[OfferModel]:
-
-		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		offers: list[OfferModel] = []
-		
-		page = self.session.get(link)
-		for i in page.html.find(".card-visited"):
-			# Отримуємо блок з Заголовком в якому міститься також і ссилка
-			block_title = i.find("h2")[0]
-			title = block_title.text
-			# Отримуємо ссилку на вакансію зрізаючи перший символ "/" оскільки в змінній __link він уже присутній
-			link = self.__link.format(block_title.find("a", first=True).attrs["href"][1:-1])
-			# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
-			about_block = i.find("b")
-			salary = about_block[0].text
-			company = about_block[1].text
-			# Отримуємо опис вакансії
-			desc = i.find("p")[0].text
-			# Отримуємо місто на яке розрахована ця ваканція
-			city = i.find('div.add-top-xs > span:nth-child(6)', first=True)
-			# ---- TODO: Зробить по людьські ----
-			if not city or city.attrs:
-				city = i.find('div.add-top-xs > span:nth-child(4)', first=True)
-				if not city or city.attrs:
-					city = i.find('div.add-top-xs > span:nth-child(5)', first=True)
-				if not city or city.attrs:
-					city = i.find('div.add-top-xs > span:nth-child(3)', first=True)
-			#------------------------------------
-	
-			offers.append(OfferModel(title=title,
-							  		 city=city.text, 
-							  		 salary=salary, 
-							  		 company=company, 
-							 		 description=desc,
-							 	 	 link=link))
-		return offers
-
 	def get_page(self,
 				     city: str | None = None,
 				     job: str | None = None, 
@@ -225,14 +200,17 @@ class WorkUA:
 
 		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
 		page_content = self.session.get(link).content
-		query = PageQuery(session=self.session, html=page_content, url=link, per_page=5)
-		return
+		return PageQuery(session=self.session, html=page_content, url=link, per_page=5)
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
+page = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 
-link = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
+from datetime import datetime
+s = datetime.now()
+offers = page.get_offers()
+print(datetime.now()-s)
 
 
 
