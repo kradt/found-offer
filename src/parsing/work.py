@@ -83,8 +83,8 @@ class OfferModel(BaseModel):
 	link: str
 
 
-
 class PageQuery(HTML):
+
 	def __init__(self, *args, per_page: int = 5, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.per_page = per_page
@@ -93,15 +93,15 @@ class PageQuery(HTML):
 
 	@property
 	def current_page(self) -> int:
-		return self._page
-
+		return self._current_page
+		
 	@current_page.setter
 	def current_page(self, value: int):
 		self.raw_html = self.session.get(self.url + f"&page={value}").content
-		self._page = value
+		self._current_page = value
+		super().__init__(session=self.session, url=self.url, html=self.html)
 
 	def get_offers(self) -> list[OfferModel]:
-		print(self)
 		offers: list[OfferModel] = []
 
 		for i in self.find(".card-visited"):
@@ -210,11 +210,7 @@ work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
-pg.current_page = 6
-
-print(pg.url)
+pg.current_page = 3
 print(pg.get_offers())
-
 print(pg.current_page)
-
 
