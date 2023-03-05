@@ -1,4 +1,4 @@
-from requests_html import HTMLSession
+from requests_html import HTMLSession, HTML
 from pydantic import BaseModel
 from enum import Enum
 
@@ -83,6 +83,33 @@ class OfferModel(BaseModel):
 	link: str
 
 
+
+class PageQuery(HTML):
+	def __init__(self, *args,  per_page: int, current_page: int = 1, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.per_page = per_page
+		self.count_of_pages = self.get_count_of_pages(self.url)
+		self.page = current_page
+
+	def paginate(self):
+		pass
+
+	def get_offers(self):
+		pass
+
+	def get_count_of_pages(self, url: str) -> int:
+		"""
+		 Метод який повертає кількість сторінок в пагінації
+		"""
+		page = self.session.get(url).html
+		pagination_block = page.find(".pagination", first=True)
+
+		count_of_pages = 1
+		if pagination_block:
+			count_of_pages = pagination_block.find("a")[-2].text
+		return int(count_of_pages)
+
+
 class WorkUA:
 	__link = "https://www.work.ua/{}"
 
@@ -130,21 +157,7 @@ class WorkUA:
 				salary_block += f"&salaryto={salary.TO.value}"
 			filter_block += salary_block
 
-		return link.format(filter_block)
-
-	def get_count_of_pages(self, link: str) -> int:
-		"""
-		 Метод який повертає кількість сторінок в пагінації
-		"""
-		#TODO: ЗРобить щоб якщо немає сторінок повертало False
-		page = self.session.get(link).html
-		pagination_block = page.find(".pagination", first=True)
-
-		count_of_pages = 1
-		if pagination_block:
-			count_of_pages = pagination_block.find("a")[-2].text
-		return int(count_of_pages)
-		
+		return link.format(filter_block)		
 
 	def _get_pages(self,
 				   city: str | None = None,
@@ -202,19 +215,25 @@ class WorkUA:
 							 		 description=desc,
 							 	 	 link=link))
 		return offers
-		
+
+	def get_page(self,
+				     city: str | None = None,
+				     job: str | None = None, 
+				     type_of_employ: tuple[TypeEmployment] | None = None, 
+				     category: tuple[WorkCategory] | None = None, 
+				     salary: SalaryRange | None = None) -> list[OfferModel]:
+
+		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
+		page_content = self.session.get(link).content
+		query = PageQuery(session=self.session, html=page_content, url=link, per_page=5)
+		return
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 
-import datetime
-start = datetime.datetime.now()
-link = work._create_link_by_filters(job="backend", type_of_employ=type_of_employ, salary=salary, category=category)
-print(link)
-offers = work.get_count_of_pages(link)
+link = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 
-print(offers)
-print("time: ", datetime.datetime.now()-start)
+
 
 
