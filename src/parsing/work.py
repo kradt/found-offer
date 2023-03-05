@@ -97,9 +97,12 @@ class PageQuery(HTML):
 		
 	@current_page.setter
 	def current_page(self, value: int):
-		self.raw_html = self.session.get(self.url + f"&page={value}").content
-		self._current_page = value
-		super().__init__(session=self.session, url=self.url, html=self.html)
+		if isinstance(value, int) and value <= self.count_of_pages:
+			self.raw_html = self.session.get(self.url + f"&page={value}").content
+			self._current_page = value
+			super().__init__(session=self.session, url=self.url, html=self.html)
+		else:
+			raise ValueError(f"The Query has only {self.count_of_pages} pages")
 
 	def get_offers(self) -> list[OfferModel]:
 		offers: list[OfferModel] = []
@@ -125,7 +128,7 @@ class PageQuery(HTML):
 					city = i.find('div.add-top-xs > span:nth-child(5)', first=True)
 				if not city or city.attrs:
 					city = i.find('div.add-top-xs > span:nth-child(3)', first=True)
-			# ------------------------------------
+			
 			offers.append(OfferModel(title=title,
 							  		 city=city.text, 
 							  		 salary=salary, 
@@ -210,7 +213,7 @@ work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
-pg.current_page = 3
+pg.current_page = 4
 print(pg.get_offers())
 print(pg.current_page)
 
