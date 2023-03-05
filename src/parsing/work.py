@@ -85,16 +85,23 @@ class OfferModel(BaseModel):
 
 
 class PageQuery(HTML):
-	def __init__(self, *args,  per_page: int, current_page: int = 1, **kwargs):
+	def __init__(self, *args, per_page: int = 5, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.per_page = per_page
 		self.count_of_pages = self.get_count_of_pages(self.url)
-		self.page = current_page
+		self._current_page = current_page
 
-	def paginate(self):
-		pass
+	@property
+	def current_page(self) -> int:
+		return self._page
 
-	def get_offers(self):
+	@current_page.setter
+	def current_page(self, value: int):
+		self.raw_html = self.session.get(self.url + f"&page={value}").content
+		self._page = value
+
+	def get_offers(self) -> list[OfferModel]:
+		print(self)
 		offers: list[OfferModel] = []
 
 		for i in self.find(".card-visited"):
@@ -119,7 +126,6 @@ class PageQuery(HTML):
 				if not city or city.attrs:
 					city = i.find('div.add-top-xs > span:nth-child(3)', first=True)
 			# ------------------------------------
-	
 			offers.append(OfferModel(title=title,
 							  		 city=city.text, 
 							  		 salary=salary, 
@@ -127,14 +133,12 @@ class PageQuery(HTML):
 							 		 description=desc,
 							 	 	 link=link))
 		return offers
-		
 
 	def get_count_of_pages(self, url: str) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
-		page = self.session.get(url).html
-		pagination_block = page.find(".pagination", first=True)
+		pagination_block = self.find(".pagination", first=True)
 
 		count_of_pages = 1
 		if pagination_block:
@@ -143,11 +147,10 @@ class PageQuery(HTML):
 
 
 class WorkUA:
-	__link = "https://www.work.ua/{}"
+	__url = "https://www.work.ua/{}"
 
 	def __init__(self):
 		self.session = HTMLSession()
-
 
 	def _create_link_by_filters(self,
 								city: str | None = None,
@@ -159,7 +162,7 @@ class WorkUA:
 		Метод який створює ссилку по потрібним фільтрам 
 
 		"""
-		link = self.__link
+		link = self.__url
 		filter_block = "jobs"
 
 		if city:
@@ -192,26 +195,26 @@ class WorkUA:
 		return link.format(filter_block)		
 
 	def get_page(self,
-				     city: str | None = None,
-				     job: str | None = None, 
-				     type_of_employ: tuple[TypeEmployment] | None = None, 
-				     category: tuple[WorkCategory] | None = None, 
-				     salary: SalaryRange | None = None) -> list[OfferModel]:
+				 city: str | None = None,
+				 job: str | None = None, 
+				 type_of_employ: tuple[TypeEmployment] | None = None, 
+				 category: tuple[WorkCategory] | None = None, 
+				 salary: SalaryRange | None = None) -> list[OfferModel]:
 
-		link = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		page_content = self.session.get(link).content
-		return PageQuery(session=self.session, html=page_content, url=link, per_page=5)
+		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
+		page_content = self.session.get(url).content
+		return PageQuery(session=self.session, html=page_content, url=url, per_page=5)
+
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
-page = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
+pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
+pg.current_page = 6
 
-from datetime import datetime
-s = datetime.now()
-offers = page.get_offers()
-print(datetime.now()-s)
+print(pg.url)
+print(pg.get_offers())
 
-
+print(pg.current_page)
 
 
