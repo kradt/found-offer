@@ -85,24 +85,21 @@ class OfferModel(BaseModel):
 	link: str
 
 
-class PageQuery(BaseParser):
+class PageQuery(HTML):
 	"""
 	Клас який представляє запит вакансій по фільтрам
 	"""
 	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.count_of_pages = self.get_count_of_pages(self.url)
+		self.count_of_pages = self.get_count_of_pages()
 		self._current_page = current_page
 		self.__per_page = per_page
+
 
 	def get_offers(self) -> list[OfferModel]:
 		offers: list[OfferModel] = []
 
 		raw_offers: list = self.find(".card-visited")
-
-		while len(raw_offers) < self.__per_page:
-			self.current_page += 1
-			raw_offers += self.find(".card-visited")
 
 		for offer in raw_offers:
 			# Отримуємо блок з Заголовком в якому міститься також і ссилка
@@ -133,7 +130,7 @@ class PageQuery(BaseParser):
 							 	 	 link=link))
 		return offers
 
-	def get_count_of_pages(self, url: str) -> int:
+	def get_count_of_pages(self) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
@@ -147,7 +144,7 @@ class PageQuery(BaseParser):
 	@property
 	def current_page(self) -> int:
 		return self._current_page
-		
+
 	@current_page.setter
 	def current_page(self, value: int):
 		if isinstance(value, int) and value <= self.count_of_pages:
@@ -166,9 +163,9 @@ class WorkUA:
 
 	def _create_link_by_filters(self,
 								city: str | None = None,
-								job: str | None = None, 
-								type_of_employ: tuple[TypeEmployment] | None = None, 
-								category: tuple[WorkCategory] | None = None, 
+								job: str | None = None,
+								type_of_employ: tuple[TypeEmployment] | None = None,
+								category: tuple[WorkCategory] | None = None,
 								salary: SalaryRange | None = None) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам 
