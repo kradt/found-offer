@@ -141,19 +141,6 @@ class PageQuery(HTML):
 			count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
 
-	@property
-	def current_page(self) -> int:
-		return self._current_page
-
-	@current_page.setter
-	def current_page(self, value: int):
-		if isinstance(value, int) and value <= self.count_of_pages:
-			html = self.session.get(self.url + f"&page={value}").content
-			# Викликаємо батьківський дандер метод __init__ для того щоб примінити новий html
-			super().__init__(session=self.session, url=self.url, html=html)
-			self._current_page = value
-		else:
-			raise ValueError(f"The Query has only {self.count_of_pages} pages")
 
 class WorkUA:
 	__url = "https://www.work.ua/{}"
