@@ -83,6 +83,7 @@ class OfferModel(BaseModel):
 	company: str
 	description: str
 	link: str
+	time_publish: str
 
 
 class PageQuery(HTML):
@@ -121,13 +122,16 @@ class PageQuery(HTML):
 					city = offer.find('div.add-top-xs > span:nth-child(5)', first=True)
 				if not city or city.attrs:
 					city = offer.find('div.add-top-xs > span:nth-child(3)', first=True)
+			time_publish = offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
+			print(time_publish)
 			
 			offers.append(OfferModel(title=title,
 							  		 city=city.text, 
 							  		 salary=salary, 
 							  		 company=company, 
 							 		 description=desc,
-							 	 	 link=link))
+							 	 	 link=link,
+							 	 	 time_publish=time_publish))
 		return offers
 
 	def get_count_of_pages(self) -> int:
