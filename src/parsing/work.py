@@ -92,8 +92,9 @@ class PageQuery(HTML):
 	"""
 	Клас який представляє запит вакансій по фільтрам
 	"""
-	def __init__(self, *args, current_page: int = 1, **kwargs):
+	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.__per_page = per_page
 		self.count_of_pages = self.get_count_of_pages()
 		self.current_page = current_page
 
@@ -114,7 +115,7 @@ class PageQuery(HTML):
 		if not city or city.attrs:
 			city = raw_offer.find('div.add-top-xs > span:nth-child(4)', first=True)
 			if not city or city.attrs:
-				city = offer.find('div.add-top-xs > span:nth-child(5)', first=True)
+				city = raw_offer.find('div.add-top-xs > span:nth-child(5)', first=True)
 			if not city or city.attrs:
 				city = raw_offer.find('div.add-top-xs > span:nth-child(3)', first=True)
 		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
@@ -146,37 +147,39 @@ class PageQuery(HTML):
 		if page == self.current_page:
 			return self
 
-		if page <= count_of_pages:
+		if page <= self.count_of_pages:
 			url = self.url + f"&page={page}"
-			page_content = self.session.get(url)
+			page_content = self.session.get(url).content
 			super().__init__(session=self.session, url=url, html=page_content)
 			self.current_page = page
 			return self
 		else:
 			raise ValueError("Page don't exist")
 
+
 	def get_number_needed_page(self, per_page: int, page: int) -> int:
-		site_per_page = 14
-		return math.ceil((page * per_page) / site_per_page)
+		return math.ceil((page * per_page) / self.__per_page)
 
 	def paginate(self, per_page: int, page: int):
 		offers: list[OfferModel] = []
 		needed_page = self.get_number_needed_page(per_page, page)
-		get_page(needed_page)
+		self.get_page(needed_page)
+
 		raw_offers: list = self.find(".card-visited")
 
 		while len(raw_offers) < per_page:
-			get_next_page()
+			self.get_next_page()
 			raw_offers.append(self.find(".card-visited"))
 
 		for i in range(0, per_page):
-			offer = raw_offer.pop(i)
+			offer = raw_offers.pop(i)
 			offers.append(self._prepare_offer(offer))
 		return offers
 
 
 class WorkUA:
 	__url = "https://www.work.ua/{}"
+	__per_page = 14
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -231,15 +234,15 @@ class WorkUA:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
 		page_content = self.session.get(url).content
-		return PageQuery(session=self.session, html=page_content, url=url)
+		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
+print(pg.url)
+print(pg.paginate(3, 5))
 
-print(pg.get_offers())
-print(pg.current_page)
 
 
