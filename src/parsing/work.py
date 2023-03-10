@@ -1,3 +1,4 @@
+from typing import Self
 from requests_html import HTMLSession, HTML, Element, BaseParser
 from pydantic import BaseModel
 from enum import Enum
@@ -137,16 +138,14 @@ class PageQuery(HTML):
 			count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
 
-	def get_next_page(self):
+	def get_next_page(self) -> Self:
 		next_page = self.current_page + 1
-		if next_page <= count_of_pages:
-			url = self.url + f"&page={next_page}"
-			page_content = self.session.get(url)
-			super().__init__(session=self.session, url=url, html=page_content)
-			self.current_page = next_page
+		return self.get_page(next_page)
+
+	def get_page(self, page: int) -> Self:
+		if page == self.current_page:
 			return self
 
-	def get_page(self, page: int):
 		if page <= count_of_pages:
 			url = self.url + f"&page={page}"
 			page_content = self.session.get(url)
@@ -162,6 +161,8 @@ class PageQuery(HTML):
 
 	def paginate(self, per_page: int, page: int):
 		offers: list[OfferModel] = []
+		needed_page = self.get_number_needed_page(per_page, page)
+		get_page(needed_page)
 		raw_offers: list = self.find(".card-visited")
 
 		while len(raw_offers) < per_page:
@@ -171,6 +172,7 @@ class PageQuery(HTML):
 		for i in range(0, per_page):
 			offer = raw_offer.pop(i)
 			offers.append(self._prepare_offer(offer))
+		return offers
 
 
 class WorkUA:
