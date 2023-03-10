@@ -98,14 +98,13 @@ class PageQuery(HTML):
 		self.count_of_pages = self.get_count_of_pages()
 		self.current_page = current_page
 
-
 	def __get_city_of_offer(self, raw_offer) -> str:
-		possible_paths = [
+		possible_paths = (
 			'div.add-top-xs > span:nth-child(6)',
-			'div.add-top-xs > span:nth-child(4)',
 			'div.add-top-xs > span:nth-child(5)',
+			'div.add-top-xs > span:nth-child(4)',
 			'div.add-top-xs > span:nth-child(3)'
-		]
+		)
 		city = None
 		for i in possible_paths:
 			variant = raw_offer.find(i, first=True)
@@ -129,7 +128,6 @@ class PageQuery(HTML):
 		# Отримуємо опис вакансії
 		desc = raw_offer.find("p", first=True).text if raw_offer.find("p") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
-		
 		city = self.__get_city_of_offer(raw_offer)
 		# Отримуємо дату публікації
 		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
@@ -267,6 +265,7 @@ salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.url)
 print(pg.paginate(14, 1))
+
 
 
 
