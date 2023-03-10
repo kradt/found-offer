@@ -156,7 +156,6 @@ class PageQuery(HTML):
 		else:
 			raise ValueError("Page don't exist")
 
-
 	def get_number_needed_page(self, per_page: int, page: int) -> int:
 		return math.ceil((page * per_page) / self.__per_page)
 
@@ -243,6 +242,7 @@ salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.url)
 print(pg.paginate(3, 5))
+
 
 
 
