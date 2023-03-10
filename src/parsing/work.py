@@ -1,6 +1,8 @@
+from typing import Self
 from requests_html import HTMLSession, HTML, Element, BaseParser
 from pydantic import BaseModel
 from enum import Enum
+import math
 
 
 class TypeEmployment(Enum):
@@ -92,47 +94,39 @@ class PageQuery(HTML):
 	"""
 	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.count_of_pages = self.get_count_of_pages()
-		self._current_page = current_page
 		self.__per_page = per_page
+		self.count_of_pages = self.get_count_of_pages()
+		self.current_page = current_page
 
-
-	def get_offers(self) -> list[OfferModel]:
-		offers: list[OfferModel] = []
-
-		raw_offers: list = self.find(".card-visited")
-
-		for offer in raw_offers:
-			# Отримуємо блок з Заголовком в якому міститься також і ссилка
-			block_title = offer.find("h2")[0]
-			title = block_title.text
-			link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs["href"]
-			# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
-			about_block = offer.find("b")
-			salary = about_block[0].text
-			company = about_block[1].text
-			# Отримуємо опис вакансії
-			desc = offer.find("p")[0].text
-			# Отримуємо місто на яке розрахована ця ваканція
-			city = offer.find('div.add-top-xs > span:nth-child(6)', first=True)
-			# ---- TODO: Зробить по людьські ----
+	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+		# Отримуємо блок з Заголовком в якому міститься також і ссилка
+		block_title = raw_offer.find("h2")[0]
+		title = block_title.text
+		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs["href"]
+		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
+		about_block = raw_offer.find("b")
+		salary = about_block[0].text
+		company = about_block[1].text
+		# Отримуємо опис вакансії
+		desc = raw_offer.find("p")[0].text
+		# Отримуємо місто на яке розрахована ця ваканція
+		city = raw_offer.find('div.add-top-xs > span:nth-child(6)', first=True)
+		# ---- TODO: Зробить по людьські ----
+		if not city or city.attrs:
+			city = raw_offer.find('div.add-top-xs > span:nth-child(4)', first=True)
 			if not city or city.attrs:
-				city = offer.find('div.add-top-xs > span:nth-child(4)', first=True)
-				if not city or city.attrs:
-					city = offer.find('div.add-top-xs > span:nth-child(5)', first=True)
-				if not city or city.attrs:
-					city = offer.find('div.add-top-xs > span:nth-child(3)', first=True)
-			time_publish = offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
-			print(time_publish)
-			
-			offers.append(OfferModel(title=title,
-							  		 city=city.text, 
-							  		 salary=salary, 
-							  		 company=company, 
-							 		 description=desc,
-							 	 	 link=link,
-							 	 	 time_publish=time_publish))
-		return offers
+				city = raw_offer.find('div.add-top-xs > span:nth-child(5)', first=True)
+			if not city or city.attrs:
+				city = raw_offer.find('div.add-top-xs > span:nth-child(3)', first=True)
+		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
+		
+		return OfferModel(title=title,
+				  		  city=city.text, 
+				  		  salary=salary, 
+				  		  company=company, 
+				 		  description=desc,
+				 	 	  link=link,
+				 	 	  time_publish=time_publish)
 
 	def get_count_of_pages(self) -> int:
 		"""
@@ -145,9 +139,46 @@ class PageQuery(HTML):
 			count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
 
+	def get_next_page(self) -> Self:
+		next_page = self.current_page + 1
+		return self.get_page(next_page)
+
+	def get_page(self, page: int) -> Self:
+		if page == self.current_page:
+			return self
+
+		if page <= self.count_of_pages:
+			url = self.url + f"&page={page}"
+			page_content = self.session.get(url).content
+			super().__init__(session=self.session, url=url, html=page_content)
+			self.current_page = page
+			return self
+		else:
+			raise ValueError("Page don't exist")
+
+	def get_number_needed_page(self, per_page: int, page: int) -> int:
+		return math.ceil((page * per_page) / self.__per_page)
+
+	def paginate(self, per_page: int, page: int):
+		offers: list[OfferModel] = []
+		needed_page = self.get_number_needed_page(per_page, page)
+		self.get_page(needed_page)
+
+		raw_offers: list = self.find(".card-visited")
+
+		while len(raw_offers) < per_page:
+			self.get_next_page()
+			raw_offers.append(self.find(".card-visited"))
+
+		for i in range(0, per_page):
+			offer = raw_offers.pop(i)
+			offers.append(self._prepare_offer(offer))
+		return offers
+
 
 class WorkUA:
 	__url = "https://www.work.ua/{}"
+	__per_page = 14
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -202,16 +233,16 @@ class WorkUA:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
 		page_content = self.session.get(url).content
-		return PageQuery(session=self.session, html=page_content, url=url, per_page=28)
+		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
-pg.current_page = 3
+print(pg.url)
+print(pg.paginate(3, 5))
 
-print(pg.get_offers())
-print(pg.current_page)
+
 
 
