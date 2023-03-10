@@ -105,13 +105,13 @@ class PageQuery(HTML):
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 		block_title = raw_offer.find("h2")[0]
 		title = block_title.text
-		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs["href"]
+		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		about_block = raw_offer.find("b")
 		salary = about_block[0].text
 		company = about_block[1].text
 		# Отримуємо опис вакансії
-		desc = raw_offer.find("p")[0].text
+		desc = raw_offer.find("p", first=True).text if raw_offer.find("p") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find('div.add-top-xs > span:nth-child(6)', first=True)
 		# ---- TODO: Зробить по людьські ----
@@ -123,13 +123,10 @@ class PageQuery(HTML):
 				city = raw_offer.find('div.add-top-xs > span:nth-child(3)', first=True)
 		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
 		
-		return OfferModel(title=title,
-				  		  city=city.text, 
-				  		  salary=salary, 
-				  		  company=company, 
-				 		  description=desc,
-				 	 	  link=link,
-				 	 	  time_publish=time_publish)
+		return OfferModel(
+			title=title, city=city.text, salary=salary, company=company, 
+			description=desc, link=link, time_publish=time_publish
+			)
 
 	def get_count_of_pages(self) -> int:
 		"""
@@ -153,7 +150,6 @@ class PageQuery(HTML):
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
-
 		if page == self.current_page:
 			return self
 
@@ -190,16 +186,6 @@ class PageQuery(HTML):
 			offer = raw_offers.pop(i)
 			offers.append(self._prepare_offer(offer))
 		return offers
-
-
-class Parser:
-
-	def _create_link_by_filters():
-		pass
-
-	def _get_page():
-		pass
-
 
 
 class WorkUA:
