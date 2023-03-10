@@ -99,6 +99,9 @@ class PageQuery(HTML):
 		self.current_page = current_page
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+		"""
+		Метод який витягує потрібні дані з необробленого блока вакансії
+		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 		block_title = raw_offer.find("h2")[0]
 		title = block_title.text
@@ -140,10 +143,17 @@ class PageQuery(HTML):
 		return int(count_of_pages)
 
 	def get_next_page(self) -> Self:
+		"""
+		Метод який змінює контент класу на контент з наступної сторінки сайту
+		"""
 		next_page = self.current_page + 1
 		return self.get_page(next_page)
 
 	def get_page(self, page: int) -> Self:
+		"""
+		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
+		"""
+
 		if page == self.current_page:
 			return self
 
@@ -156,12 +166,18 @@ class PageQuery(HTML):
 		else:
 			raise ValueError("Page don't exist")
 
-	def get_number_needed_page(self, per_page: int, page: int) -> int:
+	def _get_number_needed_page(self, per_page: int, page: int) -> int:
+		"""
+		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
+		"""
 		return math.ceil((page * per_page) / self.__per_page)
 
-	def paginate(self, per_page: int, page: int):
+	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
+		"""
+		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
+		"""
 		offers: list[OfferModel] = []
-		needed_page = self.get_number_needed_page(per_page, page)
+		needed_page = self._get_number_needed_page(per_page, page)
 		self.get_page(needed_page)
 
 		raw_offers: list = self.find(".card-visited")
@@ -176,6 +192,16 @@ class PageQuery(HTML):
 		return offers
 
 
+class Parser:
+
+	def _create_link_by_filters():
+		pass
+
+	def _get_page():
+		pass
+
+
+
 class WorkUA:
 	__url = "https://www.work.ua/{}"
 	__per_page = 14
@@ -183,12 +209,13 @@ class WorkUA:
 	def __init__(self):
 		self.session = HTMLSession()
 
-	def _create_link_by_filters(self,
-								city: str | None = None,
-								job: str | None = None,
-								type_of_employ: tuple[TypeEmployment] | None = None,
-								category: tuple[WorkCategory] | None = None,
-								salary: SalaryRange | None = None) -> str:
+	def _create_link_by_filters(
+			self,
+			city: str | None = None,
+			job: str | None = None,
+			type_of_employ: tuple[TypeEmployment] | None = None,
+			category: tuple[WorkCategory] | None = None,
+			salary: SalaryRange | None = None) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам 
 		"""
@@ -224,12 +251,13 @@ class WorkUA:
 
 		return link.format(filter_block)		
 
-	def get_page(self,
-				 city: str | None = None,
-				 job: str | None = None, 
-				 type_of_employ: tuple[TypeEmployment] | None = None, 
-				 category: tuple[WorkCategory] | None = None, 
-				 salary: SalaryRange | None = None) -> list[OfferModel]:
+	def get_page(
+			self,
+			city: str | None = None,
+			job: str | None = None, 
+			type_of_employ: tuple[TypeEmployment] | None = None, 
+			category: tuple[WorkCategory] | None = None, 
+			salary: SalaryRange | None = None) -> list[OfferModel]:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
 		page_content = self.session.get(url).content
