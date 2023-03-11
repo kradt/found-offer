@@ -2,7 +2,7 @@ from typing import Self
 from requests_html import HTMLSession, HTML, Element, BaseParser
 import math
 
-from models import TypeEmployment, SalaryRange, WorkCategory, OfferModel
+from models import TypeEmployment, SalaryRange, Salary, WorkCategory, OfferModel
 
 class PageQuery(HTML):
 	"""
@@ -132,24 +132,14 @@ class WorkUA:
 		"""
 		link = self.__url
 		filter_block = "jobs"
-
-		if city:
-			filter_block += f"-{city}"
-		if job:
-			filter_block += f"-{job}/"
-
+		filter_block += f"-{city}" if city else ""
+		filter_block += f"-{job}/" if job else ""
 		# Означає що будуть використувавтися розширені фільтри
 		filter_block += "?advs=1"
-
 		# Вибір категорії праці
-		if category:
-			category_block = "+".join((str(i.value) for i in category))
-			filter_block += f"&category={category_block}"
-
+		filter_block += f"&category={self.sum_args(category)}" if category else ""
 		# Вибір виду зайнятості
-		if type_of_employ:
-			type_block = "+".join((str(i.value) for i in type_of_employ))
-			filter_block += f"&employment={type_block}"
+		filter_block += f"&employment={self.sum_args(type_of_employ)}" if type_of_employ else ""
 
 		# Вибір діапазону заробітньої плати
 		if salary:
@@ -160,7 +150,11 @@ class WorkUA:
 				salary_block += f"&salaryto={salary.TO.value}"
 			filter_block += salary_block
 
-		return link.format(filter_block)		
+		return link.format(filter_block)
+
+	@staticmethod
+	def sum_args(args):
+		return "+".join((str(i.value) for i in args))	
 
 	def get_page(
 			self,
@@ -182,7 +176,6 @@ pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.url)
 print(pg.paginate(14, 1))
 '''
-
 
 
 
