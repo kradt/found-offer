@@ -173,6 +173,7 @@ class WorkUA:
 		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
+		
 
 '''
 work = WorkUA()
