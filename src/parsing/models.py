@@ -13,7 +13,14 @@ class TypeEmployment(Enum):
 	NOTFULL = 75
 
 
-class Salary(Enum):
+class TypeEmploymentRabota(Enum):
+	FULL = 1
+	NOTFULL = 2
+	PROJECT = 5
+	SHIFT = 7
+
+
+class SalaryWorkUA(Enum):
 	"""
 		Перелічування тисяч гривень
 		Ці дані використовуються сайтом work.ua при формуванні посилання з фільтрами які ввів користувач
@@ -33,8 +40,8 @@ class SalaryRange(BaseModel):
 	"""
 		Структура данних для формування діапазону заробітньої плати необхідної користувачеві.
 	"""
-	FROM: Salary | None
-	TO: Salary | None
+	FROM: SalaryWorkUA | None
+	TO: SalaryWorkUA | None
 
 
 class WorkCategory(Enum):
