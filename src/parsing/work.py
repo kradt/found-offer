@@ -1,7 +1,7 @@
 from typing import Self
 from requests_html import HTMLSession, HTML, Element, BaseParser
 import math
-
+from enum import Enum
 from models import TypeEmployment, SalaryRange, Salary, WorkCategory, OfferModel
 
 class PageQuery(HTML):
@@ -140,21 +140,14 @@ class WorkUA:
 		filter_block += f"&category={self.sum_args(category)}" if category else ""
 		# Вибір виду зайнятості
 		filter_block += f"&employment={self.sum_args(type_of_employ)}" if type_of_employ else ""
-
 		# Вибір діапазону заробітньої плати
-		if salary:
-			salary_block = ""
-			if salary.FROM:
-				salary_block += f"&salaryfrom={salary.FROM.value}"
-			if salary.TO:
-				salary_block += f"&salaryto={salary.TO.value}"
-			filter_block += salary_block
-
+		filter_block += f"&salaryfrom={salary.FROM.value}" if salary and salary.FROM else ""
+		filter_block += f"&salaryto={salary.TO.value}" if salary and salary.TO else ""
 		return link.format(filter_block)
 
 	@staticmethod
-	def sum_args(args):
-		return "+".join((str(i.value) for i in args))	
+	def sum_args(args: Enum):
+		return "+".join((str(i.value) for i in args))
 
 	def get_page(
 			self,
@@ -168,14 +161,14 @@ class WorkUA:
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
-'''
+
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
 salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.url)
 print(pg.paginate(14, 1))
-'''
+
 
 
 
