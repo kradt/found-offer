@@ -13,11 +13,10 @@ class TypeEmployment(Enum):
 	NOTFULL = 75
 
 
-class TypeEmploymentRabota(Enum):
+class TypeEmploymentJobsUA(Enum):
 	FULL = 1
-	NOTFULL = 2
-	PROJECT = 5
-	SHIFT = 7
+	NOTFULL = 5
+
 
 
 class SalaryWorkUA(Enum):
