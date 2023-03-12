@@ -1,10 +1,11 @@
-from requests_html import HTMLSession, Element
+import math
+from requests_html import HTMLSession, HTML, Element
 from typing import Self
-from models import TypeEmploymentRabota, OfferModel
+from models import TypeEmploymentJobsUA, OfferModel
 
 
 
-class PageQuery(HTMLSession):
+class PageQuery(HTML):
 	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.__per_page = per_page
@@ -17,34 +18,33 @@ class PageQuery(HTMLSession):
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
-		block_title = raw_offer.find("h2")[0]
+		block_title = raw_offer.find(".b-vacancy__top__title")[0]
 		title = block_title.text
-		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
+		link = block_title.find("a", first=True).attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
-		about_block = raw_offer.find("b")
-		salary = about_block[0].text
-		company = about_block[1].text
+		
+		salary = raw_offer.find(".b-vacancy__top__pay", first=True).text
+		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
 		# Отримуємо опис вакансії
-		desc = raw_offer.find("p", first=True).text if raw_offer.find("p") else ""
+		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
-		city = self.find("")
+		city = self.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		# Отримуємо дату публікації
-		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
 		
 		return OfferModel(
-			title=title, city=city.text if city else None, salary=salary, company=company, 
-			description=desc, link=link, time_publish=time_publish
+			title=title, city=city if city else None, salary=salary, company=company, 
+			description=desc, link=link
 			)
 
 	def get_count_of_pages(self) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
-		pagination_block = self.find(".pagination", first=True)
+		pagination_block = self.find(".b-vacancy__pages-title", first=True)
 
 		count_of_pages = 1
 		if pagination_block:
-			count_of_pages = pagination_block.find("a")[-2].text
+			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
 
 	def get_next_page(self) -> Self:
@@ -62,7 +62,7 @@ class PageQuery(HTMLSession):
 			return self
 
 		if page <= self.count_of_pages:
-			url = self.url + f"&page={page}"
+			url = self.url + f"/page-{page}"
 			page_content = self.session.get(url).content
 			super().__init__(session=self.session, url=url, html=page_content)
 			self.current_page = page
@@ -81,15 +81,17 @@ class PageQuery(HTMLSession):
 		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
 		"""
 		offers: list[OfferModel] = []
+
 		needed_page = self._get_number_needed_page(per_page, page)
+		
 		self.get_page(needed_page)
 
 		# block with vacansy
-		raw_offers: list = self.find(".card-visited")
+		raw_offers: list = self.find(".b-vacancy__item")
 
 		while len(raw_offers) < per_page:
 			self.get_next_page()
-			raw_offers.append(self.find(".card-visited"))
+			raw_offers.append(self.find(".b-vacancy__item"))
 
 		for i in reversed(range(0, per_page)):
 			offer = raw_offers.pop(i)
@@ -98,8 +100,8 @@ class PageQuery(HTMLSession):
 
 
 class RabotaUA:
-	__per_page = 40
-	__url = "https://rabota.ua/ua/{}"
+	__per_page = 20
+	__url = "https://jobs.ua/{}"
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -108,26 +110,28 @@ class RabotaUA:
 			self,
 			city: str | None = None,
 			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentRabota] | None = None,
-			salary_from: int | None = None) -> str:
+			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
+			salary_from: int | None = None,
+			salary_to: int | None = None ) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам 
 		"""
-		filter_block = ""
-		filter_block += f"zapros/{job}/" if job else ""
-		filter_block += f"{city}?" if city  else "" # and if city in dataclass with cities
-		filter_block += f"salary={salary_from}" if salary_from else ""# and if salary in range
+		filter_block = "vacancy/"
+		filter_block += f"{city}/" if city  else ""
+		filter_block += f"rabota-{job}/" if job else ""
+		 # and if city in dataclass with cities
+		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
 		return self.__url.format(filter_block)
-
 
 	def get_page(
 			self,
 			city: str | None = None,
 			job: str | None = None, 
-			type_of_employ: tuple[TypeEmploymentRabota] | None = None, 
-			salary_from: int | None = None) -> list[OfferModel]:
+			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None, 
+			salary_from: int | None = None,
+			salary_to: int | None = None ) -> list[OfferModel]:
 
-		url = self._create_link_by_filters(city, job, type_of_employ, salary)
+		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
@@ -135,10 +139,11 @@ class RabotaUA:
 
 r = RabotaUA()
 
-job = "backend"
-city = "киев"
-lnk = r._create_link_by_filters(city=city, job=job)
+job = "бухгалтер"
+city = "kiev"
+lnk = r.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
+session = HTMLSession()
+vacansy = lnk.paginate(3, 5)
 
-print(lnk)
 		
 
