@@ -83,10 +83,9 @@ class PageQuery(HTML):
 		offers: list[OfferModel] = []
 
 		needed_page = self._get_number_needed_page(per_page, page)
-		
 		self.get_page(needed_page)
 
-		# block with vacansy
+		# block with vacancy
 		raw_offers: list = self.find(".b-vacancy__item")
 
 		while len(raw_offers) < per_page:
@@ -135,15 +134,13 @@ class RabotaUA:
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
-
-
-r = RabotaUA()
+jobs = RabotaUA()
 
 job = "бухгалтер"
 city = "kiev"
-lnk = r.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
-session = HTMLSession()
-vacansy = lnk.paginate(3, 5)
+page = jobs.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
+vacansy = page.paginate(3, 5)
+print(vacansy)
 
 		
 
