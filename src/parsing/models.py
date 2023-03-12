@@ -88,4 +88,4 @@ class OfferModel(BaseModel):
 	company: str
 	description: str
 	link: str
-	time_publish: str
+	time_publish: str | None

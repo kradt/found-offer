@@ -1,10 +1,11 @@
-from requests_html import HTMLSession, Element
+import math
+from requests_html import HTMLSession, HTML, Element
 from typing import Self
 from models import TypeEmploymentJobsUA, OfferModel
 
 
 
-class PageQuery(HTMLSession):
+class PageQuery(HTML):
 	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.__per_page = per_page
@@ -25,15 +26,14 @@ class PageQuery(HTMLSession):
 		salary = raw_offer.find(".b-vacancy__top__pay", first=True).text
 		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
 		# Отримуємо опис вакансії
-		desc = raw_offer.find("grey-light", first=True).text if raw_offer.find(".grey-light") else ""
+		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = self.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		# Отримуємо дату публікації
-		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
 		
 		return OfferModel(
-			title=title, city=city.text if city else None, salary=salary, company=company, 
-			description=desc, link=link, time_publish=time_publish
+			title=title, city=city if city else None, salary=salary, company=company, 
+			description=desc, link=link
 			)
 
 	def get_count_of_pages(self) -> int:
@@ -44,7 +44,7 @@ class PageQuery(HTMLSession):
 
 		count_of_pages = 1
 		if pagination_block:
-			count_of_pages = pagination_block.find("b:nth-child(2)").text
+			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
 
 	def get_next_page(self) -> Self:
@@ -81,11 +81,13 @@ class PageQuery(HTMLSession):
 		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
 		"""
 		offers: list[OfferModel] = []
+
 		needed_page = self._get_number_needed_page(per_page, page)
+		
 		self.get_page(needed_page)
 
 		# block with vacansy
-		raw_offers: list = self.find("юb-vacancy__item")
+		raw_offers: list = self.find(".b-vacancy__item")
 
 		while len(raw_offers) < per_page:
 			self.get_next_page()
@@ -126,9 +128,10 @@ class RabotaUA:
 			city: str | None = None,
 			job: str | None = None, 
 			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None, 
-			salary_from: int | None = None) -> list[OfferModel]:
+			salary_from: int | None = None,
+			salary_to: int | None = None ) -> list[OfferModel]:
 
-		url = self._create_link_by_filters(city, job, type_of_employ, salary)
+		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
@@ -136,10 +139,11 @@ class RabotaUA:
 
 r = RabotaUA()
 
-job = "backend"
+job = "бухгалтер"
 city = "kiev"
-lnk = r._create_link_by_filters(city=city, job=job, salary_from=1000, salary_to=70000)
+lnk = r.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
+session = HTMLSession()
+vacansy = lnk.paginate(3, 5)
 
-print(lnk)
 		
 
