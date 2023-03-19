@@ -1,41 +1,7 @@
 {% extends 'base.html' %}
 
-
-{% from 'auth.html' import generate_auth_form %}
+{% from '_auth.html' import generate_auth_form %}
 
 {% block content %}
-
 {{  generate_auth_form(type="login", form=form)  }}
-
-<!-- <div class="row justify-content-center">
-	<div class="col-md-6">
-		<div class="card">
-			<div class="card-header">
-				<h4>Login</h4>
-			</div>
-			<div class="card-body">
-				<form action="{{ url_for('.login') }}" method="POST">
-					
-					<div class="form-group">
-						<label for="email">Email</label>
-						{{ form.email(class="form-control") }}
-					</div>
-					<div class="form-group">
-						<label for="password">Password</label>
-						{{ form.password(class="form-control") }}
-					</div>
-					<div class="form-group form-check">
-						{{ form.remember_me(class="form-check-input")}}
-						<label class="form-check-label" for="remember">Remember me</label>
-					</div>
-					{% include 'errors.html' %}
-					{{ form.submit(class="btn btn-primary") }}
-					{{ form.csrf_token }}
-				</form>
-			</div>
-		</div>
-	</div>
-</div> -->
-
-
 {% endblock %}

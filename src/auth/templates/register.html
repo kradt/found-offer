@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% from 'auth.html' import generate_auth_form %}
+{% from '_auth.html' import generate_auth_form %}
 
 {% block content %}
 {{  generate_auth_form(type="register", form=form)  }}
