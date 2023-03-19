@@ -27,25 +27,7 @@
                 {{ form.confirm_password(class="form-control") }}
                 
               </div>
-              		{% block errors %}
-						{% with messages = get_flashed_messages() %}
-							{% if messages %}
-								{% for message in messages %}
-								<div class="alert alert-dark" role="alert">
-				  					{{ message }}
-									</div>
-								{% endfor %}
-							{% endif %}	
-						{% endwith %}
-
-						{% for field, errors in form.errors.items() %}
-							<small class="form-text text-muted ">
-								<div class="alert alert-dark" role="alert">
-							  		{{ ', '.join(errors) }}
-								</div>
-							</small>
-						{% endfor %}
-					{% endblock %}
+              		{% include 'errors.html' %}
               {{ form.submit(class="btn btn-primary me-2") }}
               <a href="#" class="btn btn-secondary"><i class="fab fa-google me-2"></i>Register with Google</a>
               {{ form.csrf_token }}
