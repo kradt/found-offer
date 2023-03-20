@@ -2,7 +2,8 @@ import math
 from enum import Enum
 from requests_html import HTMLSession, HTML, Element
 from typing import Self, Callable
-from models import TypeEmploymentJobsUA,TypeEmploymentWorkUA,WorkCategory, SalaryRange, SalaryWorkUA, OfferModel
+from models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
+	WorkCategory, SalaryRange, SalaryWorkUA, OfferModel)
 
 
 class WorkUA:
@@ -38,7 +39,6 @@ class WorkUA:
 		filter_block += f"&salaryfrom={salary.FROM.value}" if salary and salary.FROM else ""
 		filter_block += f"&salaryto={salary.TO.value}" if salary and salary.TO else ""
 		return link.format(filter_block)
-
 
 	def __get_city_of_offer(self, raw_offer) -> str:
 		possible_paths = (
@@ -117,8 +117,8 @@ class WorkUA:
 
 
 class JobsUA:
-	__per_page = 20
 	__url = "https://jobs.ua/{}"
+	__per_page = 20
 	__next_page = "/page-{}"
 	__offer_classname = ".b-vacancy__item"
 
