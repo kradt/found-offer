@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from enum import Enum
 
 
-class TypeEmployment(Enum):
+class TypeEmploymentWorkUA(Enum):
 	"""
 		Перелічування видів зайнятості
 		Ці дані використовуються сайтом work.ua при формуванні посилання з фільтрами які ввів користувач
