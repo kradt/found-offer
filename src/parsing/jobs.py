@@ -98,7 +98,7 @@ class PageQuery(HTML):
 		return offers
 
 
-class RabotaUA:
+class JobsUA:
 	__per_page = 20
 	__url = "https://jobs.ua/{}"
 
@@ -134,7 +134,7 @@ class RabotaUA:
 		page_content = self.session.get(url).content
 		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
 
-jobs = RabotaUA()
+jobs = JobsUA()
 
 job = "бухгалтер"
 city = "kiev"

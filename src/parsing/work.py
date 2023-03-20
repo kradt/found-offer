@@ -2,7 +2,7 @@ from typing import Self
 from requests_html import HTMLSession, HTML, Element, BaseParser
 import math
 from enum import Enum
-from models import TypeEmployment, SalaryRange, Salary, WorkCategory, OfferModel
+from models import TypeEmployment, SalaryRange, SalaryWorkUA, WorkCategory, OfferModel
 
 class PageQuery(HTML):
 	"""
@@ -165,7 +165,7 @@ class WorkUA:
 
 work = WorkUA()
 type_of_employ = (TypeEmployment.FULL, TypeEmployment.NOTFULL)
-salary = SalaryRange(FROM=Salary.THREE, TO=Salary.FIFTY)
+salary = SalaryRange(FROM=SalaryWorkUA.THREE, TO=SalaryWorkUA.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.url)
 print(pg.paginate(14, 1))
