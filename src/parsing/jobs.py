@@ -1,6 +1,6 @@
 import math
 from requests_html import HTMLSession, HTML, Element
-from typing import Self
+from typing import Self, Callable
 from models import TypeEmploymentJobsUA, OfferModel
 
 
@@ -14,6 +14,7 @@ class PageQuery(HTML):
 			count_of_pages: int,
 			next_page_pattern: str,
 			raw_offer_classname:str,
+			prepare_offer: Callable,
 			current_page: int = 1):
 
 		super().__init__(session=session, html=html, url=url)
@@ -22,29 +23,7 @@ class PageQuery(HTML):
 		self.current_page = current_page
 		self.next_page_pattern = next_page_pattern
 		self.raw_offer_classname = raw_offer_classname
-
-	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
-		"""
-		Метод який витягує потрібні дані з необробленого блока вакансії
-		"""
-		# Отримуємо блок з Заголовком в якому міститься також і ссилка
-		block_title = raw_offer.find(".b-vacancy__top__title")[0]
-		title = block_title.text
-		link = block_title.find("a", first=True).attrs.get("href")
-		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
-		
-		salary = raw_offer.find(".b-vacancy__top__pay", first=True).text
-		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
-		# Отримуємо опис вакансії
-		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
-		# Отримуємо місто на яке розрахована ця ваканція
-		city = self.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
-		# Отримуємо дату публікації
-		
-		return OfferModel(
-			title=title, city=city if city else None, salary=salary, company=company, 
-			description=desc, link=link
-			)
+		self.prepare_offer = prepare_offer
 
 	def get_next_page(self) -> Self:
 		"""
@@ -93,7 +72,7 @@ class PageQuery(HTML):
 
 		for i in reversed(range(0, per_page)):
 			offer = raw_offers.pop(i)
-			offers.append(self._prepare_offer(offer))
+			offers.append(self.prepare_offer(offer))
 		return offers
 
 
@@ -122,6 +101,28 @@ class JobsUA:
 		 # and if city in dataclass with cities
 		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
 		return self.__url.format(filter_block)
+
+	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+		"""
+		Метод який витягує потрібні дані з необробленого блока вакансії
+		"""
+		# Отримуємо блок з Заголовком в якому міститься також і ссилка
+		block_title = raw_offer.find(".b-vacancy__top__title")[0]
+		title = block_title.text
+		link = block_title.find("a", first=True).attrs.get("href")
+		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
+		
+		salary = raw_offer.find(".b-vacancy__top__pay", first=True).text
+		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
+		# Отримуємо опис вакансії
+		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
+		# Отримуємо місто на яке розрахована ця ваканція
+		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
+		
+		return OfferModel(
+			title=title, city=city if city else None, salary=salary, company=company, 
+			description=desc, link=link
+			)
 
 	def get_count_of_pages(self, html) -> int:
 		"""
@@ -152,7 +153,8 @@ class JobsUA:
 				url=url, 
 				per_page=self.__per_page,
 				next_page_pattern=self.__next_page,
-				raw_offer_classname=self.__offer_classname)
+				raw_offer_classname=self.__offer_classname,
+				prepare_offer=self._prepare_offer)
 
 jobs = JobsUA()
 
@@ -163,4 +165,6 @@ vacansy = page.paginate(3, 5)
 print(vacansy)
 
 		
+
+
 
