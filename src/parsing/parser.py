@@ -1,5 +1,4 @@
-from .work import WorkUA
-from .jobs import JobsUA
+from .engines import WorkUA, JobsUA
 
 
 class Parser:
