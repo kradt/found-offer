@@ -4,14 +4,24 @@ from typing import Self
 from models import TypeEmploymentJobsUA, OfferModel
 
 
-
 class PageQuery(HTML):
-	def __init__(self, *args, per_page: int, count_of_pages, current_page: int = 1, **kwargs):
-		super().__init__(*args, **kwargs)
+	def __init__(
+			self, 
+			session: HTMLSession,
+			html: str,
+			url: str,
+			per_page: int,
+			count_of_pages: int,
+			next_page_pattern: str,
+			raw_offer_classname:str,
+			current_page: int = 1):
+
+		super().__init__(session=session, html=html, url=url)
 		self.__per_page = per_page
 		self.count_of_pages = count_of_pages
 		self.current_page = current_page
-
+		self.next_page_pattern = next_page_pattern
+		self.raw_offer_classname = raw_offer_classname
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
@@ -51,7 +61,7 @@ class PageQuery(HTML):
 			return self
 
 		if page <= self.count_of_pages:
-			url = self.url + f"/page-{page}"
+			url = self.url + self.next_page_pattern.format(page)
 			page_content = self.session.get(url).content
 			super().__init__(session=self.session, url=url, html=page_content)
 			self.current_page = page
@@ -75,11 +85,11 @@ class PageQuery(HTML):
 		self.get_page(needed_page)
 
 		# block with vacancy
-		raw_offers: list = self.find(".b-vacancy__item")
+		raw_offers: list = self.find(self.raw_offer_classname)
 
 		while len(raw_offers) < per_page:
 			self.get_next_page()
-			raw_offers.append(self.find(".b-vacancy__item"))
+			raw_offers.append(self.find(self.raw_offer_classname))
 
 		for i in reversed(range(0, per_page)):
 			offer = raw_offers.pop(i)
@@ -90,6 +100,8 @@ class PageQuery(HTML):
 class JobsUA:
 	__per_page = 20
 	__url = "https://jobs.ua/{}"
+	__next_page = "/page-{}"
+	__offer_classname = ".b-vacancy__item"
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -133,7 +145,14 @@ class JobsUA:
 		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
 		page_content = self.session.get(url)
 		count_of_pages = self.get_count_of_pages(page_content.html)
-		return PageQuery(session=self.session, html=page_content.content,count_of_pages=count_of_pages, url=url, per_page=self.__per_page)
+		return PageQuery(
+				session=self.session,
+				html=page_content.content,
+				count_of_pages=count_of_pages, 
+				url=url, 
+				per_page=self.__per_page,
+				next_page_pattern=self.__next_page,
+				raw_offer_classname=self.__offer_classname)
 
 jobs = JobsUA()
 
