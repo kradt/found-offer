@@ -6,10 +6,10 @@ from models import TypeEmploymentJobsUA, OfferModel
 
 
 class PageQuery(HTML):
-	def __init__(self, *args, per_page: int, current_page: int = 1, **kwargs):
+	def __init__(self, *args, per_page: int, count_of_pages, current_page: int = 1, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.__per_page = per_page
-		self.count_of_pages = self.get_count_of_pages()
+		self.count_of_pages = count_of_pages
 		self.current_page = current_page
 
 
@@ -35,17 +35,6 @@ class PageQuery(HTML):
 			title=title, city=city if city else None, salary=salary, company=company, 
 			description=desc, link=link
 			)
-
-	def get_count_of_pages(self) -> int:
-		"""
-		 Метод який повертає кількість сторінок в пагінації
-		"""
-		pagination_block = self.find(".b-vacancy__pages-title", first=True)
-
-		count_of_pages = 1
-		if pagination_block:
-			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
-		return int(count_of_pages)
 
 	def get_next_page(self) -> Self:
 		"""
@@ -122,6 +111,17 @@ class JobsUA:
 		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
 		return self.__url.format(filter_block)
 
+	def get_count_of_pages(self, html) -> int:
+		"""
+		 Метод який повертає кількість сторінок в пагінації
+		"""
+		pagination_block = html.find(".b-vacancy__pages-title", first=True)
+
+		count_of_pages = 1
+		if pagination_block:
+			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
+		return int(count_of_pages)
+
 	def get_page(
 			self,
 			city: str | None = None,
@@ -131,8 +131,9 @@ class JobsUA:
 			salary_to: int | None = None ) -> list[OfferModel]:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
-		page_content = self.session.get(url).content
-		return PageQuery(session=self.session, html=page_content, url=url, per_page=self.__per_page)
+		page_content = self.session.get(url)
+		count_of_pages = self.get_count_of_pages(page_content.html)
+		return PageQuery(session=self.session, html=page_content.content,count_of_pages=count_of_pages, url=url, per_page=self.__per_page)
 
 jobs = JobsUA()
 
