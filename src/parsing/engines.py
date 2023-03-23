@@ -103,11 +103,11 @@ class WorkUA:
 			salary: SalaryRange | None = None) -> list[OfferModel]:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		page_content = self.session.get(url)
-		count_of_pages = self._get_count_of_pages(page_content.html)
+		page_content = self.session.get(url).html
+		count_of_pages = self._get_count_of_pages(page_content)
 		return PageQuery(
 				session=self.session,
-				html=page_content.content,
+				html=page_content,
 				count_of_pages=count_of_pages, 
 				url=url, 
 				per_page=self.__per_page,
@@ -184,11 +184,11 @@ class JobsUA:
 			salary_to: int | None = None ) -> list[OfferModel]:
 
 		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
-		page_content = self.session.get(url)
-		count_of_pages = self._get_count_of_pages(page_content.html)
+		page_content = self.session.get(url).html
+		count_of_pages = self._get_count_of_pages(page_content)
 		return PageQuery(
 				session=self.session,
-				html=page_content.content,
+				html=page_content,
 				count_of_pages=count_of_pages, 
 				url=url, 
 				per_page=self.__per_page,
@@ -197,7 +197,7 @@ class JobsUA:
 				prepare_offer=self._prepare_offer)
 
 
-class PageQuery(HTML):
+class PageQuery:
 	def __init__(
 			self, 
 			session: HTMLSession,
@@ -210,7 +210,9 @@ class PageQuery(HTML):
 			prepare_offer: Callable,
 			current_page: int = 1):
 
-		super().__init__(session=session, html=html, url=url)
+		self.html = html
+		self.session = session
+		self.url = url 
 		self.__per_page = per_page
 		self.count_of_pages = count_of_pages
 		self.current_page = current_page
@@ -257,11 +259,11 @@ class PageQuery(HTML):
 		self.get_page(needed_page)
 
 		# block with vacancy
-		raw_offers: list = self.find(self.raw_offer_classname)
+		raw_offers: list = self.html.find(self.raw_offer_classname)
 
 		while len(raw_offers) < per_page:
 			self.get_next_page()
-			raw_offers.append(self.find(self.raw_offer_classname))
+			raw_offers.append(self.html.find(self.raw_offer_classname))
 
 		for i in reversed(range(0, per_page)):
 			offer = raw_offers.pop(i)
@@ -275,14 +277,13 @@ job = "бухгалтер"
 city = "kiev"
 page = jobs.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
 vacansy = page.paginate(3, 5)
-print(vacansy)
+
 
 work = WorkUA()
 type_of_employ = (TypeEmploymentWorkUA.FULL, TypeEmploymentWorkUA.NOTFULL)
 salary = SalaryRange(FROM=SalaryWorkUA.THREE, TO=SalaryWorkUA.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
-print(pg.url)
-print(pg.paginate(14, 1))
+print(pg.paginate(2,1))
 		
 
 
