@@ -237,7 +237,8 @@ class PageQuery:
 		if page <= self.count_of_pages:
 			url = self.url + self.next_page_pattern.format(page)
 			page_content = self.session.get(url).content
-			super().__init__(session=self.session, url=url, html=page_content)
+			self.url = url
+			self.html = page_content
 			self.current_page = page
 			return self
 		else:
@@ -284,7 +285,4 @@ type_of_employ = (TypeEmploymentWorkUA.FULL, TypeEmploymentWorkUA.NOTFULL)
 salary = SalaryRange(FROM=SalaryWorkUA.THREE, TO=SalaryWorkUA.FIFTY)
 pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
 print(pg.paginate(2,1))
-		
-
-
 
