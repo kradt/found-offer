@@ -14,10 +14,7 @@ class User(db.Model, UserMixin):
 		self.password = generate_password_hash(password)
 
 	def check_password(self, password) -> bool:
-		if check_password_hash(self.password, password):
-			return True
-		else:
-			return False
+		return True if check_password_hash(self.password, password) else False
 
 	def __repr__(self) -> str:
 		return f"User {self.email}"
