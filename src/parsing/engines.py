@@ -2,7 +2,7 @@ import math
 from enum import Enum
 from requests_html import HTMLSession, HTML, Element
 from typing import Self, Callable
-from models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
+from .models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
 	WorkCategory, SalaryRange, SalaryWorkUA, OfferModel)
 
 
@@ -66,7 +66,7 @@ class WorkUA:
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		about_block = raw_offer.find("b")
 		salary = about_block[0].text
-		company = about_block[1].text
+		company = about_block[1].text if len(about_block) > 1 else ""
 		# Отримуємо опис вакансії
 		desc = raw_offer.find("p", first=True).text if raw_offer.find("p") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
@@ -268,7 +268,7 @@ class PageQuery:
 
 		for i in reversed(range(0, per_page)):
 			offer = raw_offers.pop(i)
-			offers.append(self.prepare_offer(offer))
+			offers.append(self.prepare_offer(offer).dict())
 		return offers
 
 
