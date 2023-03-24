@@ -12,7 +12,5 @@ def find_work():
 
 @search_bp.route("/offers/<job>", methods=["GET"])
 def gtf(job):
-	print(1)
 	query = engines.WorkUA().get_page(job=job)
-	print(query.paginate(10, 1))
 	return str(query.paginate(10, 1))
