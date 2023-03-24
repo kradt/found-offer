@@ -1,27 +1,29 @@
-from .engines import WorkUA, JobsUA
-import Threading
+from engines import WorkUA, JobsUA
 
 
 class Parser:
 
-	def __init__(self, engines: list[object]):
+	def __init__(self, engines:list[object]):
 		self.engines = engines
 
-	def get_needed_pages(self, city, job) -> list:
+	def create_page(self, city: str, job: str):
 		pages = []
 		for i in self.engines:
-			pages.append(i.get_page(city, job))
-		return pages
+			pages.append(i.get_page(city=city, job=job))
+		self.pages = pages
 
-	def query(
-		self, 
-		city: str | None = None,
-		job: str | None = None):
-	pages = self.get_needed_pages(city, job)
-	for i in pages:
+	def paginate(self, per_page, page):
+		if not self.pages:
+			raise ValueError("You must create page before this")
+		offers = []
+		for i in self.pages:
+			pass
+
+
+
+
 
 
 
 engines = [WorkUA(), JobsUA()]
 parser = Parser(engines)
-
