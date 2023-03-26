@@ -246,10 +246,10 @@ class Page:
 			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
 				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
 				page_content = i.session.get(url).content
-				html.append(page_content)
+				htmls.append(page_content)
 			else:
 				raise ValueError("Page don't exist")
-		return html
+		return htmls
 
 	def get_next_page(self) -> Self:
 		"""
@@ -263,13 +263,13 @@ class Page:
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
 		self.current_page = page
-		self.htmls = self.get_page_data(self.engines)
+		self.html = self.get_page_data(self.engines)
 
 	def _get_number_needed_page(self, per_page: int, page: int) -> int:
 		"""
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
-		engines_per_page = sum(i.per_page for i in engines)
+		engines_per_page = sum(i.per_page for i in self.engines)
 		return math.ceil((page * per_page) / engines_per_page)
 
 	# Подумать
