@@ -117,9 +117,9 @@ class WorkUA:
 
 
 class JobsUA:
-	__url = "https://jobs.ua/{}"
+	url = "https://jobs.ua/{}"
 	__per_page = 20
-	__next_page = "/page-{}"
+	next_page_pattern = "/page-{}"
 	__offer_classname = ".b-vacancy__item"
 
 	def __init__(self):
@@ -210,26 +210,12 @@ class Query:
 		self.salary = salary_from
 		self.salary_to = salary_to
 
-		self.session = HTMLSession()
-
 	def urls(self, engines):
 		return (i._create_link_by_filters(
 						self.job,
 						self.type_of_employ, 
 						self.salary, 
 						self.salary_to) for i in engines)
-
-
-	def _get_count_of_pages(self, html) -> int:
-		"""
-		 Метод який повертає кількість сторінок в пагінації
-		"""
-		pagination_block = html.find(".b-vacancy__pages-title", first=True)
-
-		count_of_pages = 1
-		if pagination_block:
-			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
-		return int(count_of_pages)
 
 	def get_next_page(self) -> Self:
 		"""
@@ -238,20 +224,19 @@ class Query:
 		next_page = self.current_page + 1
 		return self.get_page(next_page)
 
-	def get_page(self, page: int = 1) -> Self:
+	def get_page_data(self, engines, page: int = 1) -> Self:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
-
-		if page <= self._count_of_pages:
-			url = self.url + self.next_page_pattern.format(page)
-			page_content = self.session.get(url).content
-			self.url = url
-			self.html = page_content
-			self.current_page = page
-			return self
-		else:
-			raise ValueError("Page don't exist")
+		htmls = []
+		for i in engines:
+			if page <= i._count_of_pages:
+				url = i.url + i.next_page_pattern.format(page)
+				page_content = i.session.get(url).content
+				html.append(page_content)
+			else:
+				raise ValueError("Page don't exist")
+		return html
 
 
 class Page:
