@@ -164,10 +164,11 @@ class JobsUA:
 			description=desc, link=link
 			)
 
-	def _get_count_of_pages(self, html) -> int:
+	def _get_count_of_pages(self, url) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
+		html = self.session.get(url).content
 		pagination_block = html.find(".b-vacancy__pages-title", first=True)
 
 		count_of_pages = 1
@@ -206,7 +207,7 @@ class Query:
 			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
 			salary_from: int | None = None,
 			salary_to: int | None = None ):
-	
+
 		self.job = job
 		self.city = city
 		self.type_of_employ = type_of_employ
@@ -214,7 +215,7 @@ class Query:
 		self.salary_to = salary_to
 
 	def urls(self, engines):
-		return (i._create_link_by_filters(
+		return tuple(i._create_link_by_filters(
 						self.city,
 						self.job,
 						self.type_of_employ, 
@@ -242,8 +243,8 @@ class Page:
 		"""
 		htmls = []
 		for i in engines:
-			if page <= i._count_of_pages:
-				url = i.url + i.next_page_pattern.format(page)
+			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
+				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
 				page_content = i.session.get(url).content
 				html.append(page_content)
 			else:
