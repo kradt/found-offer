@@ -140,7 +140,7 @@ class JobsUA:
 		filter_block += f"rabota-{job}/" if job else ""
 		 # and if city in dataclass with cities
 		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
-		return self.__url.format(filter_block)
+		return self.url.format(filter_block)
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
@@ -168,7 +168,7 @@ class JobsUA:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
-		html = self.session.get(url).content
+		html = self.session.get(url).html
 		pagination_block = html.find(".b-vacancy__pages-title", first=True)
 
 		count_of_pages = 1
