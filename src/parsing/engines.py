@@ -197,9 +197,124 @@ class JobsUA:
 				prepare_offer=self._prepare_offer)
 
 
+
+class Query:
+	def __init__(
+			self,
+			job: str | None = None,
+			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
+			salary_from: int | None = None,
+			salary_to: int | None = None ):
+		self.job = job
+		self.type_of_employ = type_of_employ
+		self.salary = salary_from
+		self.salary_to = salary_to
+
+		self.session = HTMLSession()
+
+	def urls(self, engines):
+		return (i._create_link_by_filters(
+						self.job,
+						self.type_of_employ, 
+						self.salary, 
+						self.salary_to) for i in engines)
+
+
+	def _get_count_of_pages(self, html) -> int:
+		"""
+		 Метод який повертає кількість сторінок в пагінації
+		"""
+		pagination_block = html.find(".b-vacancy__pages-title", first=True)
+
+		count_of_pages = 1
+		if pagination_block:
+			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
+		return int(count_of_pages)
+
+	def get_next_page(self) -> Self:
+		"""
+		Метод який змінює контент класу на контент з наступної сторінки сайту
+		"""
+		next_page = self.current_page + 1
+		return self.get_page(next_page)
+
+	def get_page(self, page: int = 1) -> Self:
+		"""
+		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
+		"""
+
+		if page <= self._count_of_pages:
+			url = self.url + self.next_page_pattern.format(page)
+			page_content = self.session.get(url).content
+			self.url = url
+			self.html = page_content
+			self.current_page = page
+			return self
+		else:
+			raise ValueError("Page don't exist")
+
+
+class Page:
+	def __init__(
+			self,
+			engines:list,
+			query: Query,
+			session: HTMLSession,
+			html: str,
+			url: str,
+			per_page: int,
+			count_of_pages: int,
+			next_page_pattern: str,
+			raw_offer_classname:str,
+			prepare_offer: Callable,
+			current_page: int = 1):
+
+		self.engines = engines
+		self.query = query
+		self.urls = query.urls(self.engines)
+		self.html = html
+		self.session = session
+		self.url = url 
+		self.__per_page = per_page
+		self.count_of_pages = count_of_pages
+		self.current_page = current_page
+		self.next_page_pattern = next_page_pattern
+		self.raw_offer_classname = raw_offer_classname
+		self.prepare_offer = prepare_offer
+
+
+	def _get_number_needed_page(self, per_page: int, page: int) -> int:
+		"""
+		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
+		"""
+		return math.ceil((page * per_page) / self.__per_page)
+
+	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
+		"""
+		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
+		"""
+		offers: list[OfferModel] = []
+
+		needed_page = self._get_number_needed_page(per_page, page)
+		self.get_page(needed_page)
+
+		# block with vacancy
+		raw_offers: list = self.html.find(self.raw_offer_classname)
+
+		while len(raw_offers) < per_page:
+			self.get_next_page()
+			raw_offers.append(self.html.find(self.raw_offer_classname))
+
+		for i in reversed(range(0, per_page)):
+			offer = raw_offers.pop(i)
+			offers.append(self.prepare_offer(offer).dict())
+		return offers
+
+
 class PageQuery:
 	def __init__(
-			self, 
+			self,
+			engines:list,
 			session: HTMLSession,
 			html: str,
 			url: str,
