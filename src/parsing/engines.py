@@ -245,7 +245,7 @@ class Page:
 		for i in engines:
 			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
 				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
-				page_content = i.session.get(url).content
+				page_content = i.session.get(url).html
 				htmls.append(page_content)
 			else:
 				raise ValueError("Page don't exist")
@@ -277,7 +277,8 @@ class Page:
 		offers = []
 		for engine in self.engines:
 			html = self.html[self.engines.index(engine)]
-			offers += [engine.prepare_html(offer) for offer in html.find(engine.raw_offer_classname)]
+			print(type(html))
+			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname)]
 		return offers
 
 
