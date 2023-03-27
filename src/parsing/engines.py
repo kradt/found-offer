@@ -7,10 +7,10 @@ from models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
 
 
 class WorkUA:
-	__url = "https://www.work.ua/{}"
-	__per_page = 14
-	__next_page = "&page={}"
-	__offer_classname = ".card-visited"
+	url = "https://www.work.ua/{}"
+	per_page = 14
+	next_page_pattern = "&page={}"
+	offer_classname = ".card-visited"
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -25,7 +25,7 @@ class WorkUA:
 		"""
 		Метод який створює ссилку по потрібним фільтрам 
 		"""
-		link = self.__url
+		link = self.url
 		filter_block = "jobs"
 		filter_block += f"-{city}" if city else ""
 		filter_block += f"-{job}/" if job else ""
@@ -62,7 +62,7 @@ class WorkUA:
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 		block_title = raw_offer.find("h2")[0]
 		title = block_title.text
-		link = "/".join(self.__url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
+		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		about_block = raw_offer.find("b")
 		salary = about_block[0].text
@@ -79,10 +79,11 @@ class WorkUA:
 			description=desc, link=link, time_publish=time_publish
 			)
 
-	def _get_count_of_pages(self, html) -> int:
+	def _get_count_of_pages(self, url) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
+		html = self.session.get(url).html
 		pagination_block = html.find(".pagination", first=True)
 
 		count_of_pages = 1
@@ -229,7 +230,7 @@ class Query:
 class Page:
 	def __init__(
 			self,
-			engines:list,
+			engines: list,
 			query: Query,
 			current_page: int = 1):
 
@@ -273,14 +274,14 @@ class Page:
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
-		return int((page * per_page) / engines_per_page)
+		return int((page * per_page) / engines_per_page) or 1
 
 	# Подумать
 	def prepare_raw_offers(self):
 		offers = []
 		for engine in self.engines:
 			html = self.html[self.engines.index(engine)]
-			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname) if offer.attrs.get("id")]
+			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname)]
 		return offers
 
 	def get_shift_of_page(self, per_page, page):
@@ -387,13 +388,14 @@ class PageQuery:
 
 
 jobs = JobsUA()
+work = WorkUA()
 
 
 job = "бухгалтер"
 city = "kiev"
 query = Query(job=job)
 
-page = Page([jobs], query)
+page = Page([work], query)
 
 # eng = WorkUA()
 
