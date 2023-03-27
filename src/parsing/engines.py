@@ -2,7 +2,7 @@ import math
 from enum import Enum
 from requests_html import HTMLSession, HTML, Element
 from typing import Self, Callable
-from .models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
+from models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
 	WorkCategory, SalaryRange, SalaryWorkUA, OfferModel)
 
 
@@ -117,10 +117,10 @@ class WorkUA:
 
 
 class JobsUA:
-	__url = "https://jobs.ua/{}"
-	__per_page = 20
-	__next_page = "/page-{}"
-	__offer_classname = ".b-vacancy__item"
+	url = "https://jobs.ua/{}"
+	per_page = 20
+	next_page_pattern = "/page-{}"
+	offer_classname = ".b-vacancy__item"
 
 	def __init__(self):
 		self.session = HTMLSession()
@@ -140,34 +140,40 @@ class JobsUA:
 		filter_block += f"rabota-{job}/" if job else ""
 		 # and if city in dataclass with cities
 		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
-		return self.__url.format(filter_block)
+		return self.url.format(filter_block)
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
-		block_title = raw_offer.find(".b-vacancy__top__title")[0]
-		title = block_title.text
-		link = block_title.find("a", first=True).attrs.get("href")
+
+		block_title = raw_offer.find(".b-vacancy__top__title", first=True)
+
+		title = block_title.text if block_title else ""
+		link = block_title.find("a", first=True).attrs.get("href") if block_title else ""
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		
-		salary = raw_offer.find(".b-vacancy__top__pay", first=True).text
-		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
+		salary = raw_offer.find(".b-vacancy__top__pay", first=True)
+		salary = salary.text if salary else ""
+		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True)
+		company = company.text if company else ""
 		# Отримуємо опис вакансії
 		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
-		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
+		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True)
+		city = city.text if city else ""
 		
 		return OfferModel(
 			title=title, city=city if city else None, salary=salary, company=company, 
 			description=desc, link=link
 			)
 
-	def _get_count_of_pages(self, html) -> int:
+	def _get_count_of_pages(self, url) -> int:
 		"""
 		 Метод який повертає кількість сторінок в пагінації
 		"""
+		html = self.session.get(url).html
 		pagination_block = html.find(".b-vacancy__pages-title", first=True)
 
 		count_of_pages = 1
@@ -197,9 +203,110 @@ class JobsUA:
 				prepare_offer=self._prepare_offer)
 
 
+
+class Query:
+	def __init__(
+			self,
+			city: str | None = None,
+			job: str | None = None,
+			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
+			salary_from: int | None = None,
+			salary_to: int | None = None ):
+
+		self.job = job
+		self.city = city
+		self.type_of_employ = type_of_employ
+		self.salary = salary_from
+		self.salary_to = salary_to
+
+	def urls(self, engines):
+		return tuple(i._create_link_by_filters(
+						self.city,
+						self.job,
+						self.type_of_employ, 
+						self.salary, 
+						self.salary_to) for i in engines)
+
+
+class Page:
+	def __init__(
+			self,
+			engines:list,
+			query: Query,
+			current_page: int = 1):
+
+		self.engines = engines
+		self.query = query
+		self.urls = query.urls(self.engines)
+		self.html = self.update_page()
+		self.current_page = current_page
+
+
+	def get_page_data(self, engines, page: int = 1) -> Self:
+		"""
+		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
+		"""
+		htmls = []
+		for i in engines:
+			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
+				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
+				page_content = i.session.get(url).html
+				htmls.append(page_content)
+			else:
+				raise ValueError("Page don't exist")
+		return htmls
+
+	def get_next_page(self) -> Self:
+		"""
+		Метод який змінює контент класу на контент з наступної сторінки сайту
+		"""
+		next_page = self.current_page + 1
+		return self.get_page(next_page)
+
+	def update_page(self, page: int = 1) -> Self:
+		"""
+		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
+		"""
+		self.current_page = page
+		self.html = self.get_page_data(self.engines)
+
+	def _get_number_needed_page(self, per_page: int, page: int) -> int:
+		"""
+		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
+		"""
+		engines_per_page = sum(i.per_page for i in self.engines)
+		return math.ceil((page * per_page) / engines_per_page)
+
+	# Подумать
+	def prepare_raw_offers(self):
+		offers = []
+		for engine in self.engines:
+			html = self.html[self.engines.index(engine)]
+			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname)]
+		return offers
+
+
+	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
+		"""
+		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
+		"""
+		offers: list[OfferModel] = []
+
+		needed_page = self._get_number_needed_page(per_page, page)
+		self.update_page(needed_page)
+
+		offers: list[OfferModel] = self.prepare_raw_offers()
+
+		while len(offers) < per_page:
+			self.get_next_page()
+			offers += self.prepare_raw_offers()
+
+		return offers[:per_page]
+
+
 class PageQuery:
 	def __init__(
-			self, 
+			self,
 			session: HTMLSession,
 			html: str,
 			url: str,
@@ -250,6 +357,9 @@ class PageQuery:
 		"""
 		return math.ceil((page * per_page) / self.__per_page)
 
+	def get_shift_of_page(self, per_page, page):
+		return (page*per_page)-per_page
+
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
 		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
@@ -258,31 +368,33 @@ class PageQuery:
 
 		needed_page = self._get_number_needed_page(per_page, page)
 		self.get_page(needed_page)
-
+		shift = self.get_shift_of_page(per_page, page)
 		# block with vacancy
-		raw_offers: list = self.html.find(self.raw_offer_classname)
+		raw_offers: list = self.html.find(self.raw_offer_classname)[shift:]
 
 		while len(raw_offers) < per_page:
 			self.get_next_page()
 			raw_offers.append(self.html.find(self.raw_offer_classname))
 
-		for i in reversed(range(0, per_page)):
-			offer = raw_offers.pop(i)
+		for i in range(0, per_page):
+			offer = raw_offers[i]
 			offers.append(self.prepare_offer(offer).dict())
 		return offers
 
 
-jobs = JobsUA()
-
-job = "бухгалтер"
-city = "kiev"
-page = jobs.get_page(city=city, job=job, salary_from=1000, salary_to=70000)
-vacansy = page.paginate(3, 5)
+# jobs = JobsUA()
 
 
-work = WorkUA()
-type_of_employ = (TypeEmploymentWorkUA.FULL, TypeEmploymentWorkUA.NOTFULL)
-salary = SalaryRange(FROM=SalaryWorkUA.THREE, TO=SalaryWorkUA.FIFTY)
-pg = work.get_page(job="backend", type_of_employ=type_of_employ, salary=salary)
-print(pg.paginate(2,1))
+job = "backend"
+# city = "kiev"
+# query = Query(job=job)
+
+# page = Page([jobs], query)
+
+eng = WorkUA()
+page = eng.get_page(job=job)
+print(page.url)
+a = page.paginate(3, 2)
+for i in a:
+	print(i,end="\n\n")
 
