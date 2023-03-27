@@ -285,6 +285,9 @@ class Page:
 			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname)]
 		return offers
 
+	def get_shift_of_page(self, per_page, page):
+		return (page*per_page)-per_page
+
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -295,13 +298,17 @@ class Page:
 		needed_page = self._get_number_needed_page(per_page, page)
 		self.update_page(needed_page)
 
+		shift = self.get_shift_of_page(per_page, page)
 		offers: list[OfferModel] = self.prepare_raw_offers()
 
 		while len(offers) < per_page:
 			self.get_next_page()
 			offers += self.prepare_raw_offers()
 
-		return offers[:per_page]
+		print(offers)
+		print(shift, per_page)
+
+		return offers[shift:per_page]
 
 
 class PageQuery:
@@ -386,15 +393,15 @@ jobs = JobsUA()
 
 
 job = "backend"
-# city = "kiev"
-# query = Query(job=job)
+city = "kiev"
+query = Query(job=job)
 
-# page = Page([jobs], query)
+page = Page([jobs], query)
 
-eng = WorkUA()
-page = eng.get_page(job=job)
-print(page.url)
+# eng = WorkUA()
+# page = eng.get_page(job=job)
 a = page.paginate(3, 2)
 for i in a:
 	print(i,end="\n\n")
+print(a)
 
