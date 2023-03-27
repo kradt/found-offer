@@ -376,8 +376,8 @@ class PageQuery:
 			self.get_next_page()
 			raw_offers.append(self.html.find(self.raw_offer_classname))
 
-		for i in reversed(range(0, per_page)):
-			offer = raw_offers.pop(i)
+		for i in range(0, per_page):
+			offer = raw_offers[i]
 			offers.append(self.prepare_offer(offer).dict())
 		return offers
 
@@ -394,5 +394,7 @@ job = "backend"
 eng = WorkUA()
 page = eng.get_page(job=job)
 print(page.url)
-print(page.paginate(5, 2))
+a = page.paginate(3, 2)
+for i in a:
+	print(i,end="\n\n")
 
