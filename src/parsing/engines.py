@@ -15,6 +15,9 @@ class WorkUA:
 	def __init__(self):
 		self.session = HTMLSession()
 
+	def is_offer_element(self, elem):
+		return True
+
 	def _create_link_by_filters(
 			self,
 			city: str | None = None,
@@ -126,6 +129,9 @@ class JobsUA:
 	def __init__(self):
 		self.session = HTMLSession()
 
+	def is_offer_element(self, elem: Element):
+		return elem.attrs.get("id") if elem.attrs else False
+		
 	def _create_link_by_filters(
 			self,
 			city: str | None = None,
@@ -274,19 +280,19 @@ class Page:
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
-		return int((page * per_page) / engines_per_page) or 1
+		needed_page = math.ceil((page * per_page) / engines_per_page)
+		return needed_page if needed_page > 0 else 1
 
 	# Подумать
 	def prepare_raw_offers(self):
 		offers = []
 		for engine in self.engines:
 			html = self.html[self.engines.index(engine)]
-			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname)]
+			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname) if engine.is_offer_element(offer)]
 		return offers
 
 	def get_shift_of_page(self, per_page, page):
 		return (page*per_page)-per_page
-
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -295,6 +301,7 @@ class Page:
 		offers: list[OfferModel] = []
 
 		needed_page = self._get_number_needed_page(per_page, page)
+		print(needed_page)
 		self.update_page(needed_page)
 
 
@@ -395,12 +402,9 @@ job = "бухгалтер"
 city = "kiev"
 query = Query(job=job)
 
-page = Page([work], query)
+page = Page([work, jobs], query)
 
-# eng = WorkUA()
-
-# page = eng.get_page(job=job)
-a = page.paginate(11, 2)
+a = page.paginate(5, 7)
 for i in a:
 	print(i,end="\n\n")
 
