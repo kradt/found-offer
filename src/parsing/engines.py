@@ -382,7 +382,7 @@ class PageQuery:
 		return offers
 
 
-# jobs = JobsUA()
+jobs = JobsUA()
 
 
 job = "backend"
