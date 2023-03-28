@@ -280,7 +280,7 @@ class Page:
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
-		needed_page = math.ceil((page * per_page) / engines_per_page)
+		needed_page = math.floor((page * per_page) / engines_per_page)
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
@@ -326,7 +326,7 @@ query = Query(job=job)
 
 page = Page([work, jobs], query)
 
-a = page.paginate(5, 7)
+a = page.paginate(5, 8)
 for i in a:
 	print(i,end="\n\n")
 
