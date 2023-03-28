@@ -311,88 +311,10 @@ class Page:
 
 		while len(offers) < per_page:
 			self.get_next_page()
+			print(self.current_page)
 			offers += self.prepare_raw_offers()
 
 		return offers[:per_page]
-
-
-class PageQuery:
-	def __init__(
-			self,
-			session: HTMLSession,
-			html: str,
-			url: str,
-			per_page: int,
-			count_of_pages: int,
-			next_page_pattern: str,
-			raw_offer_classname:str,
-			prepare_offer: Callable,
-			current_page: int = 1):
-
-		self.html = html
-		self.session = session
-		self.url = url 
-		self.__per_page = per_page
-		self.count_of_pages = count_of_pages
-		self.current_page = current_page
-		self.next_page_pattern = next_page_pattern
-		self.raw_offer_classname = raw_offer_classname
-		self.prepare_offer = prepare_offer
-
-	def get_next_page(self) -> Self:
-		"""
-		Метод який змінює контент класу на контент з наступної сторінки сайту
-		"""
-		next_page = self.current_page + 1
-		return self.get_page(next_page)
-
-	def get_page(self, page: int) -> Self:
-		"""
-		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
-		"""
-		if page == self.current_page:
-			return self
-
-		if page <= self.count_of_pages:
-			url = self.url + self.next_page_pattern.format(page)
-			page_content = self.session.get(url).content
-			self.url = url
-			self.html = page_content
-			self.current_page = page
-			return self
-		else:
-			raise ValueError("Page don't exist")
-
-	def _get_number_needed_page(self, per_page: int, page: int) -> int:
-		"""
-		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
-		"""
-		return math.ceil((page * per_page) / self.__per_page)
-
-	def get_shift_of_page(self, per_page, page):
-		return (page*per_page)-per_page
-
-	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
-		"""
-		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
-		"""
-		offers: list[OfferModel] = []
-
-		needed_page = self._get_number_needed_page(per_page, page)
-		self.get_page(needed_page)
-		shift = self.get_shift_of_page(per_page, page)
-		# block with vacancy
-		raw_offers: list = self.html.find(self.raw_offer_classname)[shift:]
-
-		while len(raw_offers) < per_page:
-			self.get_next_page()
-			raw_offers.append(self.html.find(self.raw_offer_classname))
-
-		for i in range(0, per_page):
-			offer = raw_offers[i]
-			offers.append(self.prepare_offer(offer).dict())
-		return offers
-
 
 jobs = JobsUA()
 work = WorkUA()
