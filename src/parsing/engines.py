@@ -106,18 +106,8 @@ class WorkUA:
 			category: tuple[WorkCategory] | None = None, 
 			salary: SalaryRange | None = None) -> list[OfferModel]:
 
-		url = self._create_link_by_filters(city, job, type_of_employ, category, salary)
-		page_content = self.session.get(url).html
-		count_of_pages = self._get_count_of_pages(page_content)
-		return PageQuery(
-				session=self.session,
-				html=page_content,
-				count_of_pages=count_of_pages, 
-				url=url, 
-				per_page=self.__per_page,
-				next_page_pattern=self.__next_page,
-				raw_offer_classname=self.__offer_classname,
-				prepare_offer=self._prepare_offer)
+		query = Query(city, job, type_of_employ, salary.FROM, salary.TO)
+		return PageQuery(engines=[self], query=query)
 
 
 class JobsUA:
@@ -194,18 +184,8 @@ class JobsUA:
 			salary_from: int | None = None,
 			salary_to: int | None = None ) -> list[OfferModel]:
 
-		url = self._create_link_by_filters(city, job, type_of_employ, salary_from, salary_to)
-		page_content = self.session.get(url).html
-		count_of_pages = self._get_count_of_pages(page_content)
-		return PageQuery(
-				session=self.session,
-				html=page_content,
-				count_of_pages=count_of_pages, 
-				url=url, 
-				per_page=self.__per_page,
-				next_page_pattern=self.__next_page,
-				raw_offer_classname=self.__offer_classname,
-				prepare_offer=self._prepare_offer)
+		query = Query(city, job, type_of_employ, salary_from, salary_to)
+		return PageQuery(engines=[self], query=query)
 
 
 class Query:
@@ -232,7 +212,7 @@ class Query:
 						self.salary_to) for i in engines)
 
 
-class Page:
+class PageQuery:
 	def __init__(
 			self,
 			engines: list,
@@ -242,11 +222,11 @@ class Page:
 		self.engines = engines
 		self.query = query
 		self.urls = query.urls(self.engines)
-		self.html = self.update_page()
+		self.html = self._update_page()
 		self.current_page = current_page
 
 
-	def get_page_data(self, engines, page: int = 1) -> Self:
+	def _get_page_data(self, engines, page: int = 1) -> Self:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
@@ -260,19 +240,19 @@ class Page:
 				raise ValueError("Page don't exist")
 		return htmls
 
-	def get_next_page(self) -> Self:
+	def _get_next_page(self) -> Self:
 		"""
 		Метод який змінює контент класу на контент з наступної сторінки сайту
 		"""
 		next_page = self.current_page + 1
-		return self.update_page(next_page)
+		return self._update_page(next_page)
 
-	def update_page(self, page: int = 1) -> Self:
+	def _update_page(self, page: int = 1) -> Self:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
 		self.current_page = page
-		self.html = self.get_page_data(self.engines, page)
+		self.html = self._get_page_data(self.engines, page)
 
 	def _get_number_needed_page(self, per_page: int, page: int) -> int:
 		"""
@@ -301,16 +281,13 @@ class Page:
 		offers: list[OfferModel] = []
 
 		needed_page = self._get_number_needed_page(per_page, page)
-		print("start page", needed_page)
-		self.update_page(needed_page)
+		self._update_page(needed_page)
 
 		shift = self._get_shift_of_page(per_page, page)
-		print(shift)
 		offers: list[OfferModel] = self._prepare_raw_offers()[shift:]
 
 		while len(offers) < per_page:
-			self.get_next_page()
-			print("next_page", self.current_page)
+			self._get_next_page()
 			offers += self._prepare_raw_offers()
 
 		return offers[:per_page]
@@ -323,7 +300,7 @@ job = "бухгалтер"
 city = "kiev"
 query = Query(job=job)
 
-page = Page([work, jobs], query)
+page = PageQuery([work, jobs], query)
 
 a = page.paginate(5, 14)
 for i in a:
