@@ -279,8 +279,7 @@ class Page:
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
-		needed_page = math.floor((page * per_page) / engines_per_page)
-		print("page result to little", page*per_page/engines_per_page)
+		needed_page = math.ceil(((page * per_page) - per_page) / engines_per_page)
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
@@ -292,7 +291,7 @@ class Page:
 		return offers
 
 	def get_shift_of_page(self, per_page, page):
-		return (page*per_page)-(per_page*self.current_page)
+		return (page*per_page)-per_page
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -304,10 +303,9 @@ class Page:
 		print("start page", needed_page)
 		self.update_page(needed_page)
 
-
 		shift = self.get_shift_of_page(per_page, page)
+		print(shift)
 		offers: list[OfferModel] = self.prepare_raw_offers()[shift:]
-
 
 		while len(offers) < per_page:
 			self.get_next_page()
@@ -326,7 +324,7 @@ query = Query(job=job)
 
 page = Page([work, jobs], query)
 
-a = page.paginate(5, 9)
+a = page.paginate(5, 8)
 for i in a:
 	print(i,end="\n\n")
 
