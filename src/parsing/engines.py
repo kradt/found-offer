@@ -279,20 +279,20 @@ class Page:
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
-		needed_page = math.floor((page * per_page) / engines_per_page)
-		print("page result to little", page*per_page/engines_per_page)
+		needed_page = math.ceil(((page * per_page) - per_page) / engines_per_page)
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
-	def prepare_raw_offers(self):
+	def _prepare_raw_offers(self):
 		offers = []
 		for engine in self.engines:
 			html = self.html[self.engines.index(engine)]
 			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname) if engine.is_offer_element(offer)]
 		return offers
 
-	def get_shift_of_page(self, per_page, page):
-		return (page*per_page)-(per_page*self.current_page)
+	def _get_shift_of_page(self, per_page, page):
+		engines_per_page = sum(i.per_page for i in self.engines)
+		return ((page*per_page)-per_page) - (self.current_page-1) * engines_per_page
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -304,15 +304,14 @@ class Page:
 		print("start page", needed_page)
 		self.update_page(needed_page)
 
-
-		shift = self.get_shift_of_page(per_page, page)
-		offers: list[OfferModel] = self.prepare_raw_offers()[shift:]
-
+		shift = self._get_shift_of_page(per_page, page)
+		print(shift)
+		offers: list[OfferModel] = self._prepare_raw_offers()[shift:]
 
 		while len(offers) < per_page:
 			self.get_next_page()
 			print("next_page", self.current_page)
-			offers += self.prepare_raw_offers()
+			offers += self._prepare_raw_offers()
 
 		return offers[:per_page]
 
@@ -326,7 +325,7 @@ query = Query(job=job)
 
 page = Page([work, jobs], query)
 
-a = page.paginate(5, 9)
+a = page.paginate(5, 14)
 for i in a:
 	print(i,end="\n\n")
 
