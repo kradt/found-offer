@@ -208,7 +208,6 @@ class JobsUA:
 				prepare_offer=self._prepare_offer)
 
 
-
 class Query:
 	def __init__(
 			self,
@@ -281,6 +280,7 @@ class Page:
 		"""
 		engines_per_page = sum(i.per_page for i in self.engines)
 		needed_page = math.floor((page * per_page) / engines_per_page)
+		print("page result to little", page*per_page/engines_per_page)
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
@@ -292,7 +292,7 @@ class Page:
 		return offers
 
 	def get_shift_of_page(self, per_page, page):
-		return (page*per_page)-per_page
+		return (page*per_page)-(per_page*self.current_page)
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -301,7 +301,7 @@ class Page:
 		offers: list[OfferModel] = []
 
 		needed_page = self._get_number_needed_page(per_page, page)
-		print(needed_page)
+		print("start page", needed_page)
 		self.update_page(needed_page)
 
 
@@ -311,7 +311,7 @@ class Page:
 
 		while len(offers) < per_page:
 			self.get_next_page()
-			print(self.current_page)
+			print("next_page", self.current_page)
 			offers += self.prepare_raw_offers()
 
 		return offers[:per_page]
@@ -326,7 +326,7 @@ query = Query(job=job)
 
 page = Page([work, jobs], query)
 
-a = page.paginate(5, 8)
+a = page.paginate(5, 9)
 for i in a:
 	print(i,end="\n\n")
 

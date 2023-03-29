@@ -18,7 +18,6 @@ class TypeEmploymentJobsUA(Enum):
 	NOTFULL = 5
 
 
-
 class SalaryWorkUA(Enum):
 	"""
 		Перелічування тисяч гривень
