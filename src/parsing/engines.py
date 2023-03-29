@@ -145,9 +145,9 @@ class JobsUA:
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 
-		block_title = raw_offer.find(".b-vacancy__top__title", first=True)
+		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
 		title = block_title.text
-		link = block_title.find("a", first=True).attrs.get("href")
+		link = block_title.attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		
 		salary = raw_offer.find(".b-vacancy__top__pay", first=True)
@@ -155,7 +155,8 @@ class JobsUA:
 		
 		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
 		# Отримуємо опис вакансії
-		desc = raw_offer.find(".grey-light", first=True).text if raw_offer.find(".grey-light") else ""
+		desc = raw_offer.find(".grey-light", first=True)
+		desc = desc.text if desc else "" 
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		
