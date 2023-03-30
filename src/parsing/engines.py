@@ -1,5 +1,4 @@
 import math
-import datetime
 from enum import Enum
 from requests_html import HTMLSession, HTML, Element
 from typing import Self, Callable
@@ -96,7 +95,7 @@ class WorkUA:
 		return int(count_of_pages)
 
 	@staticmethod
-	def sum_args(args: Enum):
+	def sum_args(args: Enum) -> str:
 		return "+".join((str(i.value) for i in args))
 
 	def get_page(
@@ -197,7 +196,7 @@ class Query:
 			job: str | None = None,
 			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
 			salary_from: int | None = None,
-			salary_to: int | None = None ):
+			salary_to: int | None = None ) -> None:
 
 		self.job = job
 		self.city = city
@@ -205,7 +204,7 @@ class Query:
 		self.salary = salary_from
 		self.salary_to = salary_to
 
-	def urls(self, engines):
+	def urls(self, engines) -> tuple[str]:
 		return tuple(i._create_link_by_filters(
 						self.city,
 						self.job,
@@ -228,7 +227,7 @@ class PageQuery:
 		self.current_page = current_page
 		self.total_per_page = sum(engine.per_page for engine in self.engines)
 
-	def _get_page_data(self, engines, page: int = 1) -> Self:
+	def _get_page_data(self, engines, page: int = 1) -> list[list[Element]]:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
@@ -244,14 +243,14 @@ class PageQuery:
 				raise ValueError("Page don't exist")
 		return raw_offers
 
-	def _get_next_page(self) -> Self:
+	def _get_next_page(self) -> Callable:
 		"""
 		Метод який змінює контент класу на контент з наступної сторінки сайту
 		"""
 		next_page = self.current_page + 1
 		return self._update_page(next_page)
 
-	def _update_page(self, page: int = 1) -> Self:
+	def _update_page(self, page: int = 1) -> None:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
@@ -266,7 +265,7 @@ class PageQuery:
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
-	def _prepare_raw_offers(self):
+	def _prepare_raw_offers(self) -> list[OfferModel]:
 		offers = []
 		for engine in self.engines:
 			html = self.raw_offers[self.engines.index(engine)]
