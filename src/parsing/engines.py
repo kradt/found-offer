@@ -262,7 +262,6 @@ class PageQuery:
 		"""
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
-		
 		needed_page = math.ceil(((page * per_page) - per_page) / self.total_per_page)
 		return needed_page if needed_page > 0 else 1
 
