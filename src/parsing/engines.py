@@ -293,20 +293,16 @@ class PageQuery:
 		return offers[:per_page]
 
 
-jobs = JobsUA()
-work = WorkUA()
+# jobs = JobsUA()
+# work = WorkUA()
 
-job = "бухгалтер"
-city = "kiev"
+# job = "бухгалтер"
+# city = "kiev"
 
-import datetime
-start = datetime.datetime.now()
+# query = Query(job=job)
+# page = PageQuery([jobs, work], query)
+# end = datetime.datetime.now()-start
 
-query = Query(job=job)
-page = PageQuery([jobs, work], query)
-end = datetime.datetime.now()-start
-
-a = page.paginate(5, 13)
-for i in a:
-	print(i,end="\n\n")
-print("result: ", end)
+# a = page.paginate(5, 13)
+# for i in a:
+# 	print(i,end="\n\n")
