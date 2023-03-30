@@ -236,12 +236,8 @@ class PageQuery:
 		start = datetime.datetime.now()
 		for i in engines:
 			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
-				s = datetime.datetime.now()
 				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
-				s = datetime.datetime.now()
 				page_content = i.session.get(url).html
-				s = datetime.datetime.now()
-
 				engine_offers = page_content.find(i.offer_classname)
 				raw_offers += [engine_offers]
 			else:
@@ -298,6 +294,7 @@ class PageQuery:
 			offers += self._prepare_raw_offers()
 		return offers[:per_page]
 
+
 jobs = JobsUA()
 work = WorkUA()
 
@@ -308,7 +305,7 @@ import datetime
 start = datetime.datetime.now()
 
 query = Query(job=job)
-page = PageQuery([jobs], query)
+page = PageQuery([jobs, work], query)
 end = datetime.datetime.now()-start
 
 a = page.paginate(5, 13)
