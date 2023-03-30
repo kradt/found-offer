@@ -1,4 +1,5 @@
 import math
+import datetime
 from enum import Enum
 from requests_html import HTMLSession, HTML, Element
 from typing import Self, Callable
@@ -223,23 +224,29 @@ class PageQuery:
 		self.engines = engines
 		self.query = query
 		self.urls = query.urls(self.engines)
-		self.html = self._update_page()
+		self.raw_offers: list[list[Element]] = self._update_page()
 		self.current_page = current_page
-
+		self.total_per_page = sum(engine.per_page for engine in self.engines)
 
 	def _get_page_data(self, engines, page: int = 1) -> Self:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
-		htmls = []
+		raw_offers = []
+		start = datetime.datetime.now()
 		for i in engines:
 			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
+				s = datetime.datetime.now()
 				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
+				s = datetime.datetime.now()
 				page_content = i.session.get(url).html
-				htmls.append(page_content)
+				s = datetime.datetime.now()
+
+				engine_offers = page_content.find(i.offer_classname)
+				raw_offers += [engine_offers]
 			else:
 				raise ValueError("Page don't exist")
-		return htmls
+		return raw_offers
 
 	def _get_next_page(self) -> Self:
 		"""
@@ -253,27 +260,26 @@ class PageQuery:
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
 		self.current_page = page
-		self.html = self._get_page_data(self.engines, page)
+		self.raw_offers = self._get_page_data(self.engines, page)
 
 	def _get_number_needed_page(self, per_page: int, page: int) -> int:
 		"""
 		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
 		"""
-		engines_per_page = sum(i.per_page for i in self.engines)
-		needed_page = math.ceil(((page * per_page) - per_page) / engines_per_page)
+		
+		needed_page = math.ceil(((page * per_page) - per_page) / self.total_per_page)
 		return needed_page if needed_page > 0 else 1
 
 	# Подумать
 	def _prepare_raw_offers(self):
 		offers = []
 		for engine in self.engines:
-			html = self.html[self.engines.index(engine)]
-			offers += [engine._prepare_offer(offer) for offer in html.find(engine.offer_classname) if engine.is_offer_element(offer)]
+			html = self.raw_offers[self.engines.index(engine)]
+			offers += [engine._prepare_offer(offer) for offer in html if engine.is_offer_element(offer)]
 		return offers
 
 	def _get_shift_of_page(self, per_page, page):
-		engines_per_page = sum(i.per_page for i in self.engines)
-		return ((page*per_page)-per_page) - (self.current_page-1) * engines_per_page
+		return ((page*per_page) - per_page) - (self.current_page-1) * self.total_per_page
 
 	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
 		"""
@@ -290,20 +296,22 @@ class PageQuery:
 		while len(offers) < per_page:
 			self._get_next_page()
 			offers += self._prepare_raw_offers()
-
 		return offers[:per_page]
 
 jobs = JobsUA()
 work = WorkUA()
 
-
 job = "бухгалтер"
 city = "kiev"
+
+import datetime
+start = datetime.datetime.now()
+
 query = Query(job=job)
+page = PageQuery([jobs], query)
+end = datetime.datetime.now()-start
 
-page = PageQuery([work, jobs], query)
-
-a = page.paginate(5, 14)
+a = page.paginate(5, 13)
 for i in a:
 	print(i,end="\n\n")
-
+print("result: ", end)
