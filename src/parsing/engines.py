@@ -1,9 +1,7 @@
 import math
-from enum import Enum
-from requests_html import HTMLSession, HTML, Element
-from typing import Self, Callable
-from models import (TypeEmploymentJobsUA,TypeEmploymentWorkUA,
-	WorkCategory, SalaryRange, SalaryWorkUA, OfferModel)
+from requests_html import HTMLSession, Element
+
+from models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryRange, OfferModel
 
 
 class WorkUA:
@@ -16,9 +14,9 @@ class WorkUA:
 		self.session = HTMLSession()
 
 	def is_offer_element(self, elem):
-		return True
+		return True if elem else None
 
-	def _create_link_by_filters(
+	def create_link_by_filters(
 			self,
 			city: str | None = None,
 			job: str | None = None,
@@ -26,7 +24,7 @@ class WorkUA:
 			category: tuple[WorkCategory] | None = None,
 			salary: SalaryRange | None = None) -> str:
 		"""
-		Метод який створює ссилку по потрібним фільтрам 
+		Метод який створює ссилку по потрібним фільтрам
 		"""
 		link = self.url
 		filter_block = "jobs"
@@ -43,7 +41,8 @@ class WorkUA:
 		filter_block += f"&salaryto={salary.TO.value}" if salary and salary.TO else ""
 		return link.format(filter_block)
 
-	def __get_city_of_offer(self, raw_offer) -> str:
+	@staticmethod
+	def __get_city_of_offer(raw_offer: Element) -> str | None:
 		possible_paths = (
 			'div.add-top-xs > span:nth-child(6)',
 			'div.add-top-xs > span:nth-child(5)',
@@ -51,14 +50,14 @@ class WorkUA:
 			'div.add-top-xs > span:nth-child(3)'
 		)
 		city = None
-		for i in possible_paths:
-			variant = raw_offer.find(i, first=True)
+		for path in possible_paths:
+			variant = raw_offer.find(path, first=True)
 			if variant and not variant.attrs:
 				city = variant
 				break
 		return city
 
-	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+	def prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
@@ -76,15 +75,15 @@ class WorkUA:
 		city = self.__get_city_of_offer(raw_offer)
 		# Отримуємо дату публікації
 		time_publish = raw_offer.find('div.col-sm-push-7.col-sm-5.col-xs-12.add-top > div > span', first=True).text
-		
+
 		return OfferModel(
-			title=title, city=city.text if city else None, salary=salary, company=company, 
+			title=title, city=city.text if city else None, salary=salary, company=company,
 			description=desc, link=link, time_publish=time_publish
 			)
 
-	def _get_count_of_pages(self, url) -> int:
+	def get_count_of_pages(self, url) -> int:
 		"""
-		 Метод який повертає кількість сторінок в пагінації
+		Метод який повертає кількість сторінок в пагінації
 		"""
 		html = self.session.get(url).html
 		pagination_block = html.find(".pagination", first=True)
@@ -95,16 +94,15 @@ class WorkUA:
 		return int(count_of_pages)
 
 	@staticmethod
-	def sum_args(args: Enum) -> str:
+	def sum_args(args: tuple) -> str:
 		return "+".join((str(i.value) for i in args))
 
 	def get_page(
 			self,
 			city: str | None = None,
-			job: str | None = None, 
-			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None, 
-			category: tuple[WorkCategory] | None = None, 
-			salary: SalaryRange | None = None) -> list[OfferModel]:
+			job: str | None = None,
+			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
+			salary: SalaryRange | None = None):
 
 		query = Query(city, job, type_of_employ, salary.FROM, salary.TO)
 		return PageQuery(engines=[self], query=query)
@@ -121,25 +119,26 @@ class JobsUA:
 
 	def is_offer_element(self, elem: Element):
 		return elem.attrs.get("id") if elem.attrs else False
-		
-	def _create_link_by_filters(
+
+	def create_link_by_filters(
 			self,
 			city: str | None = None,
 			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
 			salary_from: int | None = None,
-			salary_to: int | None = None ) -> str:
+			salary_to: int | None = None) -> str:
 		"""
-		Метод який створює ссилку по потрібним фільтрам 
+		Метод який створює ссилку по потрібним фільтрам
 		"""
 		filter_block = "vacancy/"
-		filter_block += f"{city}/" if city  else ""
+		filter_block += f"{city}/" if city else ""
 		filter_block += f"rabota-{job}/" if job else ""
-		 # and if city in dataclass with cities
-		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""# and if salary in range
+
+		# and if city in dataclass with cities
+		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""
 		return self.url.format(filter_block)
 
-	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+	@staticmethod
+	def prepare_offer(raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
@@ -149,25 +148,25 @@ class JobsUA:
 		title = block_title.text
 		link = block_title.attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
-		
+
 		salary = raw_offer.find(".b-vacancy__top__pay", first=True)
 		salary = salary.text if salary else ""
-		
+
 		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
 		# Отримуємо опис вакансії
 		desc = raw_offer.find(".grey-light", first=True)
-		desc = desc.text if desc else "" 
+		desc = desc.text if desc else ""
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
-		
+
 		return OfferModel(
-			title=title, city=city if city else None, salary=salary, company=company, 
+			title=title, city=city if city else None, salary=salary, company=company,
 			description=desc, link=link
 			)
 
-	def _get_count_of_pages(self, url) -> int:
+	def get_count_of_pages(self, url) -> int:
 		"""
-		 Метод який повертає кількість сторінок в пагінації
+		Метод який повертає кількість сторінок в пагінації
 		"""
 		html = self.session.get(url).html
 		pagination_block = html.find(".b-vacancy__pages-title", first=True)
@@ -180,10 +179,10 @@ class JobsUA:
 	def get_page(
 			self,
 			city: str | None = None,
-			job: str | None = None, 
-			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None, 
+			job: str | None = None,
+			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
 			salary_from: int | None = None,
-			salary_to: int | None = None ) -> list[OfferModel]:
+			salary_to: int | None = None):
 
 		query = Query(city, job, type_of_employ, salary_from, salary_to)
 		return PageQuery(engines=[self], query=query)
@@ -196,7 +195,7 @@ class Query:
 			job: str | None = None,
 			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
 			salary_from: int | None = None,
-			salary_to: int | None = None ) -> None:
+			salary_to: int | None = None) -> None:
 
 		self.job = job
 		self.city = city
@@ -204,13 +203,12 @@ class Query:
 		self.salary = salary_from
 		self.salary_to = salary_to
 
-	def urls(self, engines) -> tuple[str]:
-		return tuple(i._create_link_by_filters(
+	def urls(self, engines) -> tuple:
+		return tuple(engine.create_link_by_filters(
 						self.city,
 						self.job,
-						self.type_of_employ, 
-						self.salary, 
-						self.salary_to) for i in engines)
+						self.salary,
+						self.salary_to) for engine in engines)
 
 
 class PageQuery:
@@ -223,7 +221,7 @@ class PageQuery:
 		self.engines = engines
 		self.query = query
 		self.urls = query.urls(self.engines)
-		self.raw_offers: list[list[Element]] = self._update_page()
+		self._update_page()
 		self.current_page = current_page
 		self.total_per_page = sum(engine.per_page for engine in self.engines)
 
@@ -232,30 +230,30 @@ class PageQuery:
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
 		raw_offers = []
-		start = datetime.datetime.now()
-		for i in engines:
-			if page <= i._get_count_of_pages(self.urls[engines.index(i)]):
-				url = self.urls[engines.index(i)] + i.next_page_pattern.format(page)
-				page_content = i.session.get(url).html
-				engine_offers = page_content.find(i.offer_classname)
+		for engine in engines:
+			if page <= engine.get_count_of_pages(self.urls[engines.index(engine)]):
+				url = self.urls[engines.index(engine)] + engine.next_page_pattern.format(page)
+				page_content = engine.session.get(url).html
+				engine_offers = page_content.find(engine.offer_classname)
 				raw_offers += [engine_offers]
 			else:
 				raise ValueError("Page don't exist")
 		return raw_offers
 
-	def _get_next_page(self) -> Callable:
+	def _get_next_page(self) -> list:
 		"""
 		Метод який змінює контент класу на контент з наступної сторінки сайту
 		"""
 		next_page = self.current_page + 1
 		return self._update_page(next_page)
 
-	def _update_page(self, page: int = 1) -> None:
+	def _update_page(self, page: int = 1) -> list:
 		"""
 		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
 		"""
 		self.current_page = page
 		self.raw_offers = self._get_page_data(self.engines, page)
+		return self.raw_offers
 
 	def _get_number_needed_page(self, per_page: int, page: int) -> int:
 		"""
@@ -269,7 +267,7 @@ class PageQuery:
 		offers = []
 		for engine in self.engines:
 			html = self.raw_offers[self.engines.index(engine)]
-			offers += [engine._prepare_offer(offer) for offer in html if engine.is_offer_element(offer)]
+			offers += [engine.prepare_offer(offer) for offer in html if engine.is_offer_element(offer)]
 		return offers
 
 	def _get_shift_of_page(self, per_page, page):
@@ -279,7 +277,6 @@ class PageQuery:
 		"""
 		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
 		"""
-		offers: list[OfferModel] = []
 
 		needed_page = self._get_number_needed_page(per_page, page)
 		self._update_page(needed_page)
@@ -293,16 +290,15 @@ class PageQuery:
 		return offers[:per_page]
 
 
-# jobs = JobsUA()
-# work = WorkUA()
+jobs = JobsUA()
+work = WorkUA()
 
-# job = "бухгалтер"
-# city = "kiev"
+j = "бухгалтер"
+c = "kiev"
 
-# query = Query(job=job)
-# page = PageQuery([jobs, work], query)
-# end = datetime.datetime.now()-start
+q = Query(job=j)
+p = PageQuery([jobs, work], q)
 
-# a = page.paginate(5, 13)
-# for i in a:
-# 	print(i,end="\n\n")
+a = p.paginate(5, 13)
+for v in a:
+	print(v, end="\n\n")
