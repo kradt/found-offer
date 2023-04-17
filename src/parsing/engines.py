@@ -2,7 +2,7 @@ import math
 from requests_html import HTMLSession, Element
 from slugify import slugify
 
-from .models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryWorkUA, SalaryRange, OfferModel
+from .models import OfferModel
 
 
 class WorkUA:
@@ -14,62 +14,6 @@ class WorkUA:
 	def __init__(self):
 		self.session = HTMLSession()
 
-	def is_offer_element(self, elem):
-		return True if elem else None
-
-	def find_right_salary(self, salary: int | str):
-		return_value = 0
-		match int(salary):
-			case s if s <= 0:
-				return_value = SalaryWorkUA.ANY
-			case s if s >= 3000:
-				return_value = SalaryWorkUA.THREE
-			case s if s >= 5000:
-				return_value = SalaryWorkUA.FIVE
-			case s if s >= 7000:
-				return_value = SalaryWorkUA.SEVEN
-			case s if s >= 1000:
-				return_value = SalaryWorkUA.TEN
-			case s if s >= 15000:
-				return_value = SalaryWorkUA.FIFTEEN
-			case s if s >= 20000:
-				return_value = SalaryWorkUA.TWENTY
-			case s if s >= 30000:
-				return_value = SalaryWorkUA.THIRTY
-			case s if s >= 50000:
-				return_value = SalaryWorkUA.FIFTEEN
-		return return_value
-
-	def create_link_by_filters(
-			self,
-			city: str | None = None,
-			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
-			category: tuple[WorkCategory] | None = None,
-			salary_from: int | None = None,
-			salary_to: int | None = None) -> str:
-		"""
-		Метод який створює ссилку по потрібним фільтрам
-		"""
-		salary = SalaryRange(
-			FROM=self.find_right_salary(salary_from),
-			TO=self.find_right_salary(salary_to)
-		)
-		city = slugify(city, separator="-", allow_unicode=True)
-		link = self.url
-		filter_block = "jobs"
-		filter_block += f"-{city}" if city else ""
-		filter_block += f"-{job}/" if job else ""
-		# Означає що будуть використувавтися розширені фільтри
-		filter_block += "?advs=1"
-		# Вибір категорії праці
-		filter_block += f"&category={self.sum_args(category)}" if category else ""
-		# Вибір виду зайнятості
-		filter_block += f"&employment={self.sum_args(type_of_employ)}" if type_of_employ else ""
-		# Вибір діапазону заробітньої плати
-		filter_block += f"&salaryfrom={salary.FROM.value}" if salary and salary.FROM else ""
-		filter_block += f"&salaryto={salary.TO.value}" if salary and salary.TO else ""
-		return link.format(filter_block)
 
 	@staticmethod
 	def __get_city_of_offer(raw_offer: Element) -> str | None:
@@ -123,19 +67,6 @@ class WorkUA:
 			count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
 
-	@staticmethod
-	def sum_args(args: tuple) -> str:
-		return "+".join((str(i.value) for i in args))
-
-	def get_page(
-			self,
-			city: str | None = None,
-			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
-			salary: SalaryRange | None = None):
-
-		query = Query(city, job, type_of_employ, salary.FROM, salary.TO)
-		return PageQuery(engines=[self], query=query)
 
 
 class JobsUA:
@@ -147,25 +78,6 @@ class JobsUA:
 	def __init__(self):
 		self.session = HTMLSession()
 
-	def is_offer_element(self, elem: Element):
-		return elem.attrs.get("id") if elem.attrs else False
-
-	def create_link_by_filters(
-			self,
-			city: str | None = None,
-			job: str | None = None,
-			salary_from: int | None = None,
-			salary_to: int | None = None) -> str:
-		"""
-		Метод який створює ссилку по потрібним фільтрам
-		"""
-		filter_block = "vacancy/"
-		filter_block += f"{city.lower()}/" if city else ""
-		filter_block += f"rabota-{job}/" if job else ""
-
-		# and if city in dataclass with cities
-		filter_block += f"?salary={salary_from}%2C{salary_to}" if salary_from and salary_to else ""
-		return self.url.format(filter_block)
 
 	@staticmethod
 	def prepare_offer(raw_offer: Element) -> OfferModel:
@@ -206,129 +118,9 @@ class JobsUA:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
 
-	def get_page(
-			self,
-			city: str | None = None,
-			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
-			salary_from: int | None = None,
-			salary_to: int | None = None):
-
-		query = Query(city, job, type_of_employ, salary_from, salary_to)
-		return PageQuery(engines=[self], query=query)
 
 
-class Query:
-	def __init__(
-			self,
-			city: str | None = None,
-			job: str | None = None,
-			type_of_employ: tuple[TypeEmploymentJobsUA] | None = None,
-			salary_from: int | None = None,
-			salary_to: int | None = None) -> None:
-
-		self.job = job
-		self.city = city
-		self.type_of_employ = type_of_employ
-		self.salary_from = salary_from
-		self.salary_to = salary_to
-
-	def urls(self, engines) -> tuple:
-		return tuple(engine.create_link_by_filters(
-						city=self.city,
-						job=self.job,
-						salary_from=self.salary_from,
-						salary_to=self.salary_to) for engine in engines)
 
 
-class PageQuery:
-	def __init__(
-			self,
-			engines: list,
-			query: Query,
-			current_page: int = 1):
-
-		self.engines = engines
-		self.query = query
-		self.urls = query.urls(self.engines)
-		self._update_page()
-		self.current_page = current_page
-		self.total_per_page = sum(engine.per_page for engine in self.engines)
-
-	def _get_page_data(self, engines, page: int = 1) -> list[list[Element]]:
-		"""
-		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
-		"""
-		raw_offers = []
-		for engine in engines:
-			if page <= engine.get_count_of_pages(self.urls[engines.index(engine)]):
-				url = self.urls[engines.index(engine)] + engine.next_page_pattern.format(page)
-				page_content = engine.session.get(url).html
-				engine_offers = page_content.find(engine.offer_classname)
-				raw_offers += [engine_offers]
-			else:
-				raise ValueError("Page don't exist")
-		return raw_offers
-
-	def _get_next_page(self) -> list:
-		"""
-		Метод який змінює контент класу на контент з наступної сторінки сайту
-		"""
-		next_page = self.current_page + 1
-		return self._update_page(next_page)
-
-	def _update_page(self, page: int = 1) -> list:
-		"""
-		Метод який змінює контент класу на контент з передної сторінки якщо вона існує
-		"""
-		self.current_page = page
-		self.raw_offers = self._get_page_data(self.engines, page)
-		return self.raw_offers
-
-	def _get_number_needed_page(self, per_page: int, page: int) -> int:
-		"""
-		Метод який рахує на якій сторінці буде знаходитись потрібний діапазанон вакансій
-		"""
-		needed_page = math.ceil(((page * per_page) - per_page) / self.total_per_page)
-		return needed_page if needed_page > 0 else 1
-
-	# Подумать
-	def _prepare_raw_offers(self) -> list[OfferModel]:
-		offers = []
-		for engine in self.engines:
-			html = self.raw_offers[self.engines.index(engine)]
-			offers += [engine.prepare_offer(offer) for offer in html if engine.is_offer_element(offer)]
-		return offers
-
-	def _get_shift_of_page(self, per_page, page):
-		return ((page*per_page) - per_page) - (self.current_page-1) * self.total_per_page
-
-	def paginate(self, per_page: int, page: int) -> list[OfferModel]:
-		"""
-		Метод який повертає вакансії приймаючи аргументом кількість вакансій на сторінці та номер сторінки
-		"""
-
-		needed_page = self._get_number_needed_page(per_page, page)
-		self._update_page(needed_page)
-
-		shift = self._get_shift_of_page(per_page, page)
-		offers: list[OfferModel] = self._prepare_raw_offers()[shift:]
-
-		while len(offers) < per_page:
-			self._get_next_page()
-			offers += self._prepare_raw_offers()
-		return offers[:per_page]
 
 
-# jobs = JobsUA()
-# work = WorkUA()
-#
-# j = "бухгалтер"
-# c = "kiev"
-#
-# q = Query(job=j)
-# p = PageQuery([jobs, work], q)
-#
-# a = p.paginate(5, 13)
-# for v in a:
-# 	print(v, end="\n\n")
