@@ -1,7 +1,7 @@
 import math
 from requests_html import HTMLSession, Element
 
-from models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryRange, OfferModel
+from .models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryRange, OfferModel
 
 
 class WorkUA:
@@ -16,13 +16,19 @@ class WorkUA:
 	def is_offer_element(self, elem):
 		return True if elem else None
 
+	def find_right_salary(self, salary_from: int, salary_to: int):
+		pass
+
+
 	def create_link_by_filters(
 			self,
 			city: str | None = None,
 			job: str | None = None,
 			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
 			category: tuple[WorkCategory] | None = None,
-			salary: SalaryRange | None = None) -> str:
+			salary: SalaryRange | None = None,
+			salary_from: int | None = None,
+			salary_to: int |None = None) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам
 		"""
@@ -200,15 +206,15 @@ class Query:
 		self.job = job
 		self.city = city
 		self.type_of_employ = type_of_employ
-		self.salary = salary_from
+		self.salary_from = salary_from
 		self.salary_to = salary_to
 
 	def urls(self, engines) -> tuple:
 		return tuple(engine.create_link_by_filters(
-						self.city,
-						self.job,
-						self.salary,
-						self.salary_to) for engine in engines)
+						city=self.city,
+						job=self.job,
+						salary_from=self.salary_from,
+						salary_to=self.salary_to) for engine in engines)
 
 
 class PageQuery:
@@ -290,15 +296,15 @@ class PageQuery:
 		return offers[:per_page]
 
 
-jobs = JobsUA()
-work = WorkUA()
-
-j = "бухгалтер"
-c = "kiev"
-
-q = Query(job=j)
-p = PageQuery([jobs, work], q)
-
-a = p.paginate(5, 13)
-for v in a:
-	print(v, end="\n\n")
+# jobs = JobsUA()
+# work = WorkUA()
+#
+# j = "бухгалтер"
+# c = "kiev"
+#
+# q = Query(job=j)
+# p = PageQuery([jobs, work], q)
+#
+# a = p.paginate(5, 13)
+# for v in a:
+# 	print(v, end="\n\n")
