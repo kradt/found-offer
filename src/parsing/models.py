@@ -13,6 +13,8 @@ class TypeEmploymentWorkUA(Enum):
 	NOTFULL = 75
 
 
+
+
 class TypeEmploymentJobsUA(Enum):
 	FULL = 1
 	NOTFULL = 5

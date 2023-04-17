@@ -1,5 +1,6 @@
 import math
 from requests_html import HTMLSession, Element
+from slugify import slugify
 
 from .models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryWorkUA, SalaryRange, OfferModel
 
@@ -29,7 +30,7 @@ class WorkUA:
 				return_value = SalaryWorkUA.SEVEN
 			case s if s >= 1000:
 				return_value = SalaryWorkUA.TEN
-			case s if s  >= 15000:
+			case s if s >= 15000:
 				return_value = SalaryWorkUA.FIFTEEN
 			case s if s >= 20000:
 				return_value = SalaryWorkUA.TWENTY
@@ -46,7 +47,7 @@ class WorkUA:
 			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
 			category: tuple[WorkCategory] | None = None,
 			salary_from: int | None = None,
-			salary_to: int |None = None) -> str:
+			salary_to: int | None = None) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам
 		"""
@@ -54,6 +55,7 @@ class WorkUA:
 			FROM=self.find_right_salary(salary_from),
 			TO=self.find_right_salary(salary_to)
 		)
+		city = slugify(city, separator="-", allow_unicode=True)
 		link = self.url
 		filter_block = "jobs"
 		filter_block += f"-{city}" if city else ""
@@ -158,7 +160,7 @@ class JobsUA:
 		Метод який створює ссилку по потрібним фільтрам
 		"""
 		filter_block = "vacancy/"
-		filter_block += f"{city}/" if city else ""
+		filter_block += f"{city.lower()}/" if city else ""
 		filter_block += f"rabota-{job}/" if job else ""
 
 		# and if city in dataclass with cities
