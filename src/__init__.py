@@ -1,12 +1,15 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
 
 from src.config import Config
 
 
+
 db = SQLAlchemy()
+db = MongoEngine()
 migrate = Migrate()
 login_manager = LoginManager()
 
@@ -19,9 +22,9 @@ def create_app():
 	login_manager.init_app(app)
 	login_manager.login_view = "auth_bp.login"
 
-	with app.app_context():
-		from src.database import models
-		db.create_all()
+
+	from src.database import models
+
 
 	migrate.init_app(app, db)
 

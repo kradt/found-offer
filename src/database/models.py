@@ -4,10 +4,10 @@ from flask_login import UserMixin
 from src import db, login_manager
 
 
-class User(db.Model, UserMixin):
-	id = db.Column(db.Integer, primary_key=True)
-	email = db.Column(db.String(100), unique=True)
-	password = db.Column(db.String)
+class User(db.Document, UserMixin):
+	_id = db.ObjectIdField(auto_created=True, primary_key=True)
+	email = db.StringField()
+	password = db.StringField()
 
 	def __init__(self, email: str, password: str) -> None:
 		self.email = email
@@ -23,6 +23,6 @@ class User(db.Model, UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-	return User.query.filter_by(id=user_id).first()
+	return User.objects(id=user_id).get()
 
 

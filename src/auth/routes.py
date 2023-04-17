@@ -13,7 +13,7 @@ auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="stati
 def login():
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = auth_service.find_user_by_email(db.session, form.email.data)
+		user = auth_service.find_user_by_email(form.email.data)
 		if user and user.check_password(form.password.data):
 			flask_login.login_user(user, remember=form.remember_me.data)
 			return redirect(url_for(".home_page"))
@@ -27,7 +27,7 @@ def login():
 def register():
 	form = RegisterForm()
 	if form.validate_on_submit():
-		user = auth_service.create_user(db.session, form.email.data, form.password.data)
+		user = auth_service.create_user(form.email.data, form.password.data)
 		if not user:
 			flash("User with this email already exist")
 		else:
