@@ -1,7 +1,7 @@
 import math
 from requests_html import HTMLSession, Element
 
-from .models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryRange, OfferModel
+from .models import TypeEmploymentJobsUA, TypeEmploymentWorkUA, WorkCategory, SalaryWorkUA, SalaryRange, OfferModel
 
 
 class WorkUA:
@@ -16,9 +16,28 @@ class WorkUA:
 	def is_offer_element(self, elem):
 		return True if elem else None
 
-	def find_right_salary(self, salary_from: int, salary_to: int):
-		pass
-
+	def find_right_salary(self, salary: int | str):
+		return_value = 0
+		match int(salary):
+			case s if s <= 0:
+				return_value = SalaryWorkUA.ANY
+			case s if s >= 3000:
+				return_value = SalaryWorkUA.THREE
+			case s if s >= 5000:
+				return_value = SalaryWorkUA.FIVE
+			case s if s >= 7000:
+				return_value = SalaryWorkUA.SEVEN
+			case s if s >= 1000:
+				return_value = SalaryWorkUA.TEN
+			case s if s  >= 15000:
+				return_value = SalaryWorkUA.FIFTEEN
+			case s if s >= 20000:
+				return_value = SalaryWorkUA.TWENTY
+			case s if s >= 30000:
+				return_value = SalaryWorkUA.THIRTY
+			case s if s >= 50000:
+				return_value = SalaryWorkUA.FIFTEEN
+		return return_value
 
 	def create_link_by_filters(
 			self,
@@ -26,12 +45,15 @@ class WorkUA:
 			job: str | None = None,
 			type_of_employ: tuple[TypeEmploymentWorkUA] | None = None,
 			category: tuple[WorkCategory] | None = None,
-			salary: SalaryRange | None = None,
 			salary_from: int | None = None,
 			salary_to: int |None = None) -> str:
 		"""
 		Метод який створює ссилку по потрібним фільтрам
 		"""
+		salary = SalaryRange(
+			FROM=self.find_right_salary(salary_from),
+			TO=self.find_right_salary(salary_to)
+		)
 		link = self.url
 		filter_block = "jobs"
 		filter_block += f"-{city}" if city else ""
