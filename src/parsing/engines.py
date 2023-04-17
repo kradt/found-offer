@@ -1,6 +1,4 @@
-import math
 from requests_html import HTMLSession, Element
-from slugify import slugify
 
 from .models import OfferModel
 
@@ -8,12 +6,10 @@ from .models import OfferModel
 class WorkUA:
 	url = "https://www.work.ua/{}"
 	per_page = 14
-	next_page_pattern = "&page={}"
 	offer_classname = ".card-visited"
 
 	def __init__(self):
 		self.session = HTMLSession()
-
 
 	@staticmethod
 	def __get_city_of_offer(raw_offer: Element) -> str | None:
@@ -68,16 +64,13 @@ class WorkUA:
 		return int(count_of_pages)
 
 
-
 class JobsUA:
 	url = "https://jobs.ua/{}"
 	per_page = 20
-	next_page_pattern = "/page-{}"
 	offer_classname = ".b-vacancy__item.js-item_list"
 
 	def __init__(self):
 		self.session = HTMLSession()
-
 
 	@staticmethod
 	def prepare_offer(raw_offer: Element) -> OfferModel:
@@ -117,10 +110,3 @@ class JobsUA:
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
-
-
-
-
-
-
-
