@@ -29,7 +29,7 @@ class PageQuery:
 	def _get_count_of_pages(self, url: str) -> int:
 		pass
 
-	def make_list_of_offers(self, raw_offers: list) -> list:
+	def _make_list_of_offers(self, raw_offers: list) -> list:
 		offers_in_page: list = []
 		for offer in raw_offers:
 			if self._is_offer_element(offer):
@@ -47,7 +47,7 @@ class PageQuery:
 		page_html = self.session.get(necessary_url).html
 		raw_offers = page_html.find(self._offer_classname)
 
-		return self.make_list_of_offers(raw_offers)
+		return self._make_list_of_offers(raw_offers)
 
 
 class WorkUA(PageQuery):
