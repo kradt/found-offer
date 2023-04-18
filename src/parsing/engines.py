@@ -6,7 +6,6 @@ from .models import OfferModel
 
 sys.path.append(os.getcwd())
 
-
 # from src.database import models
 
 
@@ -63,6 +62,8 @@ class WorkUA(PageQuery):
 	@staticmethod
 	def __get_city_of_offer(raw_offer: Element) -> str | None:
 		possible_paths = (
+			'div.add-top-xs > span:nth-child(8)',
+			'div.add-top-xs > span:nth-child(7)',
 			'div.add-top-xs > span:nth-child(6)',
 			'div.add-top-xs > span:nth-child(5)',
 			'div.add-top-xs > span:nth-child(4)',
