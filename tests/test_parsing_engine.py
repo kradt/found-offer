@@ -21,6 +21,5 @@ def test_query_class(job, city, salary_from, salary_to, engines):
     assert isinstance(urls, tuple)
     assert len(urls) == len(engines)
     for url in urls:
-        print(url)
         rq = requests.get(url)
         assert rq.status_code == 200

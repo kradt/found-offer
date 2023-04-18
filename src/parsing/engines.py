@@ -1,15 +1,64 @@
 from requests_html import HTMLSession, Element
+import os
+import sys
 
-from .models import OfferModel
+from models import OfferModel
+
+sys.path.append(os.getcwd())
 
 
-class WorkUA:
-	url = "https://www.work.ua/{}"
-	per_page = 14
-	offer_classname = ".card-visited"
+# from src.database import models
 
-	def __init__(self):
+
+class PageQuery:
+	_url = ...
+	_offer_classname = ...
+	_offers_pattern = ...
+	_next_page_pattern = ...
+
+	def __init__(self, current_page: int = 0):
 		self.session = HTMLSession()
+		self.current_page = current_page
+
+	def is_offer_element(self, elem: Element):
+		pass
+
+	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
+		pass
+
+	def _get_count_of_pages(self, url: str) -> int:
+		pass
+
+	def make_list_of_offers(self, raw_offers: list) -> list:
+		offers_in_page: list = []
+		for offer in raw_offers:
+			if self.is_offer_element(offer):
+				offers_in_page.append(self._prepare_offer(offer))
+		return offers_in_page
+
+	def __iter__(self):
+		return self
+
+	def __next__(self):
+		self.current_page += 1
+		necessary_url = self._url.format(self._offers_pattern + self._next_page_pattern.format(self.current_page))
+		if self.current_page > self._get_count_of_pages(necessary_url):
+			raise StopIteration
+		page_html = self.session.get(necessary_url).html
+		raw_offers = page_html.find(self._offer_classname)
+
+		return self.make_list_of_offers(raw_offers)
+
+
+class WorkUA(PageQuery):
+	_url = "https://www.work.ua/{}"
+	_offers_pattern = "jobs/?ss=1"
+	_per_page = 14
+	_next_page_pattern = "&page={}"
+	_offer_classname = ".card-visited"
+
+	def __init__(self, current_page: int = 0):
+		super().__init__(current_page)
 
 	@staticmethod
 	def __get_city_of_offer(raw_offer: Element) -> str | None:
@@ -27,14 +76,14 @@ class WorkUA:
 				break
 		return city
 
-	def prepare_offer(self, raw_offer: Element) -> OfferModel:
+	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 		block_title = raw_offer.find("h2")[0]
 		title = block_title.text
-		link = "/".join(self.url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
+		link = "/".join(self._url.split("/")[0:3]) + block_title.find("a", first=True).attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 		about_block = raw_offer.find("b")
 		salary = about_block[0].text
@@ -49,9 +98,9 @@ class WorkUA:
 		return OfferModel(
 			title=title, city=city.text if city else None, salary=salary, company=company,
 			description=desc, link=link, time_publish=time_publish
-			)
+		)
 
-	def get_count_of_pages(self, url) -> int:
+	def _get_count_of_pages(self, url) -> int:
 		"""
 		Метод який повертає кількість сторінок в пагінації
 		"""
@@ -64,23 +113,27 @@ class WorkUA:
 		return int(count_of_pages)
 
 
-class JobsUA:
-	url = "https://jobs.ua/{}"
-	per_page = 20
-	offer_classname = ".b-vacancy__item.js-item_list"
+class JobsUA(PageQuery):
+	_url = "https://jobs.ua/{}"
+	_per_page = 20
+	_next_page_pattern = "/page-{}"
+	_offers_pattern = "vacancy"
+	_offer_classname = ".b-vacancy__item.js-item_list"
 
-	def __init__(self):
-		self.session = HTMLSession()
+	def __init__(self, current_page: int = 0):
+		super().__init__(current_page)
 
-	@staticmethod
-	def prepare_offer(raw_offer: Element) -> OfferModel:
+	def is_offer_element(self, elem: Element):
+		return elem.attrs.get("id") if elem.attrs else False
+
+	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 
 		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
-		title = block_title.text
+		title = block_title.text if block_title else ""
 		link = block_title.attrs.get("href")
 		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 
@@ -97,9 +150,9 @@ class JobsUA:
 		return OfferModel(
 			title=title, city=city if city else None, salary=salary, company=company,
 			description=desc, link=link
-			)
+		)
 
-	def get_count_of_pages(self, url) -> int:
+	def _get_count_of_pages(self, url) -> int:
 		"""
 		Метод який повертає кількість сторінок в пагінації
 		"""
@@ -110,3 +163,21 @@ class JobsUA:
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
+
+
+import datetime
+
+start = datetime.datetime.now()
+
+w = JobsUA()
+a = 0
+offers = []
+for i in w:
+	print(len(offers))
+	if len(offers) >= 1000:
+		break
+	offers.extend(i)
+	a += 1
+
+print("Length of a:", a)
+print("time result is: ", datetime.datetime.now() - start)
