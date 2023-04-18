@@ -2,7 +2,7 @@ from requests_html import HTMLSession, Element
 import os
 import sys
 
-from models import OfferModel
+from .models import OfferModel
 
 sys.path.append(os.getcwd())
 
