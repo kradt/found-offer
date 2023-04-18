@@ -20,7 +20,7 @@ class PageQuery:
 		self.session = HTMLSession()
 		self.current_page = current_page
 
-	def is_offer_element(self, elem: Element):
+	def _is_offer_element(self, elem: Element) -> bool:
 		pass
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
@@ -32,7 +32,7 @@ class PageQuery:
 	def make_list_of_offers(self, raw_offers: list) -> list:
 		offers_in_page: list = []
 		for offer in raw_offers:
-			if self.is_offer_element(offer):
+			if self._is_offer_element(offer):
 				offers_in_page.append(self._prepare_offer(offer))
 		return offers_in_page
 
@@ -75,6 +75,9 @@ class WorkUA(PageQuery):
 				city = variant
 				break
 		return city
+
+	def _is_offer_element(self, elem: Element) -> bool:
+		return True
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
@@ -123,7 +126,7 @@ class JobsUA(PageQuery):
 	def __init__(self, current_page: int = 0):
 		super().__init__(current_page)
 
-	def is_offer_element(self, elem: Element):
+	def _is_offer_element(self, elem: Element) -> bool:
 		return elem.attrs.get("id") if elem.attrs else False
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
@@ -169,7 +172,7 @@ import datetime
 
 start = datetime.datetime.now()
 
-w = JobsUA()
+w = WorkUA()
 a = 0
 offers = []
 for i in w:
@@ -181,3 +184,4 @@ for i in w:
 
 print("Length of a:", a)
 print("time result is: ", datetime.datetime.now() - start)
+time_JobsUA = " 0:01:02.672788"
