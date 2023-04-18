@@ -166,22 +166,3 @@ class JobsUA(PageQuery):
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
-
-
-import datetime
-
-start = datetime.datetime.now()
-
-w = WorkUA()
-a = 0
-offers = []
-for i in w:
-	print(len(offers))
-	if len(offers) >= 1000:
-		break
-	offers.extend(i)
-	a += 1
-
-print("Length of a:", a)
-print("time result is: ", datetime.datetime.now() - start)
-time_JobsUA = " 0:01:02.672788"
