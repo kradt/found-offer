@@ -19,7 +19,7 @@ class Vacancy(db.Document):
 	title = db.StringField(required=True)
 	city = db.StringField()
 	salary = db.FloatField()
-	date_publish = db.DatetimeField()
+	date_publish = db.DateTimeField()
 	company_name = db.StringField()
 	description = db.StringField()
 	link = db.StringField()
