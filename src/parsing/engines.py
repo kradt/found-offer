@@ -11,7 +11,7 @@ class PageQuery:
 	_offers_pattern = ...
 	_next_page_pattern = ...
 
-	def __init__(self, current_page: int = 1):
+	def __init__(self, current_page: int = 1) -> None:
 		self.session = HTMLSession()
 		self.current_page = current_page
 
@@ -34,7 +34,7 @@ class PageQuery:
 	def __iter__(self):
 		return self
 
-	def __next__(self):
+	def __next__(self) -> list:
 		self.current_page += 1
 		necessary_url = self._url.format(self._offers_pattern + self._next_page_pattern.format(self.current_page))
 		if self.current_page > self._get_count_of_pages(necessary_url):
@@ -52,7 +52,7 @@ class WorkUA(PageQuery):
 	_next_page_pattern = "&page={}"
 	_offer_classname = ".card-visited"
 
-	def __init__(self, current_page: int = 0):
+	def __init__(self, current_page: int = 0) -> None:
 		super().__init__(current_page)
 
 	@staticmethod
@@ -77,7 +77,7 @@ class WorkUA(PageQuery):
 		return True
 
 	@staticmethod
-	def __get_time_from_str(time_str: str):
+	def __get_time_from_str(time_str: str) -> datetime.datetime:
 		necessary_time = datetime.datetime.now()
 		if time_str == "вчора":
 			return necessary_time - datetime.timedelta(days=1)
@@ -151,7 +151,7 @@ class JobsUA(PageQuery):
 	_offers_pattern = "vacancy"
 	_offer_classname = ".b-vacancy__item.js-item_list"
 
-	def __init__(self, current_page: int = 0):
+	def __init__(self, current_page: int = 0) -> None:
 		super().__init__(current_page)
 		self.month_to_number_dict = {
 			"січня": 1,
@@ -171,7 +171,7 @@ class JobsUA(PageQuery):
 	def _is_offer_element(self, elem: Element) -> bool:
 		return elem.attrs.get("id") if elem.attrs else False
 
-	def __extract_date(self, link: str):
+	def __extract_date(self, link: str) -> datetime.datetime:
 		necessary_date = datetime.datetime.now()
 		data = self.session.get(link).html
 		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True).text
