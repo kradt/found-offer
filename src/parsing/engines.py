@@ -88,11 +88,16 @@ class WorkUA(PageQuery):
 		digit = int(before_publish_time[0])
 		time_marker = before_publish_time[1]
 
-		if time_marker == "хв.":  necessary_time -= datetime.timedelta(minutes=digit)
-		elif time_marker == "год.": necessary_time -= datetime.timedelta(hours=digit)
-		elif time_marker == "дні.": necessary_time -= datetime.timedelta(days=digit)
-		elif time_marker == "тиж.": necessary_time -= datetime.timedelta(weeks=digit)
-		elif time_marker == "міс.": necessary_time -= datetime.timedelta(weeks=digit * 4)
+		if time_marker == "хв.":
+			necessary_time -= datetime.timedelta(minutes=digit)
+		elif time_marker == "год.":
+			necessary_time -= datetime.timedelta(hours=digit)
+		elif time_marker == "дні.":
+			necessary_time -= datetime.timedelta(days=digit)
+		elif time_marker == "тиж.":
+			necessary_time -= datetime.timedelta(weeks=digit)
+		elif time_marker == "міс.":
+			necessary_time -= datetime.timedelta(weeks=digit * 4)
 		return necessary_time
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
@@ -119,7 +124,8 @@ class WorkUA(PageQuery):
 		city = self.__get_city_of_offer(raw_offer)
 		# Отримуємо дату публікації
 		time_publish_data = raw_offer.find('div.pull-right.no-pull-xs.nowrap > span.text-muted.small', first=True) or \
-					   raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light", first=True)
+							raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light",
+										   first=True)
 		time_publish = self.__get_time_from_str(time_publish_data.text)
 		print(salary_from, salary_to)
 		return OfferModel(
@@ -154,9 +160,31 @@ class JobsUA(PageQuery):
 		return elem.attrs.get("id") if elem.attrs else False
 
 	def __extract_date(self, link: str):
+		month_number = {
+			"січня": 1,
+			"лютого": 2,
+			"березня": 3,
+			"квітня": 4,
+			"травня": 5,
+			"червня": 6,
+			"липня": 7,
+			"серпня": 8,
+			"вересня": 9,
+			"жовтня": 10,
+			"листопада": 11,
+			"грудня": 12
+		}
+		necessary_date = datetime.datetime.now()
 		data = self.session.get(link).html
 		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True)
-		return link.text
+		items = link.split()
+		necessary_date.replace(day=items[0])
+		month = items[1]
+		necessary_date.replace(
+			year=items[2] if items[2] else necessary_date.year,
+			month=month_number[month],
+			day=items[0])
+		return necessary_date
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
@@ -184,7 +212,7 @@ class JobsUA(PageQuery):
 		print(time_publish)
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
-			description=desc, link=link
+			description=desc, link=link, time_publish=time_publish
 		)
 
 	def _get_count_of_pages(self, url) -> int:
