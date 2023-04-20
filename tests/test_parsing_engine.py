@@ -1,9 +1,9 @@
 import pytest
-
+import datetime
 from src.parsing import engines as core
 
 
-@pytest.mark.parametrize(("engine"),
+@pytest.mark.parametrize("engine",
                          [
                              (core.JobsUA()),
                              (core.WorkUA())
@@ -18,6 +18,9 @@ def test_class_jobs_ua_iterable(engine):
         assert isinstance(offer.title, str)
         assert isinstance(offer.city, str)
         assert isinstance(offer, core.OfferModel)
+        assert isinstance(offer.salary_from, float) or offer.salary_from is None
+        assert isinstance(offer.salary_to, float) or offer.salary_to is None
+        assert isinstance(offer.time_publish, datetime.datetime)
 
     next(engine)
     assert engine.current_page == 2

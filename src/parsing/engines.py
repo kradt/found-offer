@@ -2,7 +2,7 @@ from requests_html import HTMLSession, Element
 import datetime
 import re
 
-from models import OfferModel
+from .models import OfferModel
 
 
 class PageQuery:
@@ -227,6 +227,3 @@ class JobsUA(PageQuery):
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
 
-
-for i in JobsUA():
-	pass
