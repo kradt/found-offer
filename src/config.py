@@ -11,6 +11,7 @@ class Config:
 	SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 	MONGO_URI = os.getenv("MONGO_URI")
 	MONGODB_SETTINGS = {
+		'alias': 'default',
 		"host": os.getenv("MONGO_URI")
 	}
 	

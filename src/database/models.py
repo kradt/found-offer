@@ -18,9 +18,10 @@ class User(db.Document, UserMixin):
 class Vacancy(db.Document):
 	title = db.StringField(required=True)
 	city = db.StringField()
-	salary = db.FloatField()
-	date_publish = db.DateTimeField()
-	company_name = db.StringField()
+	salary_from = db.FloatField()
+	salary_to = db.FloatField()
+	time_publish = db.DateTimeField()
+	company = db.StringField()
 	description = db.StringField()
 	link = db.StringField()
 
