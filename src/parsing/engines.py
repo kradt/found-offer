@@ -153,6 +153,11 @@ class JobsUA(PageQuery):
 	def _is_offer_element(self, elem: Element) -> bool:
 		return elem.attrs.get("id") if elem.attrs else False
 
+	def __extract_date(self, link: str):
+		data = self.session.get(link).html
+		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True)
+		return link.text
+
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
 		Метод який витягує потрібні дані з необробленого блока вакансії
@@ -175,7 +180,8 @@ class JobsUA(PageQuery):
 		desc = desc.text if desc else ""
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
-
+		time_publish = self.__extract_date(link)
+		print(time_publish)
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
 			description=desc, link=link
@@ -192,3 +198,7 @@ class JobsUA(PageQuery):
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
+
+
+for i in JobsUA():
+	pass
