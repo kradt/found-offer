@@ -124,8 +124,7 @@ class WorkUA(PageQuery):
 		city = self.__get_city_of_offer(raw_offer)
 		# Отримуємо дату публікації
 		time_publish_data = raw_offer.find('div.pull-right.no-pull-xs.nowrap > span.text-muted.small', first=True) or \
-							raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light",
-										   first=True)
+							raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light", first=True)
 		time_publish = self.__get_time_from_str(time_publish_data.text)
 		print(salary_from, salary_to)
 		return OfferModel(
@@ -155,12 +154,7 @@ class JobsUA(PageQuery):
 
 	def __init__(self, current_page: int = 0):
 		super().__init__(current_page)
-
-	def _is_offer_element(self, elem: Element) -> bool:
-		return elem.attrs.get("id") if elem.attrs else False
-
-	def __extract_date(self, link: str):
-		month_number = {
+		self.month_to_number_dict = {
 			"січня": 1,
 			"лютого": 2,
 			"березня": 3,
@@ -174,16 +168,25 @@ class JobsUA(PageQuery):
 			"листопада": 11,
 			"грудня": 12
 		}
+
+	def _is_offer_element(self, elem: Element) -> bool:
+		return elem.attrs.get("id") if elem.attrs else False
+
+	def __extract_date(self, link: str):
 		necessary_date = datetime.datetime.now()
 		data = self.session.get(link).html
-		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True)
+		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True).text
 		items = link.split()
-		necessary_date.replace(day=items[0])
 		month = items[1]
-		necessary_date.replace(
-			year=items[2] if items[2] else necessary_date.year,
-			month=month_number[month],
-			day=items[0])
+		day = items[0]
+		try:
+			year = items[2]
+		except IndexError:
+			year = necessary_date.year
+		return necessary_date.replace(
+			year=int(int(year)),
+			month=self.month_to_number_dict[month],
+			day=int(day))
 		return necessary_date
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
