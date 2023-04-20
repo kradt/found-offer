@@ -1,3 +1,4 @@
+
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
@@ -12,13 +13,14 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
-    from src.database import models
+
 
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
 
     from src.parsing import start_parse_data_to_base
     with app.app_context():
+        print(db.connection)
         start_parse_data_to_base()
 
 

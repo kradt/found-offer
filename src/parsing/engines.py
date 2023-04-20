@@ -226,4 +226,3 @@ class JobsUA(PageQuery):
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
 		return int(count_of_pages)
-
