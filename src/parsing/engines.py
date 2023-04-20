@@ -187,7 +187,6 @@ class JobsUA(PageQuery):
 			year=int(int(year)),
 			month=self.month_to_number_dict[month],
 			day=int(day))
-		return necessary_date
 
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		"""
