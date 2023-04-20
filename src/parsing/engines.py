@@ -126,7 +126,6 @@ class WorkUA(PageQuery):
 		time_publish_data = raw_offer.find('div.pull-right.no-pull-xs.nowrap > span.text-muted.small', first=True) or \
 							raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light", first=True)
 		time_publish = self.__get_time_from_str(time_publish_data.text)
-		print(salary_from, salary_to)
 		return OfferModel(
 			title=title, city=city.text if city else None, salary_from=salary_from, salary_to=salary_to,
 			company=company, description=desc, link=link, time_publish=time_publish or None
@@ -211,7 +210,6 @@ class JobsUA(PageQuery):
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		time_publish = self.__extract_date(link)
-		print(time_publish)
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
 			description=desc, link=link, time_publish=time_publish
