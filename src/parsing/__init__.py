@@ -15,6 +15,7 @@ def write_offer_to_base(offers_engine: Iterator):
             total_sum_offers += len(list(saved_offers))
             print(f"{total_sum_offers} offers from {offers_engine} were saved in base")
         print(f"Offers from {offers_engine} Successfully added to base")
+        return
 
 
 def start_parse_data_to_base(parsers: list = [engines.WorkUA(), engines.JobsUA()]):
