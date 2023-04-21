@@ -20,7 +20,6 @@ def create_app():
 
     from src.parsing import start_parse_data_to_base
     with app.app_context():
-        print(db.connection)
         start_parse_data_to_base()
 
 
