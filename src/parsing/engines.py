@@ -196,7 +196,6 @@ class JobsUA(PageQuery):
 		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
 		title = block_title.text if block_title else ""
 		link = block_title.attrs.get("href")
-		# Отримуємо всі блоки обернені в тег <b> - перший з них буде зп, а другий компанією
 
 		salary = raw_offer.find(".b-vacancy__top__pay", first=True)
 		salary = salary.text if salary else ""
