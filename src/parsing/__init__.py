@@ -6,11 +6,22 @@ from loguru import logger
 from src.parsing import engines
 from src.database import models
 from src.config import Config
+from src.parsing.models import OfferModel
+
+
+def save_offers_to_base(offers: list):
+    for offer in offers:
+        if not models.Vacancy.objects(
+                title=offer.title, city=offer.city,
+                salary_from=offer.salary_from, company=offer.company):
+            models.Vacancy(**offer.dict()).save()
+    return offers
 
 
 def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
     mongoengine.connect(host=Config.MONGODB_SETTINGS["host"])
     start_time = datetime.datetime.now()
+
     while True:
         total_sum_offers = 0
         pass_time = datetime.datetime.now()
@@ -19,7 +30,7 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
         else:
             continue
         for offers in offers_engine:
-            saved_offers = (models.Vacancy(**offer.dict()).save() for offer in offers)
+            saved_offers = save_offers_to_base(offers)
             total_sum_offers += len(list(saved_offers))
             logger.debug(f"{total_sum_offers} offers from {offers_engine} were saved in base")
         logger.debug(f"Offers from {offers_engine} Successfully added to base")
