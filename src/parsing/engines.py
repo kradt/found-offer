@@ -172,6 +172,7 @@ class JobsUA(PageQuery):
 		return elem.attrs.get("id") if elem.attrs else False
 
 	def __extract_date(self, link: str) -> datetime.datetime:
+		start = datetime.datetime.now()
 		necessary_date = datetime.datetime.now()
 		data = self.session.get(link).html
 		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True).text
@@ -182,6 +183,8 @@ class JobsUA(PageQuery):
 			year = items[2]
 		except IndexError:
 			year = necessary_date.year
+		print(f"__extract_date: {datetime.datetime.now() - start}")
+
 		return necessary_date.replace(
 			year=int(int(year)),
 			month=self.month_to_number_dict[month],
@@ -192,7 +195,7 @@ class JobsUA(PageQuery):
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
-
+		start = datetime.datetime.now()
 		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
 		title = block_title.text if block_title else ""
 		link = block_title.attrs.get("href")
@@ -209,6 +212,7 @@ class JobsUA(PageQuery):
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		time_publish = self.__extract_date(link)
+		print(f"Prepare_offer: {datetime.datetime.now() - start}")
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
 			description=desc, link=link, time_publish=time_publish
@@ -218,10 +222,12 @@ class JobsUA(PageQuery):
 		"""
 		Метод який повертає кількість сторінок в пагінації
 		"""
+		start = datetime.datetime.now()
 		html = self.session.get(url).html
 		pagination_block = html.find(".b-vacancy__pages-title", first=True)
 
 		count_of_pages = 1
 		if pagination_block:
 			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
+		print(f"get_count_of_pages: {datetime.datetime.now() - start}")
 		return int(count_of_pages)

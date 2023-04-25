@@ -45,7 +45,7 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
 
 def start_parse_data_to_base():
     parsers: list = [engines.WorkUA(), engines.JobsUA()]
-    interval = datetime.timedelta(minutes=10)
+    interval = datetime.timedelta(seconds=10)
     for engine in parsers:
         process = multiprocessing.Process(
             target=write_offer_to_base,
