@@ -19,8 +19,8 @@ def create_app():
     login_manager.login_view = "auth_bp.login"
 
     from src.parsing import start_parse_data_to_base
-    with app.app_context():
-        start_parse_data_to_base()
+
+    start_parse_data_to_base()
 
 
     from src.auth.routes import auth_bp

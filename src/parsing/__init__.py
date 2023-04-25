@@ -9,16 +9,23 @@ from src.config import Config
 from src.parsing.models import OfferModel
 
 
-def save_offers_to_base(offers: list):
+def save_offers_to_base(offers: list) -> int:
+    """
+    Function saving offers to base and return amount of saved offers
+    """
+    added_to_base_offers = 0
     for offer in offers:
         if not models.Vacancy.objects(
                 title=offer.title, city=offer.city,
                 salary_from=offer.salary_from, company=offer.company):
             models.Vacancy(**offer.dict()).save()
-    return offers
+            added_to_base_offers += 1
+
+    return added_to_base_offers
 
 
 def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
+    print(f"{multiprocessing.current_process().name} was start")
     mongoengine.connect(host=Config.MONGODB_SETTINGS["host"])
     start_time = datetime.datetime.now()
 
@@ -30,15 +37,15 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
         else:
             continue
         for offers in offers_engine:
-            saved_offers = save_offers_to_base(offers)
-            total_sum_offers += len(list(saved_offers))
+            len_saved_offers = save_offers_to_base(offers)
+            total_sum_offers += len_saved_offers
             logger.debug(f"{total_sum_offers} offers from {offers_engine} were saved in base")
         logger.debug(f"Offers from {offers_engine} Successfully added to base")
 
 
 def start_parse_data_to_base():
     parsers: list = [engines.WorkUA(), engines.JobsUA()]
-    interval = datetime.timedelta(seconds=10)
+    interval = datetime.timedelta(minutes=10)
     for engine in parsers:
         process = multiprocessing.Process(
             target=write_offer_to_base,
