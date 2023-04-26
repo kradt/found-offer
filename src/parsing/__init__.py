@@ -30,14 +30,15 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
     logger.debug(f"{os.getpid()} was start")
     mongoengine.connect(host=Config.MONGODB_SETTINGS["host"])
 
-    start_time = datetime.datetime.now()
+    necessary_time = datetime.datetime.now()
     while True:
         total_sum_offers = 0
         pass_time = datetime.datetime.now()
-        if pass_time - start_time >= interval:
-            start_time = pass_time
+        if pass_time >= necessary_time:
+            necessary_time = pass_time + interval
         else:
             continue
+        offers_engine.by_default()
         for offers in offers_engine:
             len_saved_offers = save_offers_to_base(offers)
             total_sum_offers += len_saved_offers
@@ -47,7 +48,7 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
 
 def start_parse_data_to_base():
     parsers: list = [engines.JobsUA(), engines.WorkUA()]
-    interval = datetime.timedelta(seconds=10)
+    interval = datetime.timedelta(hours=12)
     for engine in parsers:
         process = multiprocessing.Process(
             target=write_offer_to_base,

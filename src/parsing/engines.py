@@ -34,6 +34,9 @@ class PageQuery:
 
 		return offers_in_page
 
+	def by_default(self):
+		self.__init__()
+
 	def __iter__(self):
 		return self
 
