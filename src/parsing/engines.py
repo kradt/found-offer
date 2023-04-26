@@ -123,6 +123,7 @@ class WorkUA(PageQuery):
 		extracted_salary = re.findall(r'\d+', ''.join(salary.split()))
 		salary_to = float(extracted_salary.pop()) if extracted_salary else None
 		salary_from = float(extracted_salary.pop()) if extracted_salary else None
+		salary_from = salary_to if salary_to and not salary_from else salary_from
 
 		company = about_block[1].text if len(about_block) > 1 else ""
 		# Отримуємо опис вакансії
@@ -212,6 +213,7 @@ class JobsUA(PageQuery):
 		salary = salary.text if salary else ""
 		extracted_salary = re.findall(r'\d+', ''.join(salary.split()))
 		salary_from = float(extracted_salary.pop()) if extracted_salary else None
+		salary_to = salary_from
 
 		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
 		# Отримуємо опис вакансії
@@ -221,7 +223,7 @@ class JobsUA(PageQuery):
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		time_publish = self.__extract_date(link)
 		return OfferModel(
-			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
+			title=title, city=city if city else None, salary_from=salary_from, salary_to=salary_to, company=company,
 			description=desc, link=link, time_publish=time_publish
 		)
 

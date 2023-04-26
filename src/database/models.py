@@ -5,7 +5,7 @@ from src import db, login_manager
 
 
 class User(db.Document, UserMixin):
-	email = db.StringField()
+	email = db.StringField(unique=True)
 	password = db.StringField()
 
 	def check_password(self, password) -> bool:
