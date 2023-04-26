@@ -5,6 +5,7 @@ import re
 from .models import OfferModel
 
 
+# Interface
 class PageQuery:
 	_url = ...
 	_offer_classname = ...
@@ -14,6 +15,7 @@ class PageQuery:
 	def __init__(self, current_page: int = 1) -> None:
 		self.session = HTMLSession()
 		self.current_page = current_page
+		self.count_of_pages = self._get_count_of_pages()
 
 	def _is_offer_element(self, elem: Element) -> bool:
 		pass
@@ -21,7 +23,7 @@ class PageQuery:
 	def _prepare_offer(self, raw_offer: Element) -> OfferModel:
 		pass
 
-	def _get_count_of_pages(self, url: str) -> int:
+	def _get_count_of_pages(self) -> int:
 		pass
 
 	def _make_list_of_offers(self, raw_offers: list) -> list:
@@ -29,6 +31,7 @@ class PageQuery:
 		for offer in raw_offers:
 			if self._is_offer_element(offer):
 				offers_in_page.append(self._prepare_offer(offer))
+
 		return offers_in_page
 
 	def __iter__(self):
@@ -37,11 +40,11 @@ class PageQuery:
 	def __next__(self) -> list:
 		self.current_page += 1
 		necessary_url = self._url.format(self._offers_pattern + self._next_page_pattern.format(self.current_page))
-		if self.current_page > self._get_count_of_pages(necessary_url):
-			raise StopIteration
+		if self.current_page > self.count_of_pages:
+			raise StopIteration("End of pages")
+
 		page_html = self.session.get(necessary_url).html
 		raw_offers = page_html.find(self._offer_classname)
-
 		return self._make_list_of_offers(raw_offers)
 
 
@@ -54,6 +57,7 @@ class WorkUA(PageQuery):
 
 	def __init__(self, current_page: int = 0) -> None:
 		super().__init__(current_page)
+		self.count_of_pages = self._get_count_of_pages()
 
 	@staticmethod
 	def __get_city_of_offer(raw_offer: Element) -> str | None:
@@ -126,15 +130,17 @@ class WorkUA(PageQuery):
 		time_publish_data = raw_offer.find('div.pull-right.no-pull-xs.nowrap > span.text-muted.small', first=True) or \
 							raw_offer.find("div.pull-right.no-pull-xs.nowrap > span.label.label-orange-light", first=True)
 		time_publish = self.__get_time_from_str(time_publish_data.text)
+
 		return OfferModel(
 			title=title, city=city.text if city else None, salary_from=salary_from, salary_to=salary_to,
 			company=company, description=desc, link=link, time_publish=time_publish or None
 		)
 
-	def _get_count_of_pages(self, url) -> int:
+	def _get_count_of_pages(self) -> int:
 		"""
 		Метод який повертає кількість сторінок в пагінації
 		"""
+		url = self._url.format(self._offers_pattern)
 		html = self.session.get(url).html
 		pagination_block = html.find(".pagination", first=True)
 
@@ -167,13 +173,14 @@ class JobsUA(PageQuery):
 			"листопада": 11,
 			"грудня": 12
 		}
+		self.count_of_pages = self._get_count_of_pages()
 
 	def _is_offer_element(self, elem: Element) -> bool:
 		return elem.attrs.get("id") if elem.attrs else False
 
 	def __extract_date(self, link: str) -> datetime.datetime:
-		start = datetime.datetime.now()
 		necessary_date = datetime.datetime.now()
+
 		data = self.session.get(link).html
 		link = data.find("div.b-vacancy-full__tech-wrapper > span.b-vacancy-full__tech__item.m-r-1", first=True).text
 		items = link.split()
@@ -183,10 +190,9 @@ class JobsUA(PageQuery):
 			year = items[2]
 		except IndexError:
 			year = necessary_date.year
-		print(f"__extract_date: {datetime.datetime.now() - start}")
 
 		return necessary_date.replace(
-			year=int(int(year)),
+			year=int(year),
 			month=self.month_to_number_dict[month],
 			day=int(day))
 
@@ -195,7 +201,6 @@ class JobsUA(PageQuery):
 		Метод який витягує потрібні дані з необробленого блока вакансії
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
-		start = datetime.datetime.now()
 		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
 		title = block_title.text if block_title else ""
 		link = block_title.attrs.get("href")
@@ -212,22 +217,17 @@ class JobsUA(PageQuery):
 		# Отримуємо місто на яке розрахована ця ваканція
 		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
 		time_publish = self.__extract_date(link)
-		print(f"Prepare_offer: {datetime.datetime.now() - start}")
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=None, company=company,
 			description=desc, link=link, time_publish=time_publish
 		)
 
-	def _get_count_of_pages(self, url) -> int:
+	def _get_count_of_pages(self) -> int:
 		"""
 		Метод який повертає кількість сторінок в пагінації
 		"""
-		start = datetime.datetime.now()
+		url = self._url.format(self._offers_pattern)
 		html = self.session.get(url).html
-		pagination_block = html.find(".b-vacancy__pages-title", first=True)
-
-		count_of_pages = 1
-		if pagination_block:
-			count_of_pages = pagination_block.find("b:nth-child(2)", first=True).text
-		print(f"get_count_of_pages: {datetime.datetime.now() - start}")
-		return int(count_of_pages)
+		count_of_pages = html.find(".b-vacancy__pages-title > span:nth-child(1) > b:nth-child(2)", first=True)
+		count_of_pages = int(count_of_pages.text) if count_of_pages else 1
+		return count_of_pages
