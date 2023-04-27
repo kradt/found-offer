@@ -1,13 +1,24 @@
 import flask_login
-from flask import Blueprint, render_template, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, flash, redirect, url_for, current_app, session
 
-from src import db
+from src import flow
 from src.auth import auth_service
 from .forms import RegisterForm, LoginForm
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
+
+@auth_bp.route("/google-data")
+def get_google_data():
+	pass
+
+@auth_bp.route("/google-login")
+def google_login():
+	authorization_url, state = flow.authorization_url(
+		include_granted_scopes='true')
+	session["state"] = state
+	return redirect(authorization_url)
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

@@ -39,10 +39,14 @@ def write_offer_to_base(offers_engine: Iterator, interval: datetime.timedelta):
         else:
             continue
         offers_engine.by_default()
-        for offers in offers_engine:
-            len_saved_offers = save_offers_to_base(offers)
-            total_sum_offers += len_saved_offers
-            logger.debug(f"{total_sum_offers} offers from {offers_engine} were saved in base")
+        try:
+            for offers in offers_engine:
+                print("offers_engine.current_page", offers_engine.current_page)
+                len_saved_offers = save_offers_to_base(offers)
+                total_sum_offers += len_saved_offers
+                logger.debug(f"{total_sum_offers} offers from {offers_engine} were saved in base")
+        except Exception as e:
+            print(e)
         logger.debug(f"{total_sum_offers} offers from {offers_engine} Successfully added to base")
 
 

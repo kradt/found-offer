@@ -124,8 +124,7 @@ class WorkUA(PageQuery):
 		salary_to = float(extracted_salary.pop()) if extracted_salary else None
 		salary_from = float(extracted_salary.pop()) if extracted_salary else None
 		salary_from = salary_to if salary_to and not salary_from else salary_from
-
-		company = about_block[1].text if len(about_block) > 1 else ""
+		company = raw_offer.find(".add-top-xs > span:nth-child(1)", first=True).text
 		# Отримуємо опис вакансії
 		desc = raw_offer.find("p", first=True).text if raw_offer.find("p") else ""
 		# Отримуємо місто на яке розрахована ця ваканція
@@ -206,7 +205,7 @@ class JobsUA(PageQuery):
 		"""
 		# Отримуємо блок з Заголовком в якому міститься також і ссилка
 		block_title = raw_offer.find("a.b-vacancy__top__title", first=True)
-		title = block_title.text if block_title else ""
+		title = str(block_title.text) if block_title else ""
 		link = block_title.attrs.get("href")
 
 		salary = raw_offer.find(".b-vacancy__top__pay", first=True)
@@ -215,12 +214,12 @@ class JobsUA(PageQuery):
 		salary_from = float(extracted_salary.pop()) if extracted_salary else None
 		salary_to = salary_from
 
-		company = raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text
+		company = str(raw_offer.find("div.b-vacancy__tech > span:nth-child(1) > span", first=True).text)
 		# Отримуємо опис вакансії
 		desc = raw_offer.find(".grey-light", first=True)
-		desc = desc.text if desc else ""
+		desc = str(desc.text) if desc else ""
 		# Отримуємо місто на яке розрахована ця ваканція
-		city = raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text
+		city = str(raw_offer.find("div.b-vacancy__tech > span:nth-child(2) > a", first=True).text)
 		time_publish = self.__extract_date(link)
 		return OfferModel(
 			title=title, city=city if city else None, salary_from=salary_from, salary_to=salary_to, company=company,
