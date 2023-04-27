@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+		<div class="row">
+			<div class="col-md-3" id="sidebar">
+				<h2>Filter</h2>
+				<form>
+					<div class="form-group">
+						<label for="job_title">Job Title:</label>
+						<input type="text" class="form-control" id="job_title" placeholder="Enter job title">
+					</div>
+					<div class="form-group">
+						<label for="job_location">Job Location:</label>
+						<input type="text" class="form-control" id="job_location" placeholder="Enter job location">
+					</div>
+					<div class="form-group">
+						<label for="job_category">Job Category:</label>
+						<select class="form-control" id="job_category">
+							<option value="">Select category</option>
+							<option value="IT">IT</option>
+							<option value="Marketing">Marketing</option>
+							<option value="Finance">Finance</option>
+						</select>
+					</div>
+					<button type="submit" class="btn btn-primary">Search</button>
+					<button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#advancedSearch">Advanced Search</button>
+					<div class="collapse" id="advancedSearch">
+						<div class="form-group">
+							<label for="job_experience">Job Experience:</label>
+							<input type="text" class="form-control" id="job_experience" placeholder="Enter job experience">
+						</div>
+						<div class="form-group">
+							<label for="job_salary">Job Salary:</label>
+							<input type="text" class="form-control" id="job_salary" placeholder="Enter job salary">
+						</div>
+						<div class="form-group">
+							<label for="job_type">Job Type:</label>
+							<select class="form-control" id="job_type">
+								<option value="">Select job type</option>
+								<option value="Full Time">Full Time</option>
+								<option value="Part Time">Part Time</option>
+								<option value="Freelance">Freelance</option>
+							</select>
+						</div>
+						<div class="form-group">
+
+
+							<label for="job_level">Job Level:</label>
+							<select class="form-control" id="job_level">
+								<option value="">Select job level</option>
+								<option value="Entry Level">Entry Level</option>
+								<option value="Mid Level">Mid Level</option>
+								<option value="Senior Level">Senior Level</option>
+							</select>
+						</div>
+					</div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+					<button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#advancedSearch">Advanced Search</button>
+				</form>
+			</div>
+			<div class="col-md-9" id="search-results">
+				<h2>Search Results</h2>
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Web Developer</h5>
+						<h6 class="card-subtitle mb-2 text-muted">ABC Company</h6>
+						<p class="card-text">We are looking for a web developer with experience in HTML, CSS, and JavaScript.</p>
+						<a href="#" class="card-link">Apply</a>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Marketing Manager</h5>
+						<h6 class="card-subtitle mb-2 text-muted">XYZ Company</h6>
+						<p class="card-text">We are looking for a marketing manager with experience in social media marketing.</p>
+						<a href="#" class="card-link">Apply</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
