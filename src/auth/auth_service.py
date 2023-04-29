@@ -11,10 +11,12 @@ def find_user_by_email(email: str) -> models.User | bool:
 		return False
 
 
-def create_user(email: str, password: str) -> models.User:
-	password_hash = generate_password_hash(password)
+def create_user(email: str, password: str = None) -> models.User:
+	if password:
+		password = generate_password_hash(password)
 	try:
-		user = models.User(email=email, password=password_hash).save()
+		user = models.User(email=email, password=password).save()
+		print(user)
 	except NotUniqueError:
 		user = None
 	return user

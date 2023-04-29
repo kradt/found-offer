@@ -1,7 +1,9 @@
 import flask_login
-from flask import Blueprint, render_template, flash, redirect, url_for, current_app, session
-
-from src import flow
+import json
+import requests
+from flask import Blueprint, render_template, flash, redirect, url_for, request
+from ..config import Config
+from src import client
 from src.auth import auth_service
 from .forms import RegisterForm, LoginForm
 
@@ -9,16 +11,64 @@ from .forms import RegisterForm, LoginForm
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
 
-@auth_bp.route("/google-data")
-def get_google_data():
-	pass
+def get_google_provider_cfg():
+	return requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+
+
+@auth_bp.route("/google-callback")
+def google_callback():
+	# Get authorization code Google sent back to you
+	code = request.args.get("code")
+
+	google_provider_cfg = get_google_provider_cfg()
+	token_endpoint = google_provider_cfg["token_endpoint"]
+
+	token_url, headers, body = client.prepare_token_request(
+		token_endpoint,
+		authorization_response=request.url,
+		redirect_url=request.base_url,
+		code=code
+	)
+	token_response = requests.post(
+		token_url,
+		headers=headers,
+		data=body,
+		auth=(Config.CLIENT_ID, Config.CLIENT_SECRET),
+	)
+
+	# Parse the tokens!
+	client.parse_request_body_response(json.dumps(token_response.json()))
+	userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+
+	uri, headers, body = client.add_token(userinfo_endpoint)
+	userinfo_response = requests.get(uri, headers=headers, data=body)
+
+	if userinfo_response.json().get("email_verified"):
+		users_email = userinfo_response.json()["email"]
+	else:
+		return "User email not available or not verified by Google.", 400
+
+	user = auth_service.create_user(email=users_email)
+	if not user:
+		user = auth_service.find_user_by_email(email=users_email)
+	flask_login.login_user(user)
+
+	# Send user back to homepage
+	return redirect(url_for("auth_bp.home_page"))
+
 
 @auth_bp.route("/google-login")
 def google_login():
-	authorization_url, state = flow.authorization_url(
-		include_granted_scopes='true')
-	session["state"] = state
-	return redirect(authorization_url)
+	google_provider_cfg = get_google_provider_cfg()
+	authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+	request_uri = client.prepare_request_uri(
+		authorization_endpoint,
+		redirect_uri=request.root_url[:-1] + url_for("auth_bp.google_callback"),
+		scope=["openid", "email", "profile"],
+	)
+	return redirect(request_uri)
+
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

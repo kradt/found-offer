@@ -2,20 +2,14 @@ import os
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
-from google_auth_oauthlib.flow import Flow
+from oauthlib.oauth2 import WebApplicationClient
 
 from src.config import Config
 
 db = MongoEngine()
 login_manager = LoginManager()
-flow = Flow.from_client_secrets_file(
-        client_secrets_file=Config.PATH_TO_GOOGLE_CREDENTIALS,
-        scopes=[
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email",
-            "openid"
-        ],
-        redirect_uri="http://localhost:5000/google-data")
+client = WebApplicationClient(None)
+
 
 def create_app():
     app = Flask(__name__)
@@ -25,7 +19,7 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
 
-
+    client.client_id = app.config["CLIENT_ID"]
     from src.parsing import start_parse_data_to_base
     #start_parse_data_to_base()
 
