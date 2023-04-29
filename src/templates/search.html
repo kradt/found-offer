@@ -43,6 +43,30 @@
                         </div>
 				    </div>
                 {% endfor %}
+                    <nav class="mt-2">
+                      <ul class="pagination justify-content-center">
+                            <li class="page-item">
+                                  <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                  </a>
+                            </li>
+
+                            {% if current_page != 1 %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                            {% endif %}
+                            <li class="page-item active"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page }}">{{ current_page }}</a></li>
+                            <li class="page-item"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}">{{ current_page + 1 }}</a></li>
+
+                            <li class="page-item">
+                                  <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                        <span class="sr-only">Next</span>
+                                  </a>
+                            </li>
+                          <li class="page-item"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ count_of_pages }}">{{ count_of_pages }}</a></li>
+                      </ul>
+                </nav>
 			</div>
 		</div>
 	</div>
