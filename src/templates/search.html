@@ -7,50 +7,18 @@
 				<h2>Filter</h2>
 				<form>
 					<div class="form-group">
-						<label for="job_title">Job Title:</label>
-						<input type="text" class="form-control" id="job_title" placeholder="Enter job title">
+						<label for="job_title">Назва Роботи:</label>
+                        {{ form.title(class="form-control", id="job_title") }}
 					</div>
 					<div class="form-group">
-						<label for="job_location">Job Location:</label>
-						<input type="text" class="form-control" id="job_location" placeholder="Enter job location">
-					</div>
-					<div class="form-group">
-						<label for="job_category">Job Category:</label>
-						<select class="form-control" id="job_category">
-							<option value="">Select category</option>
-							<option value="IT">IT</option>
-							<option value="Marketing">Marketing</option>
-							<option value="Finance">Finance</option>
-						</select>
+						<label for="job_location">Місто Роботи:</label>
+                        {{ form.city(class="form-control", id="job_location") }}
 					</div>
 					<div class="collapse" id="advancedSearch">
 						<div class="form-group">
-							<label for="job_experience">Job Experience:</label>
-							<input type="text" class="form-control" id="job_experience" placeholder="Enter job experience">
-						</div>
-						<div class="form-group">
 							<label for="job_salary">Job Salary:</label>
-							<input type="text" class="form-control" id="job_salary" placeholder="Enter job salary">
-						</div>
-						<div class="form-group">
-							<label for="job_type">Job Type:</label>
-							<select class="form-control" id="job_type">
-								<option value="">Select job type</option>
-								<option value="Full Time">Full Time</option>
-								<option value="Part Time">Part Time</option>
-								<option value="Freelance">Freelance</option>
-							</select>
-						</div>
-						<div class="form-group">
-
-
-							<label for="job_level">Job Level:</label>
-							<select class="form-control" id="job_level">
-								<option value="">Select job level</option>
-								<option value="Entry Level">Entry Level</option>
-								<option value="Mid Level">Mid Level</option>
-								<option value="Senior Level">Senior Level</option>
-							</select>
+                            {{ form.salary_from(class="form-control") }}
+                            {{ form.salary_to(class="form-control") }}
 						</div>
 					</div>
                     <button type="submit" class="btn btn-primary">Search</button>
