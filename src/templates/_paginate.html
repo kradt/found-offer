@@ -1,0 +1,53 @@
+{% macro generate_paginate_block(current_page, count_of_pages, base_href=url_for("search_bp.find_work")) %}
+    <nav class="mt-2">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="{{ base_href }}?page={{ current_page - 1 }}"
+                   aria-label="Previous">
+                    < Попередня
+                </a>
+            </li>
+
+            <!-- Відображаємо першу сторінку для швидкого доступу до неї -->
+            <li class="page-item ml-2 mr-2"><a class="page-link"
+                                               href="{{ base_href }}?page={{ 1 }}">{{ 1 }}</a>
+            </li>
+            <!-- Якщо це не перша сторінка i не друга, відображаємо попередню сторінку -->
+            {% if current_page not in [1, 2] %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ base_href }}?page={{ current_page - 1 }}">
+                        {{ current_page - 1 }}
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <a class="page-link" href="{{ base_href }}?page={{ current_page }}">
+                    {{ current_page }}
+                </a>
+            </li>
+            <!-- Якщо це не остання сторінка i перед остання, відображаємо наступну сторінку -->
+            {% if current_page not in [count_of_pages, count_of_pages - 1] %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="{{ base_href }}?page={{ current_page + 1 }}">
+                        {{ current_page + 1 }}
+                    </a>
+                </li>
+            {% endif %}
+            <!-- Відображаємо останню сторінку для швидкого доступу до неї -->
+            <li class="page-item ml-2 mr-2">
+                <a class="page-link" href="{{ base_href }}?page={{ count_of_pages }}">
+                    {{ count_of_pages }}
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link" href="{{ base_href }}?page={{ current_page + 1 }}"
+                   aria-label="Next">
+                    Наступна >
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endmacro %}
