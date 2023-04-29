@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, flash
 from src.database import models
 from .forms import FilterForm
 from ..parsing import engines
@@ -23,7 +23,8 @@ def find_work():
         if form.salary_to.data:
             filter_dict["salary_to__lte"] = form.salary_to.data
         vacancies = models.Vacancy.objects(**filter_dict)[:20]
-        print(vacancies)
+        if not vacancies:
+            flash("Вибачте, але по вашому запиту ще немає вакансій")
 
     return render_template("search.html", form=form, vacancies=vacancies)
 

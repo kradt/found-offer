@@ -27,11 +27,12 @@
 				</form>
 			</div>
 			<div class="col-md-9" id="search-results">
+                {% include '_errors.html' %}
 				<h2>Search Results</h2>
                 {% for vacancy in vacancies %}
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">{{ vacancy.title }}</h5>
+                            <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
                             {% if vacancy.salary_from or vacancy.salary_to %}
                                 <h6 class="card-title"><b>{{ vacancy.salary_from | int }} - {{ vacancy.salary_to | int }} грн</b></h6>
                             {% endif %}
