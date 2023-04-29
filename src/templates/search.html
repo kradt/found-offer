@@ -32,28 +32,16 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">{{ vacancy.title }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }}</h6>
+                            {% if vacancy.salary_from or vacancy.salary_to %}
+                                <h5 class="card-title">{{ vacancy.salary_from | int }} - {{ vacancy.salary_to | int }} грн</h5>
+                            {% endif %}
+                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
+
                             <p class="card-text">{{ vacancy.description }}</p>
                             <a href="#" class="card-link">Apply</a>
                         </div>
 				    </div>
                 {% endfor %}
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">Web Developer</h5>
-						<h6 class="card-subtitle mb-2 text-muted">ABC Company</h6>
-						<p class="card-text">We are looking for a web developer with experience in HTML, CSS, and JavaScript.</p>
-						<a href="#" class="card-link">Apply</a>
-					</div>
-				</div>
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">Marketing Manager</h5>
-						<h6 class="card-subtitle mb-2 text-muted">XYZ Company</h6>
-						<p class="card-text">We are looking for a marketing manager with experience in social media marketing.</p>
-						<a href="#" class="card-link">Apply</a>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
