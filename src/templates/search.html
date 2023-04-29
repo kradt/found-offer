@@ -5,7 +5,8 @@
 		<div class="row">
 			<div class="col-md-3" id="sidebar">
 				<h2>Filter</h2>
-				<form>
+				<form action="{{ url_for("search_bp.find_work") }}" method="POST">
+                    {{ form.csrf_token }}
 					<div class="form-group">
 						<label for="job_title">Назва Роботи:</label>
                         {{ form.title(class="form-control", id="job_title") }}
@@ -21,12 +22,22 @@
                             {{ form.salary_to(class="form-control") }}
 						</div>
 					</div>
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    {{ form.submit(class="btn btn-primary") }}
 					<button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#advancedSearch">Advanced Search</button>
 				</form>
 			</div>
 			<div class="col-md-9" id="search-results">
 				<h2>Search Results</h2>
+                {% for vacancy in vacancies %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ vacancy.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }}</h6>
+                            <p class="card-text">{{ vacancy.description }}</p>
+                            <a href="#" class="card-link">Apply</a>
+                        </div>
+				    </div>
+                {% endfor %}
 				<div class="card">
 					<div class="card-body">
 						<h5 class="card-title">Web Developer</h5>
