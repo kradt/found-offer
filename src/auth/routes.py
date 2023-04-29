@@ -23,12 +23,14 @@ def google_callback():
 	google_provider_cfg = get_google_provider_cfg()
 	token_endpoint = google_provider_cfg["token_endpoint"]
 
+	# Prepare all data that we need to have that get data for access to user information
 	token_url, headers, body = client.prepare_token_request(
 		token_endpoint,
 		authorization_response=request.url,
 		redirect_url=request.base_url,
 		code=code
 	)
+	# Getting id_token, access_token, scopes
 	token_response = requests.post(
 		token_url,
 		headers=headers,
@@ -40,11 +42,12 @@ def google_callback():
 	client.parse_request_body_response(json.dumps(token_response.json()))
 	userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
 
+	# Getting information about user
 	uri, headers, body = client.add_token(userinfo_endpoint)
-	userinfo_response = requests.get(uri, headers=headers, data=body)
+	userinfo_response = requests.get(uri, headers=headers, data=body).json()
 
-	if userinfo_response.json().get("email_verified"):
-		users_email = userinfo_response.json()["email"]
+	if userinfo_response.get("email_verified"):
+		users_email = userinfo_response["email"]
 	else:
 		return "User email not available or not verified by Google.", 400
 
@@ -62,6 +65,7 @@ def google_login():
 	google_provider_cfg = get_google_provider_cfg()
 	authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
+	# Get URL for Google authorization page
 	request_uri = client.prepare_request_uri(
 		authorization_endpoint,
 		redirect_uri=request.root_url[:-1] + url_for("auth_bp.google_callback"),

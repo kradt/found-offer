@@ -20,6 +20,7 @@ def create_app():
     login_manager.login_view = "auth_bp.login"
 
     client.client_id = app.config["CLIENT_ID"]
+
     from src.parsing import start_parse_data_to_base
     #start_parse_data_to_base()
 
