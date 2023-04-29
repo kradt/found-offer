@@ -1,86 +1,104 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-		<div class="row">
-			<div class="col-md-3" id="sidebar">
-				<h2>Filter</h2>
-				<form action="{{ url_for("search_bp.find_work") }}" method="POST">
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-md-3" id="sidebar">
+                <h2>Filter</h2>
+                <form action="{{ url_for("search_bp.find_work") }}" method="POST">
                     {{ form.csrf_token }}
-					<div class="form-group">
-						<label for="job_title">Назва Роботи:</label>
+                    <div class="form-group">
+                        <label for="job_title">Назва Роботи:</label>
                         {{ form.title(class="form-control", id="job_title") }}
-					</div>
-					<div class="form-group">
-						<label for="job_location">Місто Роботи:</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="job_location">Місто Роботи:</label>
                         {{ form.city(class="form-control", id="job_location") }}
-					</div>
-					<div class="collapse" id="advancedSearch">
-						<div class="form-group">
-							<label for="job_salary">Job Salary:</label>
+                    </div>
+                    <div class="collapse" id="advancedSearch">
+                        <div class="form-group">
+                            <label for="job_salary">Job Salary:</label>
                             {{ form.salary_from(class="form-control") }}
                             {{ form.salary_to(class="form-control") }}
-						</div>
-					</div>
+                        </div>
+                    </div>
                     {{ form.submit(class="btn btn-primary") }}
-					<button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#advancedSearch">Advanced Search</button>
-				</form>
-			</div>
-			<div class="col-md-9" id="search-results">
+                    <button type="button" class="btn btn-secondary" data-toggle="collapse"
+                            data-target="#advancedSearch">Advanced Search
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-9" id="search-results">
                 {% include '_errors.html' %}
-				<h2>Search Results</h2>
+                <h2>Search Results</h2>
                 {% for vacancy in vacancies %}
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
                             {% if vacancy.salary_from or vacancy.salary_to %}
-                                <h6 class="card-title"><b>{{ vacancy.salary_from | int }} - {{ vacancy.salary_to | int }} грн</b></h6>
+                                <h6 class="card-title"><b>{{ vacancy.salary_from | int }}
+                                    - {{ vacancy.salary_to | int }} грн</b></h6>
                             {% endif %}
                             <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
 
                             <p class="card-text">{{ vacancy.description }}</p>
                             <a href="#" class="card-link">Apply</a>
                         </div>
-				    </div>
+                    </div>
                 {% endfor %}
-                    <nav class="mt-2">
-                      <ul class="pagination justify-content-center">
+                <nav class="mt-2">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}"
+                               aria-label="Previous">
+                                < Попередня
+                            </a>
+                        </li>
+
+                        <!-- Відображаємо першу сторінку для швидкого доступу до неї -->
+                        <li class="page-item ml-2 mr-2"><a class="page-link"
+                                                           href="{{ url_for("search_bp.find_work") }}?page={{ 1 }}">{{ 1 }}</a>
+                        </li>
+                        <!-- Якщо це не перша сторінка i не друга, відображаємо попередню сторінку -->
+                        {% if current_page not in [1, 2] %}
                             <li class="page-item">
-                                  <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}" aria-label="Previous">
-                                    < Попередня
-                                  </a>
-                            </li>
-
-                            <!-- Якщо це не перша сторінка, відображаємо попередню сторінку, та першу - для швидкого переходу на початок-->
-                            {% if current_page != 1 %}
-                                <li class="page-item ml-2 mr-2"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ 1 }}">{{ 1 }}</a></li>
-                                <li class="page-item"><a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
-                            {% endif %}
-
-                            <li class="page-item active">
-                                <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page }}">
-                                    {{ current_page }}
+                                <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page - 1 }}">
+                                    {{ current_page - 1 }}
                                 </a>
                             </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page }}">
+                                {{ current_page }}
+                            </a>
+                        </li>
+                        <!-- Якщо це не остання сторінка i перед остання, відображаємо наступну сторінку -->
+                        {% if current_page not in [count_of_pages, count_of_pages - 1] %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}">
+                                <a class="page-link"
+                                   href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}">
                                     {{ current_page + 1 }}
                                 </a>
                             </li>
-                            <li class="page-item ml-2 mr-2">
-                                <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ count_of_pages }}">
-                                    {{ count_of_pages }}
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                  <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}" aria-label="Next">
-                                      Наступна >
-                                  </a>
-                            </li>
-                      </ul>
+                        {% endif %}
+                        <!-- Відображаємо останню сторінку для швидкого доступу до неї -->
+                        <li class="page-item ml-2 mr-2">
+                            <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ count_of_pages }}">
+                                {{ count_of_pages }}
+                            </a>
+                        </li>
+
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for("search_bp.find_work") }}?page={{ current_page + 1 }}"
+                               aria-label="Next">
+                                Наступна >
+                            </a>
+                        </li>
+                    </ul>
                 </nav>
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
