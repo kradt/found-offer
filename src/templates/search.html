@@ -40,12 +40,19 @@
                             <h2>Search Results: {{ request.args.get("title") }}</h2>
                         </div>
                         <div class="col-md-4">
-
-                            {% set sort_by_value = request.args.get("sort_by") %}
                             {# :param sort_by - 1 is Date, 2 is Salary #}
-                            Сортувати по:
+                            {% set sort_by_value = request.args.get("sort_by") %}
+                            <div class="row">
+
+
+                            <div class="col-md-4">
+                                Сортувати по:
+                            </div>
+                            <div class="col-md-8">
+
+
                             <div class="dropdown">
-                                <a class="btn btn-info dropdown-toggle" href="#" role="button"
+                                <a class="btn btn-primary dropdown-toggle" href="#" role="button"
                                    id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
                                    aria-expanded="false">
                                     {% if sort_by_value == '2' %}
@@ -77,6 +84,8 @@
 
 
                                 </div>
+                            </div>
+                            </div>
                             </div>
                         </div>
                     </div>
