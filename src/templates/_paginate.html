@@ -6,7 +6,17 @@
                 {% if page %}
                     {% if page != pagination.page %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for(endpoint) }}?page={{ page }}">{{ page }}</a>
+                        <!-- if argument page already in url replace him to new value-->
+                        {% if request.args.get('page') %}
+                            {% set url = request.url.replace('page=' + pagination.page | string , 'page=' + page | string)  %}
+                        <!-- if dict args is empty, add arg page to url  -->
+                        {% elif not request.args.to_dict() %}
+                            {% set url = request.url + '?page=' + page | string  %}
+                        {% else %}
+                            {% set url = request.url + '&page=' + page | string  %}
+                        {% endif %}
+                            <a class="page-link" href="{{ url }}">{{ page }}</a>
+
                         </li>
                     {% else %}
                         <li class="page-item active">
