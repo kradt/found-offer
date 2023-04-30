@@ -12,31 +12,28 @@ search_bp = Blueprint("search_bp", template_folder="templates", import_name=__na
 @search_bp.route("/", methods=["GET"])
 def find_work():
     form = FilterForm(request.args, meta={'csrf': False})
-    parsed_request_args = "&".join(f"{arg}={request.args.get(arg)}" for arg in request.args)
-    filter_dict = {}
-    if form.title.data:
-        filter_dict["title__icontains"] = form.title.data
-    if form.city.data:
-        filter_dict["city__icontains"] = form.city.data
-    if form.salary_from.data:
-        filter_dict["salary_from__gte"] = form.salary_from.data
-    if form.salary_to.data:
-        filter_dict["salary_to__lte"] = form.salary_to.data
-    vacancies = models.Vacancy.objects(**filter_dict)
-    if not vacancies:
-        flash("Вибачте, але по вашому запиту ще немає вакансій")
+    if form.validate():
+        filter_dict = {}
+        if form.title.data:
+            filter_dict["title__icontains"] = form.title.data
+        if form.city.data:
+            filter_dict["city__icontains"] = form.city.data
+        if form.salary_from.data:
+            filter_dict["salary_from__gte"] = form.salary_from.data
+        if form.salary_to.data:
+            filter_dict["salary_to__lte"] = form.salary_to.data
+        vacancies = models.Vacancy.objects(**filter_dict)
+        if not vacancies:
+            flash("Вибачте, але по вашому запиту ще немає вакансій")
+    current_page = int(request.args.get('page', 1))
 
-    current_page = int(request.args.get("page", 1))
     items_per_page = 20
-    offset = (current_page - 1) * items_per_page
-    count_of_pages = math.floor(vacancies.count() / items_per_page)
-    vacancies = vacancies.skip(offset).limit(items_per_page)
+    vacancies = vacancies.paginate(page=current_page, per_page=items_per_page)
+
     return render_template(
         "search.html",
         form=form,
-        vacancies=vacancies,
-        current_page=current_page,
-        count_of_pages=count_of_pages)
+        vacancies=vacancies)
 
 
 @search_bp.route("/offers/<job>", methods=["GET"])
