@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-md-3" id="sidebar">
                 <h2>Filter</h2>
-                <form action="{{ url_for("search_bp.find_work") }}" method="GET">
+                <form action="{{ url_for("search_bp.find_work") }}" id="search-form" method="GET">
 
                     <div class="form-group">
                         <label for="job_title">Назва Роботи:</label>
@@ -20,11 +20,11 @@
                     <div class="collapse" id="advancedSearch">
                         <div class="form-group">
                             <label for="job_salary">Job Salary:</label>
-                            {{ form.salary_from(class="form-control") }}
-                            {{ form.salary_to(class="form-control") }}
+                            {{ form.salary_from(class="form-control", id="job_salary_from") }}
+                            {{ form.salary_to(class="form-control", id="job_salary_to") }}
                         </div>
                     </div>
-                    {{ form.submit(class="btn btn-primary") }}
+                    {{ form.submit(class="btn btn-primary", id="submit") }}
                     <button type="button" class="btn btn-secondary" data-toggle="collapse"
                             data-target="#advancedSearch">Advanced Search
                     </button>
@@ -53,5 +53,32 @@
             </div>
         </div>
     </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#search-form").submit(function() {
+            $("#submit").remove();
+            if($("#job_title").val()==="") {
+                $("#job_title").prop('disabled', true);
+            }
+            if($("#job_location").val()===""){
+                $("#job_location").prop('disabled', true);
+            }
+            if($("#job_location").val()===""){
+                $("#job_location").prop('disabled', true);
+            }
+            if($("#job_salary_from").val()===""){
+                $("#job_salary_from").prop('disabled', true);
+            }
+            if($("#job_salary_to").val()===""){
+                $("#job_salary_to").prop('disabled', true);
+            }
+        });
+     });
+    </script>
 
 {% endblock %}
