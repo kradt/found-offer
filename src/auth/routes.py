@@ -2,8 +2,9 @@ import flask_login
 import json
 import requests
 from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask_mail import Message
 from ..config import Config
-from src import client
+from src import client, mail
 from src.auth import auth_service
 from .forms import RegisterForm, LoginForm
 
@@ -13,6 +14,17 @@ auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="stati
 
 def get_google_provider_cfg():
 	return requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+
+@auth_bp.route("/confirm")
+def send_message_to_confirm_email():
+	msg = Message(
+		"Everything will be fine",
+		sender=Config.MAIL_DEFAULT_SENDER,
+		recipients=["mynamedark713@gmail.com"])
+
+	mail.send(msg)
+	return "Message was successfully sent to recipient", 200
+
 
 
 @auth_bp.route("/google-callback")

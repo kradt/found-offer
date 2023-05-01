@@ -22,6 +22,7 @@ def find_work():
         filter_dict["salary_from__gte"] = form.salary_from.data
     if form.salary_to.data:
         filter_dict["salary_to__lte"] = form.salary_to.data
+
     sort_value = "-time_publish"
     if request.args.get("sort_by") == '2':
         sort_value = "-salary_from"
@@ -29,8 +30,8 @@ def find_work():
     vacancies = models.Vacancy.objects(**filter_dict).order_by(sort_value)
     if not vacancies:
         flash("Вибачте, але по вашому запиту ще немає вакансій")
-    current_page = int(request.args.get('page', 1))
 
+    current_page = int(request.args.get('page', 1))
     items_per_page = 20
     vacancies = vacancies.paginate(page=current_page, per_page=items_per_page)
     return render_template(

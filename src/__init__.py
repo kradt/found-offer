@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
+from flask_mail import Mail
 from oauthlib.oauth2 import WebApplicationClient
 
 from src.config import Config
@@ -9,6 +10,7 @@ from src.config import Config
 db = MongoEngine()
 login_manager = LoginManager()
 client = WebApplicationClient(None)
+mail = Mail()
 
 
 def create_app():
@@ -20,7 +22,7 @@ def create_app():
     login_manager.login_view = "auth_bp.login"
 
     client.client_id = app.config["CLIENT_ID"]
-
+    mail.init_app(app)
     from src.parsing import start_parse_data_to_base
     #start_parse_data_to_base()
 
