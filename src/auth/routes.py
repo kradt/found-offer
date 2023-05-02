@@ -132,12 +132,14 @@ def logout():
 	return redirect(url_for("root_bp.index"))
 
 
+
+@auth_bp.route("/me")
+@flask_login.login_required
+def recover_password():
+	pass
+
 # User Home page after login
 @auth_bp.route("/me")
 @flask_login.login_required
 def home_page():
-	if flask_login.current_user.confirmed:
-		message = f"hello {flask_login.current_user.email}"
-	else:
-		message = f"hello {flask_login.current_user.email} Check your email and confirm your account"
-	return message
+	return render_template("home.html", user=flask_login.current_user)

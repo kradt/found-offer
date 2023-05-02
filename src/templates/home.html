@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if user.confirmed %}
+        Hello {{ user.email }}
+    {% else %}
+        Hello {{ user.email }} Check your email and confirm your account
+    {% endif %}
+
+    <a href="{{ url_for(".recover_password") }}">Recover Password</a>
+{% endblock %}
