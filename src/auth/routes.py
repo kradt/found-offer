@@ -2,7 +2,6 @@ import flask_login
 import json
 import requests
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
-from flask_mail import Message
 from ..config import Config
 from src import client
 from src.auth import auth_service
@@ -16,18 +15,8 @@ auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="stati
 def get_google_provider_cfg():
 	return requests.get(Config.GOOGLE_DISCOVERY_URL).json()
 
-@auth_bp.route("/confirm")
-def send_message_to_confirm_email():
-	user = flask_login.current_user
-	send_data = {
-		"sender": current_app.config["MAIL_DEFAULT_SENDER"],
-		"recipients":[user.email],
-	}
-	send_message_to_email.delay(send_data)
-	return "Message was successfully sent to recipient", 200
 
-
-
+# Google callback for get token that get account information
 @auth_bp.route("/google-callback")
 def google_callback():
 	# Get authorization code Google sent back to you
@@ -64,7 +53,7 @@ def google_callback():
 	else:
 		return "User email not available or not verified by Google.", 400
 
-	user = auth_service.create_user(email=users_email)
+	user = auth_service.create_user(email=users_email, confirmed=True)
 	if not user:
 		user = auth_service.find_user_by_email(email=users_email)
 	flask_login.login_user(user)
@@ -73,6 +62,7 @@ def google_callback():
 	return redirect(url_for("auth_bp.home_page"))
 
 
+# Login user using Google OAuth
 @auth_bp.route("/google-login")
 def google_login():
 	google_provider_cfg = get_google_provider_cfg()
@@ -87,6 +77,17 @@ def google_login():
 	return redirect(request_uri)
 
 
+# Confirm mail using token from url
+@auth_bp.route("/confirm/<token>")
+def confirm_email(token):
+	email = auth_service.confirm_token(token)
+	user = auth_service.find_user_by_email(email=email)
+	if user:
+		user.update(confirmed=True)
+	return redirect(url_for(".home_page"))
+
+
+# Login user in system from login form
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
 	form = LoginForm()
@@ -101,6 +102,7 @@ def login():
 	return render_template("login.html", form=form)
 
 
+# Register user and send message to email for confirm account
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
 	form = RegisterForm()
@@ -109,10 +111,20 @@ def register():
 		if not user:
 			flash("User with this email already exist")
 		else:
-			return redirect(url_for(".login"))
+			token = auth_service.generate_confirmation_token(user.email)
+			flask_login.login_user(user)
+			send_data = {
+				"sender": current_app.config["MAIL_DEFAULT_SENDER"],
+				"recipients": [user.email],
+			}
+			confirm_link = url_for(".confirm_email", token=token, _external=True)
+			send_message_to_email.delay(send_data, confirm_link)
+
+			return redirect(url_for(".home_page"))
 	return render_template("register.html", form=form)
 
 
+# User log out route
 @auth_bp.route("/logout")
 @flask_login.login_required
 def logout():
@@ -120,7 +132,12 @@ def logout():
 	return redirect(url_for("root_bp.index"))
 
 
+# User Home page after login
 @auth_bp.route("/me")
 @flask_login.login_required
 def home_page():
-	return f"hello {flask_login.current_user.email}"
+	if flask_login.current_user.confirmed:
+		message = f"hello {flask_login.current_user.email}"
+	else:
+		message = f"hello {flask_login.current_user.email} Check your email and confirm your account"
+	return message

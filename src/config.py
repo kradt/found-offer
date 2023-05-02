@@ -7,7 +7,8 @@ load_dotenv(find_dotenv())
 
 class Config:
     DEBUG = True
-    SECRET_KEY = os.getenv("SECRET_KEY", default=secrets.token_hex(15))
+    SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(15))
+    SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT", "password_salt")
     SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
     MAIL_PORT = 465
     MAIL_SERVER = 'smtp.gmail.com'
