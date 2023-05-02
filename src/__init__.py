@@ -1,4 +1,5 @@
 import os
+from celery import Celery
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
@@ -11,6 +12,7 @@ db = MongoEngine()
 login_manager = LoginManager()
 client = WebApplicationClient(None)
 mail = Mail()
+celery = Celery(__name__, broker='redis://localhost:6379/0')
 
 
 def create_app():

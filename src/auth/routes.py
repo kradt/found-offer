@@ -4,12 +4,21 @@ import requests
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_mail import Message
 from ..config import Config
-from src import client, mail
+from src import client, mail, celery
 from src.auth import auth_service
 from .forms import RegisterForm, LoginForm
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
+
+
+@celery.task
+def send_message_to_email():
+	msg = Message(
+		"Everything will be fine",
+		sender=Config.MAIL_DEFAULT_SENDER,
+		recipients=["mynamedark713@gmail.com"])
+	mail.send(msg)
 
 
 def get_google_provider_cfg():
