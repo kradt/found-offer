@@ -1,24 +1,16 @@
 import flask_login
 import json
 import requests
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from flask_mail import Message
 from ..config import Config
-from src import client, mail, celery
+from src import client
 from src.auth import auth_service
+from .tasks import send_message_to_email
 from .forms import RegisterForm, LoginForm
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
-
-
-@celery.task
-def send_message_to_email():
-	msg = Message(
-		"Everything will be fine",
-		sender=Config.MAIL_DEFAULT_SENDER,
-		recipients=["mynamedark713@gmail.com"])
-	mail.send(msg)
 
 
 def get_google_provider_cfg():
@@ -26,12 +18,12 @@ def get_google_provider_cfg():
 
 @auth_bp.route("/confirm")
 def send_message_to_confirm_email():
-	msg = Message(
-		"Everything will be fine",
-		sender=Config.MAIL_DEFAULT_SENDER,
-		recipients=["mynamedark713@gmail.com"])
-
-	mail.send(msg)
+	user = flask_login.current_user
+	send_data = {
+		"sender": current_app.config["MAIL_DEFAULT_SENDER"],
+		"recipients":[user.email],
+	}
+	send_message_to_email.delay(send_data)
 	return "Message was successfully sent to recipient", 200
 
 

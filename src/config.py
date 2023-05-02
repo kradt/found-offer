@@ -17,6 +17,10 @@ class Config:
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
     CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+    CELERY = {
+        "broker_url": "redis://localhost:6379",
+        "result_backend": "redis://localhost:6379"
+    }
     GOOGLE_DISCOVERY_URL = (
         "https://accounts.google.com/.well-known/openid-configuration"
     )
