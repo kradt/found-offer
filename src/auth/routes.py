@@ -131,6 +131,11 @@ def logout():
 	flask_login.logout_user()
 	return redirect(url_for("root_bp.index"))
 
+@auth_bp.route("/reset-password")
+@flask_login.login_required
+def reset_password():
+	pass
+
 
 @auth_bp.route("/change-password")
 @flask_login.login_required
