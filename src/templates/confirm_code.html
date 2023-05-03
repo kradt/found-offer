@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>Відновлення паролю</h1>
+        <form id="codeForm">
+            <div class="form-group">
+                <label for="code">Код:</label>
+                {{ form.code(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+            <a class="btn btn-secondary" href="{{ url_for(".reset_password") }}">Send code again</a>
+        </form>
+        {% include '_errors.html' %}
+
+    </div>
+
+{% endblock %}

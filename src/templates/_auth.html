@@ -22,7 +22,6 @@
 						{{ form.password(class="form-control") }}
 					</div>
 					{% if type=="register" %}
-
 						<div class="mb-3">
 		                	<label for="confirm-password" class="form-label">Confirm Password</label>
 		                	{{ form.confirm_password(class="form-control") }}
@@ -35,12 +34,17 @@
 							{{ form.remember_me(class="form-check-input")}}
 							<label class="form-check-label" for="remember">Remember me</label>
 						</div>
-                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary"><i class="fab fa-google me-2"></i>Login with Google</a>
-                        <a href="{{ url_for(".reset_password") }}">Forgot your password?</a>
+                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary">
+                            <i class="fab fa-google me-2"></i>
+                            Login with Google
+                        </a>
 					{% endif %}
 
 					{% include '_errors.html' %}
 					{{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for(".reset_password") }}">
+                            Forgot your password?
+                    </a>
 					{{ form.csrf_token }}
 				</form>
 			</div>

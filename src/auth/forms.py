@@ -16,3 +16,12 @@ class LoginForm(FlaskForm):
 	password = PasswordField("Password", validators=[Length(min=8, max=100), DataRequired()], render_kw={"placeholder":"Enter password"})
 	remember_me = BooleanField("Remember me?" )
 	submit = SubmitField("Log In")
+
+
+class RecoverPasswordEmail(FlaskForm):
+	email = StringField("Email", validators=[Length(min=5, max=100), Email(), DataRequired()], render_kw={"placeholder": "Enter email"})
+	submit = SubmitField("Get confirm code")
+
+class RecoverPasswordCode(FlaskForm):
+	code = StringField("Code", validators=[Length(min=6, max=6), DataRequired()], render_kw={"placeholder": "Enter code"})
+	submit = SubmitField("Reset Password")

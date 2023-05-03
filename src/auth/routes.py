@@ -6,7 +6,7 @@ from ..config import Config
 from src import client
 from src.auth import auth_service
 from .tasks import send_message_to_email
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, RecoverPasswordEmail, RecoverPasswordCode
 
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
@@ -131,10 +131,22 @@ def logout():
 	flask_login.logout_user()
 	return redirect(url_for("root_bp.index"))
 
-@auth_bp.route("/reset-password")
-@flask_login.login_required
+@auth_bp.route("/reset-password/confirm-code", methods=["GET", "POST"])
+def get_confirm_code():
+	form = RecoverPasswordCode()
+
+	return render_template("confirm_code.html", form=form)
+
+@auth_bp.route("/reset-password/get-code", methods=["GET", "POST"])
 def reset_password():
-	pass
+	form = RecoverPasswordEmail()
+	if form.validate_on_submit():
+		user = auth_service.find_user_by_email(email=form.email.data)
+		if not user:
+			flash("User with this email doesn't exist")
+		return redirect(url_for(".get_confirm_code"))
+
+	return render_template("reset_password.html", form=form)
 
 
 @auth_bp.route("/change-password")
