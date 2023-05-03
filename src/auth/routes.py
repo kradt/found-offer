@@ -1,13 +1,14 @@
+import random
+
 import flask_login
 import json
 import requests
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from ..config import Config
-from src import client
+from src import client, redis_client
 from src.auth import auth_service
-from .tasks import send_message_to_email
+from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
 from .forms import RegisterForm, LoginForm, RecoverPasswordEmail, RecoverPasswordCode
-
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
@@ -118,7 +119,7 @@ def register():
 				"recipients": [user.email],
 			}
 			confirm_link = url_for(".confirm_email", token=token, _external=True)
-			send_message_to_email.delay(send_data, confirm_link)
+			send_message_to_email_for_confirm_him.delay(send_data, confirm_link)
 
 			return redirect(url_for(".home_page"))
 	return render_template("register.html", form=form)
@@ -131,11 +132,13 @@ def logout():
 	flask_login.logout_user()
 	return redirect(url_for("root_bp.index"))
 
-@auth_bp.route("/reset-password/confirm-code", methods=["GET", "POST"])
-def get_confirm_code():
-	form = RecoverPasswordCode()
 
-	return render_template("confirm_code.html", form=form)
+@auth_bp.route("/new-password", methods=["GET", "POST"])
+@flask_login.login_required
+def write_new_password():
+	return "New passsword"
+
+
 
 @auth_bp.route("/reset-password/get-code", methods=["GET", "POST"])
 def reset_password():
@@ -144,7 +147,21 @@ def reset_password():
 		user = auth_service.find_user_by_email(email=form.email.data)
 		if not user:
 			flash("User with this email doesn't exist")
-		return redirect(url_for(".get_confirm_code"))
+			return render_template("reset_password.html", form=form)
+		if form.code.data:
+			necessary_code = str(redis_client.get(user.email))
+			if necessary_code and necessary_code == form.code.data:
+				flask_login.login_user(user)
+				return redirect(url_for(".write_new_password"))
+			else:
+				flash("Wrong code")
+		code = random.randint(100000, 999999)
+		redis_client.set(user.email, code, ex=3600)
+		send_data = {
+			"sender": current_app.config["MAIL_DEFAULT_SENDER"],
+			"recipients": [user.email],
+		}
+		send_code_to_email_for_reset_password.delay(send_data, code)
 
 	return render_template("reset_password.html", form=form)
 

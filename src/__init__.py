@@ -4,6 +4,7 @@ from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_redis import FlaskRedis
 from oauthlib.oauth2 import WebApplicationClient
 from .celery_utils import celery_init_app
 from src.config import Config
@@ -12,6 +13,7 @@ db = MongoEngine()
 login_manager = LoginManager()
 client = WebApplicationClient(None)
 mail = Mail()
+redis_client = FlaskRedis(decode_responses=True)
 
 
 
@@ -26,6 +28,7 @@ def create_app():
     client.client_id = app.config["CLIENT_ID"]
     mail.init_app(app)
     celery_init_app(app)
+    redis_client.init_app(app)
 
     from src.parsing import start_parse_data_to_base
     #start_parse_data_to_base()
