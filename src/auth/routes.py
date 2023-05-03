@@ -132,11 +132,11 @@ def logout():
 	return redirect(url_for("root_bp.index"))
 
 
-
-@auth_bp.route("/me")
+@auth_bp.route("/change-password")
 @flask_login.login_required
-def recover_password():
+def change_password():
 	pass
+
 
 # User Home page after login
 @auth_bp.route("/me")
