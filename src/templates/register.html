@@ -2,6 +2,13 @@
 
 {% from '_auth.html' import generate_auth_form %}
 
+{% block style %}
+    {{ super() }}
+    <style>
+    body{color:black}
+    </style>
+{% endblock %}
+
 {% block content %}
     {{ generate_auth_form(type="register", form=form) }}
 {% endblock %}

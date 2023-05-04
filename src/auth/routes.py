@@ -180,3 +180,15 @@ def reset_password():
 @flask_login.login_required
 def home_page():
 	return render_template("home.html", user=flask_login.current_user)
+
+
+@auth_bp.route("/me")
+@flask_login.login_required
+def auto_search():
+	return render_template("home.html", user=flask_login.current_user)
+
+
+@auth_bp.route("/me")
+@flask_login.login_required
+def add_new_vacancy():
+	return render_template("home.html", user=flask_login.current_user)
