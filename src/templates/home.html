@@ -7,5 +7,13 @@
         Hello {{ user.email }} Check your email and confirm your account
     {% endif %}
 
-    <a href="{{ url_for(".change_password") }}">Recover Password</a>
+    <a href="{{ url_for(".reset_password") }}">Recover Password</a>
+{% endblock %}
+
+{% block auth %}
+ <li class="nav-item">
+    <a class="nav-link btn btn-danger" style="color:white" href="{{ url_for('auth_bp.logout') }}">
+        Log Out
+    </a>
+ </li>
 {% endblock %}

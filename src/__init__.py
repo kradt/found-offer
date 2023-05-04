@@ -1,5 +1,3 @@
-import os
-from celery import Celery, Task
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
@@ -16,7 +14,6 @@ mail = Mail()
 redis_client = FlaskRedis(decode_responses=True)
 
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -31,7 +28,7 @@ def create_app():
     redis_client.init_app(app)
 
     from src.parsing import start_parse_data_to_base
-    #start_parse_data_to_base()
+    # start_parse_data_to_base()
 
     from src.auth.routes import auth_bp
     from src.search.routes import search_bp

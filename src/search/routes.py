@@ -1,10 +1,7 @@
-import datetime
-import math
+from flask import Blueprint, render_template, flash, request
 
-from flask import Blueprint, render_template, jsonify, flash, request, Response
 from src.database import models
 from .forms import FilterForm
-from ..parsing import engines
 
 search_bp = Blueprint("search_bp", template_folder="templates", import_name=__name__)
 
@@ -38,9 +35,3 @@ def find_work():
         "search.html",
         form=form,
         vacancies=vacancies)
-
-
-@search_bp.route("/offers/<job>", methods=["GET"])
-def gtf(job):
-    query = engines.WorkUA().get_page(job=job)
-    return str(query.paginate(10, 1))

@@ -1,14 +1,15 @@
 import random
-
 import flask_login
 import json
 import requests
+from werkzeug.security import generate_password_hash
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
-from ..config import Config
+
 from src import client, redis_client
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
-from .forms import RegisterForm, LoginForm, RecoverPasswordEmail, RecoverPasswordCode
+from .forms import RegisterForm, LoginForm, RecoverPasswordEmail, NewPasswordForm
+from ..config import Config
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
@@ -133,16 +134,23 @@ def logout():
 	return redirect(url_for("root_bp.index"))
 
 
+# Reset password from user sent data
 @auth_bp.route("/new-password", methods=["GET", "POST"])
 @flask_login.login_required
 def write_new_password():
-	return "New passsword"
+	form = NewPasswordForm()
+	if form.validate_on_submit():
+		user = flask_login.current_user
+		user.update(password=generate_password_hash(form.password.data))
+		return redirect(url_for(".home_page"))
+	return render_template("new_password.html", form=form)
 
 
-
-@auth_bp.route("/reset-password/get-code", methods=["GET", "POST"])
+# Get user email and send code to mail for reset password
+@auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
 	form = RecoverPasswordEmail()
+	email_was_sent = False
 	if form.validate_on_submit():
 		user = auth_service.find_user_by_email(email=form.email.data)
 		if not user:
@@ -162,14 +170,9 @@ def reset_password():
 			"recipients": [user.email],
 		}
 		send_code_to_email_for_reset_password.delay(send_data, code)
+		email_was_sent = True
 
-	return render_template("reset_password.html", form=form)
-
-
-@auth_bp.route("/change-password")
-@flask_login.login_required
-def change_password():
-	pass
+	return render_template("reset_password.html", form=form, email_was_sent=email_was_sent)
 
 
 # User Home page after login

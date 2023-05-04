@@ -1,13 +1,15 @@
+from flask import current_app
 from werkzeug.security import generate_password_hash
 from mongoengine.errors import NotUniqueError
-from src.database import models
-from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
+
+from src.database import models
 
 
 def generate_confirmation_token(email):
     serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     return serializer.dumps(email, salt=current_app.config['SECURITY_PASSWORD_SALT'])
+
 
 def confirm_token(token, expiration=3600):
     serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
@@ -17,7 +19,8 @@ def confirm_token(token, expiration=3600):
             salt=current_app.config['SECURITY_PASSWORD_SALT'],
             max_age=expiration
         )
-    except:
+    except Exception as e:
+        print(e)
         return False
     return email
 

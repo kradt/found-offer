@@ -1,17 +1,19 @@
 {% with messages = get_flashed_messages() %}
-	{% if messages %}
-		{% for message in messages %}
-		<div class="alert alert-dark" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
-	{% endif %}	
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dark mt-2" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endwith %}
 
 {% for field, errors in form.errors.items() %}
-	<small class="form-text text-muted ">
-		<div class="alert alert-dark" role="alert">
-	  		{{ ', '.join(errors) }}
-		</div>
-	</small>
+
+    <div class="alert alert-dark" role="alert">
+        <small class="form-text text-muted mt-2">
+            {{ ', '.join(errors) }}
+        </small>
+    </div>
+
 {% endfor %}

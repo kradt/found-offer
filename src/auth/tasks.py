@@ -1,8 +1,8 @@
 from celery import shared_task
 from flask import render_template
 from flask_mail import Message
-from src import mail
 
+from src import mail
 
 
 def make_message(message, send_data):
@@ -11,6 +11,7 @@ def make_message(message, send_data):
 		sender=send_data["sender"],
 		recipients=send_data["recipients"])
 	return msg
+
 
 @shared_task
 def send_message_to_email_for_confirm_him(send_data: dict, confirm_link):
