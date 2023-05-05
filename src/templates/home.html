@@ -2,7 +2,7 @@
 
 {% from '_paginate.html' import render_pagination %}
 
-{% block style %}
+{% block head %}
     {{ super() }}
     <style>
         body {
@@ -125,7 +125,6 @@
                 {% endfor %}
                 {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
             </div>
-
             <!-- Блок для інформації про автоматичний пошук -->
             <div class="auto-search-info">
                 <h2 class="auto-search-heading">Автоматичний пошук</h2>
