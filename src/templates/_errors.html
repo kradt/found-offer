@@ -9,11 +9,9 @@
 {% endwith %}
 
 {% for field, errors in form.errors.items() %}
-
     <div class="alert alert-dark" role="alert">
         <small class="form-text text-muted mt-2">
             {{ ', '.join(errors) }}
         </small>
     </div>
-
 {% endfor %}

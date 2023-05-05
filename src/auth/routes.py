@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request,
 from src import client, redis_client
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
-from .forms import RegisterForm, LoginForm, RecoverPasswordForm, NewPasswordForm, NewVacancyForm
+from .forms import RegisterForm, LoginForm, RecoverPasswordForm, NewPasswordForm, NewVacancyForm, AutoSearchForm
 from ..config import Config
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
@@ -198,7 +198,10 @@ def delete_vacancy(vacancy_id: str):
 @auth_bp.route("/auto-search", methods=["GET", "POST"])
 @flask_login.login_required
 def auto_search():
-	return render_template("home.html")
+	form = AutoSearchForm()
+	if form.validate_on_submit():
+		pass
+	return render_template("auto_search_vacancy.html", form=form)
 
 
 @auth_bp.route("/new-vacancy", methods=["GET", "POST"])

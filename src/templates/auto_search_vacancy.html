@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>Опишіть вакансію яку б ви хотіли знайти</h1>
+        <form action="{{ url_for(".auto_search") }}" method="post">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                <label for="jobTitle">Назва вакансії:</label>
+                {{ form.title(class="form-control") }}
+            </div>
+            <div class="form-group">
+                <label for="minSalary">Зарплата:</label>
+                {{ form.salary(class="form-control") }}
+            </div>
+            <div class="form-group">
+                <label for="city">Місто:</label>
+                {{ form.city(class="form-control") }}
+            </div>
+            {% include '_errors.html' %}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 {% from '_auth.html' import generate_auth_form %}
 
-{% block style %}
+{% block head %}
     {{ super() }}
     <style>
     body{color:black}
@@ -11,15 +11,4 @@
 
 {% block content %}
     {{ generate_auth_form(type="register", form=form) }}
-{% endblock %}
-
-{% block scripts %}
-    {{ super() }}
-    <!-- Font Awesome -->
-    <script src="https://kit.fontawesome.com/5689a33a08.js" crossorigin="anonymous"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"
-            integrity="sha384-LwBx/mxPud/nMXZq3Jq8n7VXk/HGhRtRuyQsY3Lq3pOkmqzN8zf7AuzdN0aQixfP"></script>
-
 {% endblock %}

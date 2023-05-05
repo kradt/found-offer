@@ -1,5 +1,4 @@
 {% macro render_pagination(pagination, endpoint, request) %}
-
     <nav class="mt-2">
         <div class="pagination justify-content-center">
             {%- for page in pagination.iter_pages() %}
