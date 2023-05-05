@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
 
-
 {% from '_paginate.html' import render_pagination %}
 
 {% block style %}
     {{ super() }}
     <style>
-        /* Додатковий CSS для стилізації */
         body {
             background-color: #333;
-            padding: 0;
-            margin: 0;
         }
         .container {
             height: 100vh;
@@ -20,14 +16,6 @@
             color: #fff;
             margin-top: 50px;
         }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 30px;
-        }
-        p {
-            font-size: 1.2em;
-            margin-bottom: 40px;
-        }
         .custom-btn-container {
             display: flex;
             justify-content: center;
@@ -35,37 +23,28 @@
             margin-top: 30px;
         }
         .custom-btn {
-            display: block;
             width: 200px;
             padding: 10px;
             margin: 10px;
-            font-size: 18px;
             font-weight: bold;
             color: #fff;
             background-color: #007bff;
-            border: none;
             border-radius: 5px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease;
             text-decoration: none;
-        }
-        .custom-btn:hover {
-            background-color: #004dff;
         }
         .vacancy-list {
             margin-top: 50px;
         }
-        .card{
-            display: flex;
-            justify-content: flex-start;
+        .card {
             text-align: left;
         }
-        .card-footer{
+        .card-footer {
             display: flex;
             justify-content: space-between;
         }
         /* Медіа-запити для респонсивного дизайну */
-        @media screen and (max-width: @media screen and (max-width: 768px){
+        @media screen and (max-width: @media screen and (max-width:  768px ) {
             .container {
                 align-items: center;
             }
@@ -79,8 +58,8 @@
             Log Out
         </a>
     </li>
-
 {% endblock %}
+
 {% block content %}
     <div class="container">
         <div class="content">
@@ -108,21 +87,17 @@
                 <!-- Кнопка для автоматичного пошуку -->
                 <a href="{{ url_for(".auto_search") }}" id="autoSearchBtn" class="btn btn-primary custom-btn">Автоматичний
                     пошук</a>
-
                 <!-- Кнопка для додавання вакансії -->
                 <a href="{{ url_for(".add_new_vacancy") }}" id="addVacancyBtn" class="btn btn-primary custom-btn">Додати
                     вакансію</a>
-
                 <!-- Кнопка для пошуку вакансій -->
                 <a href="{{ url_for("search_bp.find_work") }}" id="searchBtn" class="btn btn-primary custom-btn">Знайти
                     вакансії</a>
-
                 <!-- Кнопка для зміни паролю -->
                 <a href="{{ url_for(".reset_password") }}" class="btn btn-primary custom-btn">
                     Змінити пароль
                 </a>
             </div>
-
             <!-- Блок з вакансіями -->
             <div class="vacancy-list">
                 <h2 class="your-vacancies">Ваші вакансії</h2>
@@ -141,13 +116,14 @@
                         </div>
                         <div class="card-footer text-muted">
                             {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
-                            <a href="{{ url_for("auth_bp.delete_vacancy", id=vacancy.id) }}" class="btn btn-danger">
+                            <a href="{{ url_for("auth_bp.delete_vacancy", vacancy_id=vacancy.id) }}"
+                               class="btn btn-danger">
                                 Delete
                             </a>
                         </div>
                     </div>
                 {% endfor %}
-            {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
+                {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
             </div>
 
             <!-- Блок для інформації про автоматичний пошук -->

@@ -186,15 +186,13 @@ def home_page():
 	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user)
 
 
-@auth_bp.route("/drop-vacancy/<id>")
+@auth_bp.route("/drop-vacancy/<vacancy_id>")
 @flask_login.login_required
-def delete_vacancy(id):
-	vacancy = auth_service.find_vacancy_by_id(id=id)
+def delete_vacancy(vacancy_id: str):
+	vacancy = auth_service.find_vacancy_by_id(id=vacancy_id)
 	if vacancy:
 		vacancy.delete()
 	return redirect(url_for(".home_page"))
-
-
 
 
 @auth_bp.route("/auto-search", methods=["GET", "POST"])
