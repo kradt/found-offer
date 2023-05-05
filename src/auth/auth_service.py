@@ -66,5 +66,15 @@ def create_vacancy(title, company, city, description, salary_from, salary_to, us
 def get_user_vacancies(user_id: str):
     return models.Vacancy.objects(user_id=user_id)
 
+
 def find_vacancy_by_id(id: str):
     return models.Vacancy.objects(id=id).first()
+
+
+def add_auto_search_pattern_to_user(user: models.User, pattern: dict):
+    auto_search_pattern = models.VacancySearchPattern(**pattern)
+    user.update(push__auto_search=auto_search_pattern)
+
+
+def drop_pattern_from_user(user, pattern_id):
+    user.update(pull__vacancysearchpattern__id=pattern_id)

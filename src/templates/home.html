@@ -44,7 +44,7 @@
             justify-content: space-between;
         }
         /* Медіа-запити для респонсивного дизайну */
-        @media screen and (max-width: @media screen and (max-width:  768px ) {
+        @media screen and (max-width:  768px ){
             .container {
                 align-items: center;
             }
@@ -128,8 +128,21 @@
             <!-- Блок для інформації про автоматичний пошук -->
             <div class="auto-search-info">
                 <h2 class="auto-search-heading">Автоматичний пошук</h2>
-                <p class="auto-search-description">Отримуйте нові вакансії, які відповідають вашим критеріям,
-                    автоматично на електронну пошту.</p>
+            <p class="auto-search-description">Cписок вакансій які ми шукаємо для вас</p>
+                {% for pattern in patterns %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><a href="#">{{ pattern.title }}</a></h5>
+                                <h6 class="card-title" style="color:black"><b>{{ pattern.salary }}грн</b></h6>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ pattern.city }}</h6>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <a href="{{ url_for("auth_bp.delete_search_pattern", pattern_id=pattern.id) }}"
+                               class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                {% endfor %}
+
             </div>
         </div>
     </div>

@@ -180,10 +180,11 @@ def reset_password():
 @flask_login.login_required
 def home_page():
 	user = flask_login.current_user
+	patterns = user.auto_search
 	current_page = int(request.args.get('page', 1))
 	items_per_page = 5
 	vacancies = auth_service.get_user_vacancies(user.id).paginate(page=current_page, per_page=items_per_page)
-	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user)
+	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user, patterns=patterns)
 
 
 @auth_bp.route("/drop-vacancy/<vacancy_id>")
@@ -195,12 +196,27 @@ def delete_vacancy(vacancy_id: str):
 	return redirect(url_for(".home_page"))
 
 
+@auth_bp.route("/drop-search-pattern/<pattern_id>", methods=["GET", "POST"])
+@flask_login.login_required
+def delete_search_pattern(pattern_id):
+	user = flask_login.current_user
+	auth_service.drop_pattern_from_user(user, pattern_id)
+	return redirect(url_for(".home_page"))
+
+
 @auth_bp.route("/auto-search", methods=["GET", "POST"])
 @flask_login.login_required
 def auto_search():
 	form = AutoSearchForm()
 	if form.validate_on_submit():
-		pass
+		user = flask_login.current_user
+		if len(user.auto_search) >= 3:
+			flash("You can't have more than 3 search pattern")
+		else:
+			pattern = {"title": form.title.data, "city": form.city.data, "salary": form.salary.data}
+			auth_service.add_auto_search_pattern_to_user(user, pattern)
+			return redirect(url_for(".home_page"))
+
 	return render_template("auto_search_vacancy.html", form=form)
 
 

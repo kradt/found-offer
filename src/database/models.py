@@ -4,10 +4,17 @@ from flask_login import UserMixin
 from src import db, login_manager
 
 
+class VacancySearchPattern(db.EmbeddedDocument):
+	title = db.StringField()
+	city = db.StringField()
+	salary = db.IntField()
+
+
 class User(db.Document, UserMixin):
 	email = db.StringField(unique=True)
 	password = db.StringField()
 	confirmed = db.BooleanField(default=False)
+	auto_search = db.ListField(db.EmbeddedDocumentField(VacancySearchPattern))
 
 	def check_password(self, password) -> bool:
 		return True if check_password_hash(self.password, password) else False
