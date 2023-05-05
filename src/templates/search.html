@@ -45,47 +45,47 @@
                             <div class="row">
 
 
-                            <div class="col-md-4">
-                                Сортувати по:
-                            </div>
-                            <div class="col-md-8">
-
-
-                            <div class="dropdown">
-                                <a class="btn btn-primary dropdown-toggle" href="#" role="button"
-                                   id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-                                   aria-expanded="false">
-                                    {% if sort_by_value == '2' %}
-                                        Зарплаті
-                                    {% else %}
-                                        Даті
-                                    {% endif %}
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-
-                                    <!-- if argument page already in url replace him to new value-->
-                                    {% if sort_by_value %}
-                                        {% set url_for_date = request.url.replace('sort_by=' + sort_by_value, 'sort_by=1') %}
-                                        {% set url_for_salary = request.url.replace('sort_by=' + sort_by_value, 'sort_by=2') %}
-                                        <!-- if dict args is empty, add arg page to url  -->
-                                    {% elif not request.args.to_dict() %}
-                                        {% set url_for_date = request.url + '?sort_by=1' %}
-                                        {% set url_for_salary = request.url + '?sort_by=2' %}
-                                    {% else %}
-                                        {% set url_for_date = request.url + '&sort_by=1' %}
-                                        {% set url_for_salary = request.url + '&sort_by=2' %}
-                                    {% endif %}
-                                    <a class="dropdown-item" href="{{ url_for_date }}">
-                                        Даті
-                                    </a>
-                                    <a class="dropdown-item" href="{{ url_for_salary }}">
-                                        Зарплаті
-                                    </a>
-
-
+                                <div class="col-md-4">
+                                    Сортувати по:
                                 </div>
-                            </div>
-                            </div>
+                                <div class="col-md-8">
+
+
+                                    <div class="dropdown">
+                                        <a class="btn btn-primary dropdown-toggle" href="#" role="button"
+                                           id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            {% if sort_by_value == '2' %}
+                                                Зарплаті
+                                            {% else %}
+                                                Даті
+                                            {% endif %}
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+
+                                            <!-- if argument page already in url replace him to new value-->
+                                            {% if sort_by_value %}
+                                                {% set url_for_date = request.url.replace('sort_by=' + sort_by_value, 'sort_by=1') %}
+                                                {% set url_for_salary = request.url.replace('sort_by=' + sort_by_value, 'sort_by=2') %}
+                                                <!-- if dict args is empty, add arg page to url  -->
+                                            {% elif not request.args.to_dict() %}
+                                                {% set url_for_date = request.url + '?sort_by=1' %}
+                                                {% set url_for_salary = request.url + '?sort_by=2' %}
+                                            {% else %}
+                                                {% set url_for_date = request.url + '&sort_by=1' %}
+                                                {% set url_for_salary = request.url + '&sort_by=2' %}
+                                            {% endif %}
+                                            <a class="dropdown-item" href="{{ url_for_date }}">
+                                                Даті
+                                            </a>
+                                            <a class="dropdown-item" href="{{ url_for_salary }}">
+                                                Зарплаті
+                                            </a>
+
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

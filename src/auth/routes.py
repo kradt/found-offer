@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request,
 from src import client, redis_client
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
-from .forms import RegisterForm, LoginForm, RecoverPasswordEmail, NewPasswordForm
+from .forms import RegisterForm, LoginForm, RecoverPasswordForm, NewPasswordForm, NewVacancyForm
 from ..config import Config
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
@@ -149,7 +149,7 @@ def write_new_password():
 # Get user email and send code to mail for reset password
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
-	form = RecoverPasswordEmail()
+	form = RecoverPasswordForm()
 	email_was_sent = False
 	if form.validate_on_submit():
 		user = auth_service.find_user_by_email(email=form.email.data)
@@ -179,16 +179,47 @@ def reset_password():
 @auth_bp.route("/me")
 @flask_login.login_required
 def home_page():
-	return render_template("home.html", user=flask_login.current_user)
+	user = flask_login.current_user
+	current_page = int(request.args.get('page', 1))
+	items_per_page = 5
+	vacancies = auth_service.get_user_vacancies(user.id).paginate(page=current_page, per_page=items_per_page)
+	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user)
 
 
-@auth_bp.route("/me")
+@auth_bp.route("/drop-vacancy/<id>")
+@flask_login.login_required
+def delete_vacancy(id):
+	vacancy = auth_service.find_vacancy_by_id(id=id)
+	if vacancy:
+		vacancy.delete()
+	return redirect(url_for(".home_page"))
+
+
+
+
+@auth_bp.route("/auto-search", methods=["GET", "POST"])
 @flask_login.login_required
 def auto_search():
-	return render_template("home.html", user=flask_login.current_user)
+	return render_template("home.html")
 
 
-@auth_bp.route("/me")
+@auth_bp.route("/new-vacancy", methods=["GET", "POST"])
 @flask_login.login_required
 def add_new_vacancy():
-	return render_template("home.html", user=flask_login.current_user)
+	form = NewVacancyForm()
+	if form.validate_on_submit():
+		# Moderate vacancy
+		user = flask_login.current_user
+		vacancy = auth_service.create_vacancy(
+			title=form.title.data,
+			company=form.company.data,
+			city=form.city.data,
+			description=form.description.data,
+			salary_from=form.salary_from.data,
+			salary_to=form.salary_to.data,
+			user_id=user.id
+		)
+		if vacancy:
+			return redirect(url_for(".home_page"))
+		flash("Something went wrong, try again")
+	return render_template("new_vacancy.html", form=form)

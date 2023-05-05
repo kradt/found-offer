@@ -25,6 +25,7 @@ class Vacancy(db.Document):
 	company = db.StringField()
 	description = db.StringField()
 	link = db.StringField()
+	user_id = db.ObjectIdField()
 
 	def __repr__(self):
 		return f"<Vacancy {self.title}>"

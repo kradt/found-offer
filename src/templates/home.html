@@ -1,139 +1,165 @@
 {% extends 'base.html' %}
 
 
+{% from '_paginate.html' import render_pagination %}
+
 {% block style %}
     {{ super() }}
     <style>
-    /* Додатковий CSS для стилізації */
-    body {
-      background-color: #333;
-      padding: 0;
-      margin: 0;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-    }
-
-    .content {
-      text-align: center;
-      color: #fff;
-      margin-top: 100px;
-    }
-
-    h1 {
-      font-size: 3em;
-      margin-bottom: 30px;
-    }
-
-    p {
-      font-size: 1.2em;
-      margin-bottom: 40px;
-    }
-
-    .custom-btn-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 30px;
-    }
-
-    .custom-btn {
-      display: block;
-      width: 200px;
-      padding: 10px;
-      margin: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #fff;
-      background-color: #007bff;
-      border: none;
-      border-radius: 5px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: background-color 0.3s ease;
-      text-decoration: none;
-    }
-
-    .custom-btn:hover {
-      background-color: #004dff;
-    }
-
-    /* Медіа-запити для респонсивного дизайну */
-    @media screen and (max-width: 768px) {
-      .container {
-          align-items: center;
-      }
-
-
-  </style>
+        /* Додатковий CSS для стилізації */
+        body {
+            background-color: #333;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            height: 100vh;
+        }
+        .content {
+            text-align: center;
+            color: #fff;
+            margin-top: 50px;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        .custom-btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .custom-btn {
+            display: block;
+            width: 200px;
+            padding: 10px;
+            margin: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+        .custom-btn:hover {
+            background-color: #004dff;
+        }
+        .vacancy-list {
+            margin-top: 50px;
+        }
+        .card{
+            display: flex;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .card-footer{
+            display: flex;
+            justify-content: space-between;
+        }
+        /* Медіа-запити для респонсивного дизайну */
+        @media screen and (max-width: @media screen and (max-width: 768px){
+            .container {
+                align-items: center;
+            }
+        }
+    </style>
 {% endblock %}
+
 {% block auth %}
-     <li class="nav-item">
+    <li class="nav-item">
         <a class="nav-link btn btn-danger" style="color:white" href="{{ url_for('auth_bp.logout') }}">
             Log Out
         </a>
-     </li>
+    </li>
 
 {% endblock %}
 {% block content %}
-    {#    {% if user.confirmed %}#}
-    {#        Hello {{ user.email }}#}
-    {#    {% else %}#}
-    {#        Hello {{ user.email }} Check your email and confirm your account#}
-    {#    {% endif %}#}
-    {##}
-    {#    <a href="{{ url_for(".reset_password") }}">Recover Password</a>#}
-    {#{% endblock %}#}
-    {##}
-    {#{% block auth %}#}
-    {# <li class="nav-item">#}
-    {#    <a class="nav-link btn btn-danger" style="color:white" href="{{ url_for('auth_bp.logout') }}">#}
-    {#        Log Out#}
-    {#    </a>#}
-    {# </li>#}
-
     <div class="container">
-    <div class="content">
-      <h1>Особистий кабінет</h1>
-        {% if user.confirmed %}
-        <p>
-            Ласкаво просимо! Ви увійшли як
-            <strong>
-                {{ user.email }}
-            </strong>
-        </p>
-        {% else %}
-            <p>Ласкаво просимо! Ви увійшли як
-                <strong>
-                    {{ user.email }}
-                </strong>
-                <em style="color:lightgoldenrodyellow">
-                    Check your email and confirm your account
-                </em>
-            </p>
-        {% endif %}
-      <p>Що бажаєте зробити?</p>
+        <div class="content">
+            <h1>Особистий кабінет</h1>
+            {% if user.confirmed %}
+                <p>
+                    Ласкаво просимо! Ви увійшли як
+                    <strong>
+                        {{ user.email }}
+                    </strong>
+                </p>
+            {% else %}
+                <p>
+                    Ласкаво просимо! Ви увійшли як
+                    <strong>
+                        {{ user.email }}
+                    </strong>
+                    <em style="color:lightgoldenrodyellow">
+                        Перевірте свою електронну пошту і підтвердіть свій обліковий запис
+                    </em>
+                </p>
+            {% endif %}
+            <p>Що бажаєте зробити?</p>
+            <div class="custom-btn-container">
+                <!-- Кнопка для автоматичного пошуку -->
+                <a href="{{ url_for(".auto_search") }}" id="autoSearchBtn" class="btn btn-primary custom-btn">Автоматичний
+                    пошук</a>
 
-      <div class="custom-btn-container">
-        <!-- Кнопка для автоматичного пошуку -->
-        <a href="{{ url_for(".auto_search") }}" id="autoSearchBtn" class="btn btn-primary custom-btn">Автоматичний пошук</a>
+                <!-- Кнопка для додавання вакансії -->
+                <a href="{{ url_for(".add_new_vacancy") }}" id="addVacancyBtn" class="btn btn-primary custom-btn">Додати
+                    вакансію</a>
 
-        <!-- Кнопка для додавання вакансії -->
-        <a href="{{ url_for(".add_new_vacancy") }}" id="addVacancyBtn" class="btn btn-primary custom-btn">Додати вакансію</a>
+                <!-- Кнопка для пошуку вакансій -->
+                <a href="{{ url_for("search_bp.find_work") }}" id="searchBtn" class="btn btn-primary custom-btn">Знайти
+                    вакансії</a>
 
-        <!-- Кнопка для пошуку вакансій -->
-          <a href="{{ url_for("search_bp.find_work") }}" id="searchBtn" class="btn btn-primary custom-btn">Знайти вакансії</a>
-        <!-- Кнопка для зміни паролю -->
+                <!-- Кнопка для зміни паролю -->
+                <a href="{{ url_for(".reset_password") }}" class="btn btn-primary custom-btn">
+                    Змінити пароль
+                </a>
+            </div>
 
-          <a href="{{ url_for(".reset_password") }}" class="btn btn-primary custom-btn">
-              Змінити пароль
-          </a>
+            <!-- Блок з вакансіями -->
+            <div class="vacancy-list">
+                <h2 class="your-vacancies">Ваші вакансії</h2>
+                {% for vacancy in vacancies.items %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
+                            {% if vacancy.salary_from or vacancy.salary_to %}
+                                <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
+                                    - {{ vacancy.salary_to | int }} грн</b></h6>
+                            {% endif %}
+                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
 
-      </div>
+                            <p class="card-text" style="color:grey">{{ vacancy.description }}</p>
+                            <a href="#" class="card-link">Apply</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
+                            <a href="{{ url_for("auth_bp.delete_vacancy", id=vacancy.id) }}" class="btn btn-danger">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
+            </div>
+
+            <!-- Блок для інформації про автоматичний пошук -->
+            <div class="auto-search-info">
+                <h2 class="auto-search-heading">Автоматичний пошук</h2>
+                <p class="auto-search-description">Отримуйте нові вакансії, які відповідають вашим критеріям,
+                    автоматично на електронну пошту.</p>
+                <a href="{{ url_for(".auto_search") }}" class="btn btn-primary custom-btn">Налаштувати автоматичний
+                    пошук</a>
+            </div>
+        </div>
     </div>
-  </div>
-
 {% endblock %}
+
+

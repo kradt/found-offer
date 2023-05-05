@@ -1,3 +1,5 @@
+import datetime
+
 from flask import current_app
 from werkzeug.security import generate_password_hash
 from mongoengine.errors import NotUniqueError
@@ -41,3 +43,28 @@ def create_user(email: str, password: str = None, confirmed=False) -> models.Use
     except NotUniqueError:
         user = None
     return user
+
+
+def create_vacancy(title, company, city, description, salary_from, salary_to, user_id):
+    time_now = datetime.datetime.now()
+    try:
+        vacancy = models.Vacancy(
+            title=title,
+            company=company,
+            city=city,
+            description=description,
+            salary_from=salary_from,
+            salary_to=salary_to,
+            time_publish=time_now,
+            user_id=user_id).save()
+    except Exception as e:
+        print(e)
+        return False
+    return vacancy
+
+
+def get_user_vacancies(user_id: str):
+    return models.Vacancy.objects(user_id=user_id)
+
+def find_vacancy_by_id(id: str):
+    return models.Vacancy.objects(id=id).first()
