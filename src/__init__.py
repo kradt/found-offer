@@ -27,9 +27,6 @@ def create_app():
     celery_init_app(app)
     redis_client.init_app(app)
 
-    from src.parsing import start_parse_data_to_base
-    # start_parse_data_to_base()
-
     from src.auth.routes import auth_bp
     from src.search.routes import search_bp
     from src.root.routes import root_bp

@@ -1,5 +1,9 @@
+import datetime
+
 from flask import Flask
 from celery import Celery, Task
+
+from src.parsing import engines
 
 
 def celery_init_app(app: Flask) -> Celery:
@@ -8,6 +12,15 @@ def celery_init_app(app: Flask) -> Celery:
             with app.app_context():
                 return self.run(*args, **kwargs)
 
+    CELERYBEAT_SCHEDULER = {
+        "start_parse_to_base": {
+            "task": "src.auth.tasks.start_parse_to_base",
+            "schedule": datetime.timedelta(minutes=1),
+            "args": (engines.JobsUA(),)
+
+        }
+    }
+    app.config["CELERYBEAT_SCHEDULER"] = CELERYBEAT_SCHEDULER
     celery_app = Celery(app.name, task_cls=FlaskTask)
     celery_app.config_from_object(app.config["CELERY"])
     celery_app.set_default()

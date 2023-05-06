@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 
 from src import client, redis_client
+from src.utils import confirm_required
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
 from .forms import RegisterForm, LoginForm, RecoverPasswordForm, NewPasswordForm, NewVacancyForm, AutoSearchForm
@@ -137,6 +138,7 @@ def logout():
 # Reset password from user sent data
 @auth_bp.route("/new-password", methods=["GET", "POST"])
 @flask_login.login_required
+@confirm_required
 def write_new_password():
 	form = NewPasswordForm()
 	if form.validate_on_submit():
@@ -148,6 +150,8 @@ def write_new_password():
 
 # Get user email and send code to mail for reset password
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
+@flask_login.login_required
+@confirm_required
 def reset_password():
 	form = RecoverPasswordForm()
 	email_was_sent = False
@@ -187,8 +191,10 @@ def home_page():
 	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user, patterns=patterns)
 
 
+# Delete vacancy from user's vacancy list
 @auth_bp.route("/drop-vacancy/<vacancy_id>")
 @flask_login.login_required
+@confirm_required
 def delete_vacancy(vacancy_id: str):
 	vacancy = auth_service.find_vacancy_by_id(id=vacancy_id)
 	if vacancy:
@@ -196,16 +202,20 @@ def delete_vacancy(vacancy_id: str):
 	return redirect(url_for(".home_page"))
 
 
+# Delete search pattern from user's search patterns list
 @auth_bp.route("/drop-search-pattern/<pattern_id>", methods=["GET", "POST"])
 @flask_login.login_required
+@confirm_required
 def delete_search_pattern(pattern_id):
 	user = flask_login.current_user
 	auth_service.drop_pattern_from_user(user, pattern_id)
 	return redirect(url_for(".home_page"))
 
 
+# Route for add search pattern
 @auth_bp.route("/auto-search", methods=["GET", "POST"])
 @flask_login.login_required
+@confirm_required
 def auto_search():
 	form = AutoSearchForm()
 	if form.validate_on_submit():
@@ -220,8 +230,10 @@ def auto_search():
 	return render_template("auto_search_vacancy.html", form=form)
 
 
+# Route for add new vacancy
 @auth_bp.route("/new-vacancy", methods=["GET", "POST"])
 @flask_login.login_required
+@confirm_required
 def add_new_vacancy():
 	form = NewVacancyForm()
 	if form.validate_on_submit():

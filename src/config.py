@@ -2,6 +2,7 @@ import secrets
 import os
 from dotenv import load_dotenv, find_dotenv
 
+
 load_dotenv(find_dotenv())
 
 
@@ -20,8 +21,9 @@ class Config:
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
     CELERY = {
         "broker_url": "redis://localhost:6379",
-        "result_backend": "redis://localhost:6379"
+        "result_backend": "redis://localhost:6379",
     }
+    CELERY_TIMEZONE = "UTC"
     GOOGLE_DISCOVERY_URL = (
         "https://accounts.google.com/.well-known/openid-configuration"
     )
