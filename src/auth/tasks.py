@@ -88,3 +88,26 @@ def remove_old_vacancies():
 	count_of_del_vacancies = old_vacancies.count()
 	old_vacancies.delete()
 	logger.debug(f"{count_of_del_vacancies} vacancies were deleted ")
+
+
+@shared_task
+def find_user_vacancies():
+	for user in models.User.objects():
+		search_patterns = user.auto_search
+		for search_pattern in search_patterns:
+			necessary_vacancies = models.Vacancy.objects(
+				title__icontains=search_pattern["title"],
+				city__icontains=search_pattern["city"],
+				salary_from__gte=search_pattern["salary"],
+				time_publish__lte=search_pattern["start_search"])
+			if necessary_vacancies:
+				search_patterns[search_patterns.index(search_pattern)].time_publish = datetime.datetime.now()
+				user.update(auto_search=search_patterns)
+				send_data = {
+					"sender": Config.MAIL_DEFAULT_SENDER,
+					"recipients": [user.email],
+				}
+				msg = make_message("Hello dear user", send_data)
+				msg.html = render_template("template_for_vacancy.html", vacancies=necessary_vacancies)
+				mail.send(msg)
+				logger.debug(f"vacancies sussefully send to {user.email} ")

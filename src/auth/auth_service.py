@@ -77,4 +77,8 @@ def add_auto_search_pattern_to_user(user: models.User, pattern: dict):
 
 
 def drop_pattern_from_user(user, pattern_id):
-    user.update(pull__vacancysearchpattern__id=pattern_id)
+    search_patterns = user.auto_search
+    for pattern in search_patterns:
+        if str(pattern.id) == pattern_id:
+            del search_patterns[search_patterns.index(pattern)]
+    user.update(auto_search=search_patterns)

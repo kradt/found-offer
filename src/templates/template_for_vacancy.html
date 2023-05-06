@@ -1,0 +1,21 @@
+<h1>
+    We find these vacancies for you
+</h1>
+{% for vacancy in vacancies %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
+        {% if vacancy.salary_from or vacancy.salary_to %}
+            <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
+                - {{ vacancy.salary_to | int }} грн</b></h6>
+        {% endif %}
+        <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
+
+        <p class="card-text" style="color:grey">{{ vacancy.description }}</p>
+        <a href="#" class="card-link">Apply</a>
+    </div>
+    <div class="card-footer text-muted">
+        {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
+    </div>
+</div>
+{% endfor %}

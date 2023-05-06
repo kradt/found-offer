@@ -1,3 +1,7 @@
+import datetime
+
+from bson import ObjectId
+from mongoengine import ObjectIdField
 from werkzeug.security import check_password_hash
 from flask_login import UserMixin
 
@@ -5,9 +9,16 @@ from src import db, login_manager
 
 
 class VacancySearchPattern(db.EmbeddedDocument):
+	id = ObjectIdField(
+		required=True,
+		default=ObjectId,
+		unique=True,
+		primary_key=True,
+		sparse=True)
 	title = db.StringField()
 	city = db.StringField()
-	salary = db.IntField()
+	salary = db.FloatField()
+	start_search = db.DateTimeField(default=datetime.datetime.now())
 
 
 class User(db.Document, UserMixin):
