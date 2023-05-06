@@ -99,9 +99,9 @@ def find_user_vacancies():
 				title__icontains=search_pattern["title"],
 				city__icontains=search_pattern["city"],
 				salary_from__gte=search_pattern["salary"],
-				time_publish__lte=search_pattern["start_search"])
+				time_publish__gte=search_pattern["start_search"])
 			if necessary_vacancies:
-				search_patterns[search_patterns.index(search_pattern)].time_publish = datetime.datetime.now()
+				search_patterns[search_patterns.index(search_pattern)].start_search = datetime.datetime.now()
 				user.update(auto_search=search_patterns)
 				send_data = {
 					"sender": Config.MAIL_DEFAULT_SENDER,
