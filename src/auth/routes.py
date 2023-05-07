@@ -3,7 +3,7 @@ import flask_login
 import json
 import requests
 from werkzeug.security import generate_password_hash
-from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
+from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app, abort
 
 from src import client, redis_client
 from src.utils import confirm_required
@@ -54,7 +54,7 @@ def google_callback():
 	if userinfo_response.get("email_verified"):
 		users_email = userinfo_response["email"]
 	else:
-		return "User email not available or not verified by Google.", 400
+		return abort(400, "User email not available or not verified by Google.")
 
 	user = auth_service.create_user(email=users_email, confirmed=True)
 	if not user:

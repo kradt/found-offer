@@ -30,9 +30,11 @@ def create_app():
     from src.auth.routes import auth_bp
     from src.search.routes import search_bp
     from src.root.routes import root_bp
+    from src.exceptions import errors_bp
 
     app.register_blueprint(root_bp, url_prefix="/")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(search_bp, url_prefix="/search")
+    app.register_blueprint(errors_bp)
 
     return app

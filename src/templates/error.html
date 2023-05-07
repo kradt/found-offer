@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 600px;
+            background-color: #fff;
+            box-shadow: 0px 0px 5px #888;
+            text-align: center;
+        }
+        h1 {
+            color: #dc3545;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ error.name }}</h1>
+        <p>{{ error.description }}</p>
+    </div>
+{% endblock %}

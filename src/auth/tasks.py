@@ -110,4 +110,4 @@ def find_user_vacancies():
 				msg = make_message("Hello dear user", send_data)
 				msg.html = render_template("template_for_vacancy.html", vacancies=necessary_vacancies)
 				mail.send(msg)
-				logger.debug(f"vacancies sussefully send to {user.email} ")
+				logger.debug(f"vacancies successfully send to {user.email} ")
