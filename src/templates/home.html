@@ -3,56 +3,6 @@
 {% from '_paginate.html' import render_pagination %}
 {% from '_vacancy_list.html' import generate_vacancy_list %}
 
-{% block head %}
-    {{ super() }}
-    <style>
-        body {
-            background-color: #333;
-        }
-        .container {
-            height: 100vh;
-        }
-        .content {
-            text-align: center;
-            color: #fff;
-            margin-top: 50px;
-        }
-        .custom-btn-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 30px;
-        }
-        .custom-btn {
-            width: 200px;
-            padding: 10px;
-            margin: 10px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #007bff;
-            border-radius: 5px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            text-decoration: none;
-        }
-        .vacancy-list {
-            margin-top: 50px;
-        }
-        .card {
-            text-align: left;
-        }
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-        }
-        /* Медіа-запити для респонсивного дизайну */
-        @media screen and (max-width:  768px ){
-            .container {
-                align-items: center;
-            }
-        }
-    </style>
-{% endblock %}
-
 {% block auth %}
     <li class="nav-item">
         <a class="nav-link btn btn-danger" style="color:white" href="{{ url_for('auth_bp.logout') }}">
