@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% from '_paginate.html' import render_pagination %}
+{% from '_vacancy_list.html' import generate_vacancy_list %}
 
 {% block head %}
     {{ super() }}
@@ -102,28 +103,7 @@
             <!-- Блок з вакансіями -->
             <div class="vacancy-list">
                 <h2 class="your-vacancies">Ваші вакансії</h2>
-                {% for vacancy in vacancies.items %}
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
-                            {% if vacancy.salary_from or vacancy.salary_to %}
-                                <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
-                                    - {{ vacancy.salary_to | int }} грн</b></h6>
-                            {% endif %}
-                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
-
-                            <p class="card-text" style="color:grey">{{ vacancy.description }}</p>
-                            <a href="#" class="card-link">Apply</a>
-                        </div>
-                        <div class="card-footer text-muted">
-                            {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
-                            <a href="{{ url_for("auth_bp.delete_vacancy", vacancy_id=vacancy.id) }}"
-                               class="btn btn-danger">
-                                Delete
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
+                {{ generate_vacancy_list(vacancies.items, native=True) }}
                 {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
             </div>
             <!-- Блок для інформації про автоматичний пошук -->

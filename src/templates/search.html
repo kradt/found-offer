@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% from '_paginate.html' import render_pagination %}
+{% from '_vacancy_list.html' import generate_vacancy_list %}
 
 {% block content %}
     <div class="container-fluid mt-3">
@@ -96,26 +97,7 @@
                         </p>
                     </div>
                 </div>
-
-
-                {% for vacancy in vacancies.items %}
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
-                            {% if vacancy.salary_from or vacancy.salary_to %}
-                                <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
-                                    - {{ vacancy.salary_to | int }} грн</b></h6>
-                            {% endif %}
-                            <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
-
-                            <p class="card-text" style="color:grey">{{ vacancy.description }}</p>
-                            <a href="#" class="card-link">Apply</a>
-                        </div>
-                        <div class="card-footer text-muted">
-                            {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
-                        </div>
-                    </div>
-                {% endfor %}
+                {{ generate_vacancy_list(vacancies.items) }}
                 {{ render_pagination(vacancies, 'search_bp.find_work', request ) }}
             </div>
         </div>
