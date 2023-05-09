@@ -76,10 +76,18 @@ def saved_auto_search(confirmed_user, auto_search):
     confirmed_user.modify(pull__auto_search=search_pattern)
 
 
-
 @pytest.fixture()
 def vacancy():
     return dict(title="Backend Developer", company="My new Company", city="Київ",
                 description="We find Junior Python BackEnd Developer for remote\nWe offer the best experience and the "
                             "best team",
                 salary_from=20000, salary_to=35000)
+
+
+@pytest.fixture()
+def saved_vacancy(confirmed_user, vacancy):
+    vacancy_in_base = models.Vacancy(**vacancy, user_id=confirmed_user.id)
+    vacancy_in_base.save()
+    yield vacancy_in_base
+
+    models.Vacancy.objects(**vacancy).delete()

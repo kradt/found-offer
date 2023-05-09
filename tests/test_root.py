@@ -47,3 +47,11 @@ def test_drop_auto_search_pattern(client, confirmed_user, saved_auto_search):
         assert response.status_code == 200
         assert response.request.path == "/me"
         assert saved_auto_search not in confirmed_user.auto_search
+
+
+def test_drop_vacancy_from_user_storage(client, confirmed_user, saved_vacancy):
+    with client:
+        response = client.get(f"/drop-vacancy/{saved_vacancy.id}", follow_redirects=True)
+        assert response.status_code == 200
+        assert response.request.path == "/me"
+        assert saved_vacancy not in models.Vacancy.objects(user_id=confirmed_user.id)
