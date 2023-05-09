@@ -11,7 +11,6 @@ from src.utils import confirm_required
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
 
-from ..config import Config
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
@@ -35,7 +34,7 @@ def google_callback():
 		token_url,
 		headers=headers,
 		data=body,
-		auth=(Config.CLIENT_ID, Config.CLIENT_SECRET),
+		auth=(current_app.config["CLIENT_ID"], current_app.config["CLIENT_SECRET"]),
 	)
 
 	# Parse the tokens!

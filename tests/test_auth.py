@@ -42,7 +42,7 @@ def test_user_already_exist(client, user, saved_user):
     assert response.status_code == 200
 
 
-def test_user_unconfirmed(client, logined_user, context):
+def test_user_unconfirmed(client, logined_user):
     with client:
         response = client.get("/auth/new-password")
         assert response.status_code == 403
@@ -50,3 +50,9 @@ def test_user_unconfirmed(client, logined_user, context):
         response = client.get("/auth/new-password")
         assert response.status_code == 200
         assert response.request.path == "/auth/new-password"
+
+
+def test_user_logout(client, logined_user):
+    with client:
+        response = client.get("auth/logout", follow_redirects=True)
+        assert response.status_code == 200
