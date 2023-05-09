@@ -38,12 +38,6 @@ def saved_user(user):
 
 
 @pytest.fixture()
-def context(app):
-    with app.test_request_context():
-        yield app
-
-
-@pytest.fixture()
 def logined_user(saved_user, context):
     # SetUp
     login_user(saved_user)
@@ -51,11 +45,19 @@ def logined_user(saved_user, context):
     # TearDown
     logout_user()
 
+@pytest.fixture()
+def confirmed_user(logined_user, context):
+    # SetUp
+    logined_user.modify(confirmed=True)
+    yield logined_user
+    # TearDown
+    logined_user.modify(confirmed=False)
+
 
 
 @pytest.fixture()
-def login_client(app):
-    app.test_client_class = FlaskLoginClient
-    yield app.test_client
+def context(app):
+    with app.test_request_context():
+        yield app
 
 

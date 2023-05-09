@@ -136,7 +136,7 @@ def write_new_password():
 	form = forms.NewPasswordForm()
 	if form.validate_on_submit():
 		user = flask_login.current_user
-		user.update(password=generate_password_hash(form.password.data))
+		user.modify(password=generate_password_hash(form.password.data))
 		return redirect(url_for("root_bp.home_page"))
 	return render_template("new_password.html", form=form)
 

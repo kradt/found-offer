@@ -1,5 +1,5 @@
-
 from src.database import models
+from werkzeug.security import check_password_hash
 
 
 def test_login_user(client, saved_user, user):
@@ -54,5 +54,18 @@ def test_user_unconfirmed(client, logined_user):
 
 def test_user_logout(client, logined_user):
     with client:
-        response = client.get("auth/logout", follow_redirects=True)
+        response = client.get("/auth/logout", follow_redirects=True)
         assert response.status_code == 200
+
+
+def test_new_password(client, confirmed_user):
+    new_password = "12345678"
+
+    with client:
+        response = client.post(
+            "/auth/new-password",
+            data={"password": new_password, "confirm_password": new_password},
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert confirmed_user.check_password(new_password)
