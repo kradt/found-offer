@@ -63,8 +63,7 @@ def google_callback():
 # Login user using Google OAuth
 @auth_bp.route("/google-login")
 def google_login():
-	google_provider_cfg = get_google_provider_cfg()
-	authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+	authorization_endpoint = current_app.config["GOOGLE_AUTHORIZATION_ENDPOINT"]
 
 	# Get URL for Google authorization page
 	request_uri = client.prepare_request_uri(
