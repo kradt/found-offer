@@ -1,4 +1,5 @@
 from src.database import models
+from src import mail
 from werkzeug.security import check_password_hash
 
 
@@ -69,3 +70,9 @@ def test_new_password(client, confirmed_user):
         )
         assert response.status_code == 200
         assert confirmed_user.check_password(new_password)
+
+
+def test_reset_password(client, saved_user):
+    with client:
+        response = client.post("auth/reset-password", data={"email": saved_user.email})
+        assert response.status_code == 200

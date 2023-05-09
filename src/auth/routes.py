@@ -143,8 +143,6 @@ def write_new_password():
 
 # Get user email and send code to mail for reset password
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
-@flask_login.login_required
-@confirm_required
 def reset_password():
 	form = forms.RecoverPasswordForm()
 	email_was_sent = False
@@ -155,7 +153,9 @@ def reset_password():
 			return render_template("reset_password.html", form=form)
 		if form.code.data:
 			necessary_code = str(redis_client.get(user.email))
-			if necessary_code and necessary_code == form.code.data:
+			if not necessary_code:
+				flash("Code was expired")
+			elif necessary_code == form.code.data:
 				flask_login.login_user(user)
 				return redirect(url_for(".write_new_password"))
 			else:

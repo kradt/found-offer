@@ -13,6 +13,7 @@ def app():
     app.config.update({
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
+        "CELERY_ALWAYS_EAGER": True
     })
     yield app
 
