@@ -11,7 +11,7 @@ def test_login_user(client, saved_user, user):
             "/auth/login",
             data={"email": login, "password": password},
             follow_redirects=True)
-        assert response.request.path == "/auth/me"
+        assert response.request.path == "/me"
     assert response.status_code == 200
 
 
@@ -24,7 +24,7 @@ def test_register_user(client, user):
                                data={"email": login, "password": password, "confirm_password": password},
                                follow_redirects=True)
         user = models.User.objects(email=login).first()
-        assert response.request.path == "/auth/me"
+        assert response.request.path == "/me"
 
     assert user is not None
     assert user.email == login
@@ -47,7 +47,6 @@ def test_user_unconfirmed(client, logined_user, context):
     with client:
         response = client.get("/auth/new-password")
         assert response.status_code == 403
-
         logined_user.modify(confirmed=True)
         response = client.get("/auth/new-password")
         assert response.status_code == 200

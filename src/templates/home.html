@@ -54,7 +54,7 @@
             <div class="vacancy-list">
                 <h2 class="your-vacancies">Ваші вакансії</h2>
                 {{ generate_vacancy_list(vacancies.items, native=True) }}
-                {{ render_pagination(vacancies, 'auth_bp.home_page', request ) }}
+                {{ render_pagination(vacancies, 'root_bp.home_page', request ) }}
             </div>
             <!-- Блок для інформації про автоматичний пошук -->
             <div class="auto-search-info">
@@ -68,7 +68,7 @@
                                 <h6 class="card-subtitle mb-2 text-muted">{{ pattern.city }}</h6>
                         </div>
                         <div class="card-footer text-muted">
-                            <a href="{{ url_for("auth_bp.delete_search_pattern", pattern_id=pattern.id) }}"
+                            <a href="{{ url_for("root_bp.delete_search_pattern", pattern_id=pattern.id) }}"
                                class="btn btn-danger">Delete</a>
                         </div>
                     </div>

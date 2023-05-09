@@ -5,11 +5,12 @@ import requests
 from werkzeug.security import generate_password_hash
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app, abort
 
+from src.auth import forms
 from src import client, redis_client
 from src.utils import confirm_required
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
-from .forms import RegisterForm, LoginForm, RecoverPasswordForm, NewPasswordForm, NewVacancyForm, AutoSearchForm
+
 from ..config import Config
 
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
@@ -62,7 +63,7 @@ def google_callback():
 	flask_login.login_user(user)
 
 	# Send user back to homepage
-	return redirect(url_for("auth_bp.home_page"))
+	return redirect(url_for("root_bp.home_page"))
 
 
 # Login user using Google OAuth
@@ -87,18 +88,18 @@ def confirm_email(token):
 	user = auth_service.find_user_by_email(email=email)
 	if user:
 		user.update(confirmed=True)
-	return redirect(url_for(".home_page"))
+	return redirect(url_for("root_bp.home_page"))
 
 
 # Login user in system from login form
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-	form = LoginForm()
+	form = forms.LoginForm()
 	if form.validate_on_submit():
 		user = auth_service.find_user_by_email(form.email.data)
 		if user and user.check_password(form.password.data):
 			flask_login.login_user(user, remember=form.remember_me.data)
-			return redirect(url_for(".home_page"))
+			return redirect(url_for("root_bp.home_page"))
 		else:
 			flash("Wrong email or password")
 
@@ -108,7 +109,7 @@ def login():
 # Register user and send message to email for confirm account
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
-	form = RegisterForm()
+	form = forms.RegisterForm()
 	if form.validate_on_submit():
 		user = auth_service.create_user(form.email.data, form.password.data)
 		if not user:
@@ -123,7 +124,7 @@ def register():
 			confirm_link = url_for(".confirm_email", token=token, _external=True)
 			send_message_to_email_for_confirm_him.delay(send_data, confirm_link)
 
-			return redirect(url_for(".home_page"))
+			return redirect(url_for("root_bp.home_page"))
 	return render_template("register.html", form=form)
 
 
@@ -140,11 +141,11 @@ def logout():
 @flask_login.login_required
 @confirm_required
 def write_new_password():
-	form = NewPasswordForm()
+	form = forms.NewPasswordForm()
 	if form.validate_on_submit():
 		user = flask_login.current_user
 		user.update(password=generate_password_hash(form.password.data))
-		return redirect(url_for(".home_page"))
+		return redirect(url_for("root_bp.home_page"))
 	return render_template("new_password.html", form=form)
 
 
@@ -153,7 +154,7 @@ def write_new_password():
 @flask_login.login_required
 @confirm_required
 def reset_password():
-	form = RecoverPasswordForm()
+	form = forms.RecoverPasswordForm()
 	email_was_sent = False
 	if form.validate_on_submit():
 		user = auth_service.find_user_by_email(email=form.email.data)
@@ -177,78 +178,3 @@ def reset_password():
 		email_was_sent = True
 
 	return render_template("reset_password.html", form=form, email_was_sent=email_was_sent)
-
-
-# User Home page after login
-@auth_bp.route("/me")
-@flask_login.login_required
-def home_page():
-	user = flask_login.current_user
-	patterns = user.auto_search
-	current_page = int(request.args.get('page', 1))
-	items_per_page = 5
-	vacancies = auth_service.get_user_vacancies(user.id).paginate(page=current_page, per_page=items_per_page)
-	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user, patterns=patterns)
-
-
-# Delete vacancy from user's vacancy list
-@auth_bp.route("/drop-vacancy/<vacancy_id>")
-@flask_login.login_required
-@confirm_required
-def delete_vacancy(vacancy_id: str):
-	vacancy = auth_service.find_vacancy_by_id(id=vacancy_id)
-	if vacancy:
-		vacancy.delete()
-	return redirect(url_for(".home_page"))
-
-
-# Delete search pattern from user's search patterns list
-@auth_bp.route("/drop-search-pattern/<pattern_id>", methods=["GET", "POST"])
-@flask_login.login_required
-@confirm_required
-def delete_search_pattern(pattern_id):
-	user = flask_login.current_user
-	auth_service.drop_pattern_from_user(user, pattern_id)
-	return redirect(url_for(".home_page"))
-
-
-# Route for add search pattern
-@auth_bp.route("/auto-search", methods=["GET", "POST"])
-@flask_login.login_required
-@confirm_required
-def auto_search():
-	form = AutoSearchForm()
-	if form.validate_on_submit():
-		user = flask_login.current_user
-		if len(user.auto_search) >= 3:
-			flash("You can't have more than 3 search pattern")
-		else:
-			pattern = {"title": form.title.data, "city": form.city.data, "salary": form.salary.data}
-			auth_service.add_auto_search_pattern_to_user(user, pattern)
-			return redirect(url_for(".home_page"))
-
-	return render_template("auto_search_vacancy.html", form=form)
-
-
-# Route for add new vacancy
-@auth_bp.route("/new-vacancy", methods=["GET", "POST"])
-@flask_login.login_required
-@confirm_required
-def add_new_vacancy():
-	form = NewVacancyForm()
-	if form.validate_on_submit():
-		# Moderate vacancy
-		user = flask_login.current_user
-		vacancy = auth_service.create_vacancy(
-			title=form.title.data,
-			company=form.company.data,
-			city=form.city.data,
-			description=form.description.data,
-			salary_from=form.salary_from.data,
-			salary_to=form.salary_to.data,
-			user_id=user.id
-		)
-		if vacancy:
-			return redirect(url_for(".home_page"))
-		flash("Something went wrong, try again")
-	return render_template("new_vacancy.html", form=form)
