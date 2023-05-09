@@ -1,4 +1,3 @@
-import random
 
 from src.database import models
 

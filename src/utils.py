@@ -1,6 +1,7 @@
 from functools import wraps
-from flask import redirect, url_for, abort
+from flask import abort
 import flask_login
+from flask_mail import Message
 
 
 def confirm_required(func):
@@ -11,4 +12,13 @@ def confirm_required(func):
             return func(*args, **kwargs)
         else:
             return abort(403, "Please confirm your account on mail")
+
     return wrapper
+
+
+def make_message(message, send_data):
+    msg = Message(
+        message,
+        sender=send_data["sender"],
+        recipients=send_data["recipients"])
+    return msg
