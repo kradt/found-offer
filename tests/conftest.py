@@ -25,7 +25,7 @@ def client(app):
 
 @pytest.fixture()
 def user():
-    return {"email": "a@b.c", "password": "A9090997a"}
+    return dict(email="a@b.c", password="A9090997a")
 
 
 @pytest.fixture()
@@ -46,6 +46,7 @@ def logined_user(saved_user, context):
     # TearDown
     logout_user()
 
+
 @pytest.fixture()
 def confirmed_user(logined_user):
     # SetUp
@@ -63,4 +64,12 @@ def context(app):
 
 @pytest.fixture()
 def auto_search():
-    return {"title": "Backend Developer", "city": "Київ", "salary": 32000}
+    return dict(title="Backend Developer", city="Київ", salary=32000)
+
+
+@pytest.fixture()
+def vacancy():
+    return dict(title="Backend Developer", company="My new Company", city="Київ",
+                description="We find Junior Python BackEnd Developer for remote\nWe offer the best experience and the "
+                            "best team",
+                salary_from=20000, salary_to=35000)
