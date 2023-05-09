@@ -46,9 +46,8 @@ def context(app):
 @pytest.fixture()
 def logined_user(saved_user, context):
     # SetUp
-
     login_user(saved_user)
-    yield user
+    yield saved_user
     # TearDown
     logout_user()
 

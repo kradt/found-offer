@@ -44,10 +44,14 @@ def test_user_already_exist(client, user, saved_user):
 
 
 def test_user_unconfirmed(client, logined_user, context):
-
     with client:
         response = client.get("/auth/new-password", follow_redirects=True)
         assert response.status_code == 403
-    assert response.request.path == "/auth/new-password"
 
+    logined_user.modify(confirmed=True)
+    print(logined_user)
 
+    with client:
+        response = client.get("/auth/new-password")
+        assert response.status_code == 200
+        assert response.request.path == "/auth/new-password"
