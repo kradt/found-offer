@@ -68,6 +68,16 @@ def auto_search():
 
 
 @pytest.fixture()
+def saved_auto_search(confirmed_user, auto_search):
+    search_pattern = models.VacancySearchPattern(**auto_search)
+    confirmed_user.modify(push__auto_search=search_pattern)
+    yield search_pattern
+
+    confirmed_user.modify(pull__auto_search=search_pattern)
+
+
+
+@pytest.fixture()
 def vacancy():
     return dict(title="Backend Developer", company="My new Company", city="Київ",
                 description="We find Junior Python BackEnd Developer for remote\nWe offer the best experience and the "

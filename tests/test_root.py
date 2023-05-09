@@ -40,3 +40,10 @@ def test_user_add_vacancy(client, confirmed_user, vacancy):
         assert vacancy_in_base.salary_from == vacancy["salary_from"]
         assert vacancy_in_base.salary_to == vacancy["salary_to"]
 
+
+def test_drop_auto_search_pattern(client, confirmed_user, saved_auto_search):
+    with client:
+        response = client.get(f"/drop-search-pattern/{saved_auto_search.id}", follow_redirects=True)
+        assert response.status_code == 200
+        assert response.request.path == "/me"
+        assert saved_auto_search not in confirmed_user.auto_search
