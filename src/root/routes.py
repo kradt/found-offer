@@ -61,7 +61,7 @@ def auto_search():
 		if len(user.auto_search) >= 3:
 			flash("You can't have more than 3 search pattern")
 		else:
-			pattern = {"title": form.title.data, "city": form.city.data, "salary": form.salary.data}
+			pattern = {"title": form.title.data, "city": form.city.data, "salary": float(form.salary.data)}
 			root_service.add_auto_search_pattern_to_user(user, pattern)
 			return redirect(url_for(".home_page"))
 

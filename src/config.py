@@ -22,8 +22,8 @@ class Config:
 
     CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-    GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token",
-    GOOGLE_USER_INFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo",
+    GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+    GOOGLE_USER_INFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
     GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 
     CELERY = {

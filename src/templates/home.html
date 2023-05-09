@@ -29,52 +29,53 @@
                         {{ user.email }}
                     </strong><br>
                     <em style="color:lightgoldenrodyellow">
-                        Для доступо до фукціоналу вашого кабінету перевірте свою електронну пошту і підтвердіть свій обліковий запис
+                        Для доступо до фукціоналу вашого кабінету перевірте свою електронну пошту і підтвердіть свій
+                        обліковий запис
                     </em>
                 </p>
             {% endif %}
             {% if user.confirmed %}
-            <p>Що бажаєте зробити?</p>
-            <div class="custom-btn-container">
-                <!-- Кнопка для автоматичного пошуку -->
-                <a href="{{ url_for(".auto_search") }}" id="autoSearchBtn" class="btn btn-primary custom-btn">Автоматичний
-                    пошук</a>
-                <!-- Кнопка для додавання вакансії -->
-                <a href="{{ url_for(".add_new_vacancy") }}" id="addVacancyBtn" class="btn btn-primary custom-btn">Додати
-                    вакансію</a>
-                <!-- Кнопка для пошуку вакансій -->
-                <a href="{{ url_for("search_bp.find_work") }}" id="searchBtn" class="btn btn-primary custom-btn">Знайти
-                    вакансії</a>
-                <!-- Кнопка для зміни паролю -->
-                <a href="{{ url_for("auth_bp.reset_password") }}" class="btn btn-primary custom-btn">
-                    Змінити пароль
-                </a>
-            </div>
-            <!-- Блок з вакансіями -->
-            <div class="vacancy-list">
-                <h2 class="your-vacancies">Ваші вакансії</h2>
-                {{ generate_vacancy_list(vacancies.items, native=True) }}
-                {{ render_pagination(vacancies, 'root_bp.home_page', request ) }}
-            </div>
-            <!-- Блок для інформації про автоматичний пошук -->
-            <div class="auto-search-info">
-                <h2 class="auto-search-heading">Автоматичний пошук</h2>
-            <p class="auto-search-description">Cписок вакансій які ми шукаємо для вас</p>
-                {% for pattern in patterns %}
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">{{ pattern.title }}</a></h5>
+                <p>Що бажаєте зробити?</p>
+                <div class="custom-btn-container">
+                    <!-- Кнопка для автоматичного пошуку -->
+                    <a href="{{ url_for(".auto_search") }}" id="autoSearchBtn" class="btn btn-primary custom-btn">Автоматичний
+                        пошук</a>
+                    <!-- Кнопка для додавання вакансії -->
+                    <a href="{{ url_for(".add_new_vacancy") }}" id="addVacancyBtn" class="btn btn-primary custom-btn">Додати
+                        вакансію</a>
+                    <!-- Кнопка для пошуку вакансій -->
+                    <a href="{{ url_for("search_bp.find_work") }}" id="searchBtn" class="btn btn-primary custom-btn">Знайти
+                        вакансії</a>
+                    <!-- Кнопка для зміни паролю -->
+                    <a href="{{ url_for("auth_bp.reset_password") }}" class="btn btn-primary custom-btn">
+                        Змінити пароль
+                    </a>
+                </div>
+                <!-- Блок з вакансіями -->
+                <div class="vacancy-list">
+                    <h2 class="your-vacancies">Ваші вакансії</h2>
+                    {{ generate_vacancy_list(vacancies.items, native=True) }}
+                    {{ render_pagination(vacancies, 'root_bp.home_page', request ) }}
+                </div>
+                <!-- Блок для інформації про автоматичний пошук -->
+                <div class="auto-search-info">
+                    <h2 class="auto-search-heading">Автоматичний пошук</h2>
+                    <p class="auto-search-description">Cписок вакансій які ми шукаємо для вас</p>
+                    {% for pattern in patterns %}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="#">{{ pattern.title }}</a></h5>
                                 <h6 class="card-title" style="color:black"><b>{{ pattern.salary }}грн</b></h6>
                                 <h6 class="card-subtitle mb-2 text-muted">{{ pattern.city }}</h6>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <a href="{{ url_for("root_bp.delete_search_pattern", pattern_id=pattern.id) }}"
+                                   class="btn btn-danger">Delete</a>
+                            </div>
                         </div>
-                        <div class="card-footer text-muted">
-                            <a href="{{ url_for("root_bp.delete_search_pattern", pattern_id=pattern.id) }}"
-                               class="btn btn-danger">Delete</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

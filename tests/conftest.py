@@ -47,13 +47,12 @@ def logined_user(saved_user, context):
     logout_user()
 
 @pytest.fixture()
-def confirmed_user(logined_user, context):
+def confirmed_user(logined_user):
     # SetUp
     logined_user.modify(confirmed=True)
     yield logined_user
     # TearDown
     logined_user.modify(confirmed=False)
-
 
 
 @pytest.fixture()
@@ -62,3 +61,6 @@ def context(app):
         yield app
 
 
+@pytest.fixture()
+def auto_search():
+    return {"title": "Backend Developer", "city": "Київ", "salary": 32000}

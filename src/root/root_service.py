@@ -31,7 +31,7 @@ def find_vacancy_by_id(id: str):
 
 def add_auto_search_pattern_to_user(user: models.User, pattern: dict):
     auto_search_pattern = models.VacancySearchPattern(**pattern)
-    user.update(push__auto_search=auto_search_pattern)
+    user.modify(push__auto_search=auto_search_pattern)
 
 
 def drop_pattern_from_user(user, pattern_id):
