@@ -1,5 +1,5 @@
 import pytest
-from flask_login import FlaskLoginClient, login_user
+from flask_login import FlaskLoginClient, login_user, logout_user
 from werkzeug.security import generate_password_hash
 from mongoengine import NotUniqueError
 
@@ -14,7 +14,6 @@ def app():
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
     })
-
     yield app
 
 
@@ -39,7 +38,24 @@ def saved_user(user):
 
 
 @pytest.fixture()
-def login_client(app, user):
+def context(app):
+    with app.test_request_context():
+        yield app
+
+
+@pytest.fixture()
+def logined_user(saved_user, context):
+    # SetUp
+
+    login_user(saved_user)
+    yield user
+    # TearDown
+    logout_user()
+
+
+
+@pytest.fixture()
+def login_client(app):
     app.test_client_class = FlaskLoginClient
     yield app.test_client
 
