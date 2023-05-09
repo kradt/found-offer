@@ -27,7 +27,7 @@ def celery_init_app(app: Flask) -> Celery:
         },
         "find_user_vacancies": {
             "task": "src.root.tasks.find_user_vacancies",
-            "schedule": datetime.timedelta(minutes=1)
+            "schedule": datetime.timedelta(hours=24)
         }
     }
     celery_app.set_default()

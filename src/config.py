@@ -24,6 +24,8 @@ class Config:
         "result_backend": "redis://localhost:6379",
     }
     CELERY_TIMEZONE = "UTC"
+    GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token",
+    GOOGLE_USER_INFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo",
     GOOGLE_DISCOVERY_URL = (
         "https://accounts.google.com/.well-known/openid-configuration"
     )

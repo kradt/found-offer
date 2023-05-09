@@ -16,18 +16,12 @@ from ..config import Config
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
 
-def get_google_provider_cfg():
-	return requests.get(Config.GOOGLE_DISCOVERY_URL).json()
-
-
 # Google callback for get token that get account information
 @auth_bp.route("/google-callback")
 def google_callback():
 	# Get authorization code Google sent back to you
 	code = request.args.get("code")
-
-	google_provider_cfg = get_google_provider_cfg()
-	token_endpoint = google_provider_cfg["token_endpoint"]
+	token_endpoint = current_app.config["GOOGLE_TOKEN_ENDPOINT"]
 
 	# Prepare all data that we need to have that get data for access to user information
 	token_url, headers, body = client.prepare_token_request(
@@ -46,7 +40,7 @@ def google_callback():
 
 	# Parse the tokens!
 	client.parse_request_body_response(json.dumps(token_response.json()))
-	userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+	userinfo_endpoint = current_app.config["GOOGLE_USER_INFO_ENDPOINT"]
 
 	# Getting information about user
 	uri, headers, body = client.add_token(userinfo_endpoint)
