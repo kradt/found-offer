@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import redirect, url_for
+from flask import redirect, url_for, abort
 import flask_login
 
 
@@ -10,5 +10,5 @@ def confirm_required(func):
         if user.confirmed:
             return func(*args, **kwargs)
         else:
-            return redirect(url_for("auth_bp.home_page"))
+            return abort(403, "Please confirm your account on mail")
     return wrapper

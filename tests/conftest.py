@@ -1,5 +1,6 @@
 import pytest
 from flask_login import FlaskLoginClient, login_user
+from werkzeug.security import generate_password_hash
 from mongoengine import NotUniqueError
 
 from src import create_app
@@ -30,14 +31,16 @@ def user():
 @pytest.fixture()
 def saved_user(user):
     # SetUp
-    user = models.User(email=user["email"], password=user["password"])
+    user = models.User(email=user["email"], password=generate_password_hash(user["password"]))
     user.save()
-    # TearDown
     yield user
+    # TearDown
     user.delete()
 
 
 @pytest.fixture()
 def login_client(app, user):
     app.test_client_class = FlaskLoginClient
+    yield app.test_client
+
 
