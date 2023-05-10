@@ -33,7 +33,7 @@ def write_offer_to_base(offers_engine: Iterator):
     mongoengine.connect(host=Config.MONGODB_SETTINGS["host"])
 
     total_sum_offers = 0
-    offers_engine.by_default()
+    offers_engine.set_default()
     try:
         for offers in offers_engine:
             len_saved_offers = save_offers_to_base(offers)

@@ -1,5 +1,4 @@
 import datetime
-
 from bson import ObjectId
 from mongoengine import ObjectIdField
 from werkzeug.security import check_password_hash
@@ -22,7 +21,7 @@ class VacancySearchPattern(db.EmbeddedDocument):
 
 
 class User(db.Document, UserMixin):
-	email = db.StringField(unique=True)
+	email = db.StringField(required=True, unique=True)
 	password = db.StringField()
 	confirmed = db.BooleanField(default=False)
 	auto_search = db.ListField(db.EmbeddedDocumentField(VacancySearchPattern))

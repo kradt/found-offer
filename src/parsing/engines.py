@@ -1,11 +1,11 @@
-from requests_html import HTMLSession, Element
-import datetime
 import re
+import datetime
+from requests_html import HTMLSession, Element
 
 from .models import OfferModel
 
 
-# Interface
+# Interface for realize iterator pattern
 class PageQuery:
 	_url = ...
 	_offer_classname = ...
@@ -34,7 +34,7 @@ class PageQuery:
 
 		return offers_in_page
 
-	def by_default(self):
+	def set_default(self):
 		self.__init__()
 
 	def __iter__(self):
