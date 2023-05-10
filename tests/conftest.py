@@ -32,7 +32,11 @@ def context(app):
 
 @pytest.fixture()
 def user():
-    return dict(email="a@b.c", password="A9090997a")
+    email = "a@b.c"
+    password = "A9090997a"
+    user = models.User.objects(email=email).first()
+    user.delete() if user else None
+    return dict(email=email, password=password)
 
 
 @pytest.fixture()

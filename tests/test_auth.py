@@ -30,20 +30,18 @@ def test_register_and_confirm_user(client, user):
             assert response.status_code == 200
             message_to_confirm = outbox[-1]
             assert message_to_confirm
+
             link = re.search('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', message_to_confirm.html).group()
             confirm_code = link.split("/")[-1]
-            response = client.get(f"/auth/confirm/{confirm_code}", follow_redirects=True)
 
+            response = client.get(f"/auth/confirm/{confirm_code}", follow_redirects=True)
             assert response.status_code == 200
             assert response.request.path == "/me"
 
-
             user = models.User.objects(email=login).first()
-
             assert user is not None
             assert user.email == login
             assert user.confirmed
-    user.delete()
 
 
 def test_user_already_exist(client, user, saved_user):
