@@ -51,6 +51,7 @@ class PageQuery:
 		return self._make_list_of_offers(raw_offers)
 
 
+# Class realize parser WorkUA
 class WorkUA(PageQuery):
 	_url = "https://www.work.ua/{}"
 	_offers_pattern = "jobs/?ss=1"
@@ -153,6 +154,7 @@ class WorkUA(PageQuery):
 		return int(count_of_pages)
 
 
+# Class realize parser JobsUA
 class JobsUA(PageQuery):
 	_url = "https://jobs.ua/{}"
 	_per_page = 20

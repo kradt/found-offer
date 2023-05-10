@@ -36,9 +36,8 @@ def home_page():
 @flask_login.login_required
 @confirm_required
 def delete_vacancy(vacancy_id: str):
-	vacancy = root_service.find_vacancy_by_id(id=vacancy_id)
-	if vacancy:
-		vacancy.delete()
+	vacancy = root_service.find_vacancy_by_id(vacancy_id=vacancy_id)
+	vacancy.delete()
 	return redirect(url_for(".home_page"))
 
 

@@ -57,12 +57,12 @@ class RecoverPasswordForm(FlaskForm):
 
 # Form for write new user password
 class NewPasswordForm(FlaskForm):
-	password = StringField(
+	password = PasswordField(
 		"Password",
 		validators=[Length(min=8, max=100), DataRequired()],
 		render_kw={"placeholder": "Enter Password"}
 	)
-	confirm_password = StringField(
+	confirm_password = PasswordField(
 		"Repeat Password",
 		validators=[Length(min=8, max=100), EqualTo('password', "Passwords must be equal"), DataRequired()],
 		render_kw={"placeholder": "Enter Password Again"}

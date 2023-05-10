@@ -1,9 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField, IntegerField
+from wtforms import StringField, SubmitField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired, Length, ValidationError
 from wtforms.widgets import NumberInput
 
 
+# Form for add new vacancy
 class NewVacancyForm(FlaskForm):
     title = StringField(
         "Title",
@@ -42,6 +43,7 @@ class NewVacancyForm(FlaskForm):
             raise ValidationError("Salary to must be higher than salary from")
 
 
+# Form for add new auto search pattern
 class AutoSearchForm(FlaskForm):
     title = StringField(
         "Title",
