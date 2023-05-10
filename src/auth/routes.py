@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app, abort
 
 from src.auth import forms
-from src import client, redis_client
+from src import oauth_client, redis_client
 from src.utils import confirm_required
 from src.auth import auth_service
 from .tasks import send_message_to_email_for_confirm_him, send_code_to_email_for_reset_password
@@ -23,7 +23,7 @@ def google_callback():
 	token_endpoint = current_app.config["GOOGLE_TOKEN_ENDPOINT"]
 
 	# Prepare all data that we need to have that get data for access to user information
-	token_url, headers, body = client.prepare_token_request(
+	token_url, headers, body = oauth_client.prepare_token_request(
 		token_endpoint,
 		authorization_response=request.url,
 		redirect_url=request.base_url,
@@ -38,11 +38,11 @@ def google_callback():
 	)
 
 	# Parse the tokens!
-	client.parse_request_body_response(json.dumps(token_response.json()))
+	oauth_client.parse_request_body_response(json.dumps(token_response.json()))
 	userinfo_endpoint = current_app.config["GOOGLE_USER_INFO_ENDPOINT"]
 
 	# Getting information about user
-	uri, headers, body = client.add_token(userinfo_endpoint)
+	uri, headers, body = oauth_client.add_token(userinfo_endpoint)
 	userinfo_response = requests.get(uri, headers=headers, data=body).json()
 
 	if userinfo_response.get("email_verified"):
@@ -65,7 +65,7 @@ def google_login():
 	authorization_endpoint = current_app.config["GOOGLE_AUTHORIZATION_ENDPOINT"]
 
 	# Get URL for Google authorization page
-	request_uri = client.prepare_request_uri(
+	request_uri = oauth_client.prepare_request_uri(
 		authorization_endpoint,
 		redirect_uri=request.root_url[:-1] + url_for("auth_bp.google_callback"),
 		scope=["openid", "email", "profile"],

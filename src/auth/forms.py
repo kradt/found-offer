@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from wtforms.widgets import NumberInput
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 
+# Form for register user
 class RegisterForm(FlaskForm):
 	email = StringField(
 		"Email",
@@ -23,6 +23,7 @@ class RegisterForm(FlaskForm):
 	submit = SubmitField("Register")
 
 
+# Form for login user
 class LoginForm(FlaskForm):
 	email = StringField(
 		"Email",
@@ -38,21 +39,8 @@ class LoginForm(FlaskForm):
 	submit = SubmitField("Log In")
 
 
+# Form for confirm that user can recover password
 class RecoverPasswordForm(FlaskForm):
-	email = StringField(
-		"Email",
-		validators=[Length(min=5, max=100), Email(), DataRequired()],
-		render_kw={"placeholder": "Enter email"}
-	)
-	code = StringField(
-		"Code",
-		render_kw={"placeholder": "Enter code"}
-	)
-	submit = SubmitField("Get confirm code")
-	send_code = SubmitField("Send Code")
-
-
-class RecoverPasswordCode(FlaskForm):
 	email = StringField(
 		"Email",
 		validators=[Length(min=5, max=100), Email(), DataRequired()],
@@ -67,6 +55,7 @@ class RecoverPasswordCode(FlaskForm):
 	send_code = StringField("Send Code")
 
 
+# Form for write new user password
 class NewPasswordForm(FlaskForm):
 	password = StringField(
 		"Password",
