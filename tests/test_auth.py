@@ -31,7 +31,7 @@ def test_register_and_confirm_user(client, user):
             message_to_confirm = outbox[-1]
             assert message_to_confirm
 
-            link = re.search('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', message_to_confirm.html).group()
+            link = re.search('href=[\'"]?([^\'" >]+)', message_to_confirm.html).group()
             confirm_code = link.split("/")[-1]
 
             response = client.get(f"/auth/confirm/{confirm_code}", follow_redirects=True)
