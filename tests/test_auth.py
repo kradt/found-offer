@@ -1,7 +1,7 @@
+import re
+
 from src.database import models
 from src import mail
-from loguru import logger
-from werkzeug.security import check_password_hash
 
 
 def test_login_user(client, saved_user, user):
@@ -12,24 +12,37 @@ def test_login_user(client, saved_user, user):
             "/auth/login",
             data={"email": login, "password": password},
             follow_redirects=True)
+
         assert response.request.path == "/me"
-    assert response.status_code == 200
+        assert response.status_code == 200
 
 
-def test_register_user(client, user):
+def test_register_and_confirm_user(client, user):
     login = user["email"]
     password = user["password"]
 
     with client:
-        response = client.post("/auth/register",
-                               data={"email": login, "password": password, "confirm_password": password},
-                               follow_redirects=True)
-        user = models.User.objects(email=login).first()
-        assert response.request.path == "/me"
+        with mail.record_messages() as outbox:
+            response = client.post("/auth/register",
+                                   data={"email": login, "password": password, "confirm_password": password},
+                                   follow_redirects=True)
+            assert response.request.path == "/me"
+            assert response.status_code == 200
+            message_to_confirm = outbox[-1]
+            assert message_to_confirm
+            link = re.search('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', message_to_confirm.html).group()
+            confirm_code = link.split("/")[-1]
+            response = client.get(f"/auth/confirm/{confirm_code}", follow_redirects=True)
 
-    assert user is not None
-    assert user.email == login
-    assert response.status_code == 200
+            assert response.status_code == 200
+            assert response.request.path == "/me"
+
+
+            user = models.User.objects(email=login).first()
+
+            assert user is not None
+            assert user.email == login
+            assert user.confirmed
     user.delete()
 
 

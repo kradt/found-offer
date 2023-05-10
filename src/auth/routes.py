@@ -79,7 +79,7 @@ def confirm_email(token):
 	email = auth_service.confirm_token(token)
 	user = auth_service.find_user_by_email(email=email)
 	if user:
-		user.update(confirmed=True)
+		user.modify(confirmed=True)
 	return redirect(url_for("root_bp.home_page"))
 
 
