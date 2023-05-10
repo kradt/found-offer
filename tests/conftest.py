@@ -1,7 +1,6 @@
 import pytest
-from flask_login import FlaskLoginClient, login_user, logout_user
+from flask_login import login_user, logout_user
 from werkzeug.security import generate_password_hash
-from mongoengine import NotUniqueError
 
 from src import create_app
 from src.database import models
@@ -13,7 +12,9 @@ def app():
     app.config.update({
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
-        "CELERY_ALWAYS_EAGER": True
+    })
+    app.config["CELERY"].update({
+        'task_always_eager': True
     })
     yield app
 
@@ -21,6 +22,12 @@ def app():
 @pytest.fixture()
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture()
+def context(app):
+    with app.test_request_context():
+        yield app
 
 
 @pytest.fixture()
@@ -57,9 +64,14 @@ def confirmed_user(logined_user):
 
 
 @pytest.fixture()
-def context(app):
-    with app.test_request_context():
-        yield app
+def confirmed_user_without_login(saved_user):
+    # SetUp
+    saved_user.modify(confirmed=True)
+    yield saved_user
+    # TearDown
+    saved_user.modify(confirmed=False)
+
+
 
 
 @pytest.fixture()

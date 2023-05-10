@@ -13,9 +13,11 @@ root_bp = Blueprint("root_bp", template_folder="templates", import_name=__name__
 def index():
 	return redirect(url_for("search_bp.find_work"))
 
+
 @root_bp.route("/about")
 def about():
 	return render_template("base.html")
+
 
 # User Home page after login
 @root_bp.route("/me")

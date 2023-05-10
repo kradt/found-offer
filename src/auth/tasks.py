@@ -12,7 +12,7 @@ def send_message_to_email_for_confirm_him(send_data: dict, confirm_link):
 	mail.send(msg)
 
 
-@shared_task
+@shared_task()
 def send_code_to_email_for_reset_password(send_data: dict, code):
 	msg = make_message("RECOVER PASSWORD", send_data)
 	msg.body = f"Your code is {code}"

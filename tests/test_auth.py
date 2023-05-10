@@ -1,5 +1,6 @@
 from src.database import models
 from src import mail
+from loguru import logger
 from werkzeug.security import check_password_hash
 
 
@@ -72,7 +73,24 @@ def test_new_password(client, confirmed_user):
         assert confirmed_user.check_password(new_password)
 
 
-def test_reset_password(client, saved_user):
+def test_reset_password(client, confirmed_user_without_login):
     with client:
-        response = client.post("auth/reset-password", data={"email": saved_user.email})
-        assert response.status_code == 200
+        with mail.record_messages() as outbox:
+            response = client.post(
+                "auth/reset-password",
+                data={"email": confirmed_user_without_login.email}
+            )
+            assert response.status_code == 200
+            message = outbox[-1].body
+            assert message
+            code = message.split()[-1]
+            assert code.isdigit()
+            assert len(code) == 6
+
+            response = client.post(
+                "auth/reset-password",
+                data={"email": confirmed_user_without_login.email, "code": code},
+                follow_redirects=True
+            )
+            assert response.status_code == 200
+            assert response.request.path == "/auth/new-password"

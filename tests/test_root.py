@@ -1,5 +1,6 @@
 from src.database import models
 
+
 def test_user_auto_search(client, confirmed_user, auto_search):
     with client:
         response = client.post(
