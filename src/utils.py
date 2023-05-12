@@ -1,7 +1,8 @@
+from flask_mail import Message
 from functools import wraps
 from flask import abort
 import flask_login
-from flask_mail import Message
+
 
 
 def confirm_required(func):

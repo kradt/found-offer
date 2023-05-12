@@ -9,11 +9,13 @@ from src.utils import confirm_required
 root_bp = Blueprint("root_bp", template_folder="templates", import_name=__name__)
 
 
+# Index redirect to search route
 @root_bp.route("/")
 def index():
 	return redirect(url_for("search_bp.find_work"))
 
 
+# About route
 @root_bp.route("/about")
 def about():
 	return render_template("base.html")
@@ -28,7 +30,7 @@ def home_page():
 	current_page = int(request.args.get('page', 1))
 	items_per_page = 5
 	vacancies = root_service.get_user_vacancies(user.id).paginate(page=current_page, per_page=items_per_page)
-	return render_template("home.html", vacancies=vacancies, user=flask_login.current_user, patterns=patterns)
+	return render_template("home.html", vacancies=vacancies, user=user, patterns=patterns)
 
 
 # Delete vacancy from user's vacancy list
@@ -76,7 +78,7 @@ def auto_search():
 def add_new_vacancy():
 	form = forms.NewVacancyForm()
 	if form.validate_on_submit():
-		# Moderate vacancy
+		# Here we can add Moderate vacancy
 		user = flask_login.current_user
 		vacancy = root_service.create_vacancy(
 			title=form.title.data,

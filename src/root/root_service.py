@@ -1,5 +1,7 @@
 import datetime
 from bson import ObjectId
+from flask_mongoengine import BaseQuerySet
+
 from src.database import models
 
 
@@ -25,7 +27,7 @@ def create_vacancy(
 
 
 # Function for get all user vacancies
-def get_user_vacancies(user_id: str) -> list[models.Vacancy]:
+def get_user_vacancies(user_id: str) -> BaseQuerySet:
     return models.Vacancy.objects(user_id=user_id)
 
 

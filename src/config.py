@@ -1,5 +1,5 @@
-import secrets
 import os
+import secrets
 from dotenv import load_dotenv, find_dotenv
 
 
