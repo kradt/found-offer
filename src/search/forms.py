@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 
 
+# Form for filters in search route
 class FilterForm(FlaskForm):
     title = StringField("Title", render_kw={"placeholder": "Enter Job Title"})
     city = StringField("City", render_kw={"placeholder": "Enter Job location"})
