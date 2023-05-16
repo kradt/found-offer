@@ -106,7 +106,7 @@ def register():
 		if not user:
 			flash("User with this email already exist")
 		else:
-			flask_login.login_user(user)
+			flask_login.login_user(user, remember=form.remember_me.data)
 			token = auth_service.generate_confirmation_token(user.email)
 			confirm_link = url_for(".confirm_email", token=token, _external=True)
 			send_data = auth_service.prepare_send_data([user.email])

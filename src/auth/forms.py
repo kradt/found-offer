@@ -20,6 +20,7 @@ class RegisterForm(FlaskForm):
 		validators=[Length(min=8, max=100), DataRequired(), EqualTo('password', "Passwords must be equal")],
 		render_kw={"placeholder": "Confirm password"}
 	)
+	remember_me = BooleanField("Remember me?")
 	submit = SubmitField("Register")
 
 

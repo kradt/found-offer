@@ -4,52 +4,37 @@ body {
     margin: 0;
     color:white;
 }
-
 .search {
     color: white;
 }
-
 
 .custom-form-control{
     background-color: #fff;
     color: black;
     padding: 25px;
 }
-
+.custom-auth-form{
+    color:black;
+}
 .filter_form{
     background-color: #333;
     color:white;
 }
-
 h1 {
     font-size: 24px;
     text-align: center;
     margin-bottom: 20px;
 }
-
 .form-group {
     margin-bottom: 20px;
 }
-
 label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
 }
-
 textarea {
     height: 100px;
-}
-
-input[type="submit"] {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 button {
@@ -66,20 +51,17 @@ button {
 input[type="submit"]:hover {
     background-color: #004dff;
 }
-
 .content {
     text-align: center;
     color: #fff;
     margin-top: 50px;
 }
-
 .custom-btn-container {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 30px;
 }
-
 .custom-btn {
     width: 200px;
     padding: 10px;
@@ -91,20 +73,16 @@ input[type="submit"]:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     text-decoration: none;
 }
-
 .vacancy-list {
     margin-top: 50px;
 }
-
 .card {
     text-align: left;
 }
-
 .card-footer {
     display: flex;
     justify-content: space-between;
 }
-
 /* Медіа-запити для респонсивного дизайну */
 @media screen and (max-width: 768px ) {
     .container {

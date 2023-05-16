@@ -1,12 +1,17 @@
 {% macro generate_auth_form(type='login', form="") %}
 
 <div class="row justify-content-center">
-	<div class="col-md-6">
+	<div class="col-md-6 custom-auth-form">
 		<div class="card">
 			<div class="card-header">
-				<h4>Login</h4>
+				{% if type=="register" %}
+				<h4>Log In</h4>
+				{% else %}
+				<h4>Sign Up</h4>
+
+				{% endif %}
 			</div>
-			<div class="card-body">
+			<div class="card-body ">
 				{% if type=='login' %}
 					<form action="{{ url_for('.login') }}" method="POST">
 				{% else %}
@@ -22,29 +27,40 @@
 						{{ form.password(class="form-control") }}
 					</div>
 					{% if type=="register" %}
-						<div class="mb-3">
-		                	<label for="confirm-password" class="form-label">Confirm Password</label>
-		                	{{ form.confirm_password(class="form-control") }}
-		              	</div>
-		              	<a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary"><i class="fab fa-google me-2"></i>Register with Google</a>
-
-					{% else %}
-
-						<div class="form-group form-check">
-							{{ form.remember_me(class="form-check-input")}}
-							<label class="form-check-label" for="remember">Remember me</label>
-						</div>
-                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary">
-                            <i class="fab fa-google me-2"></i>
-                            Login with Google
-                        </a>
+					<div class="mb-3">
+			                <label for="confirm-password" class="form-label">
+			               		Confirm Password
+			           		</label>
+			                {{ form.confirm_password(class="form-control") }}
+			         </div>
 					{% endif %}
+					<div class="form-group form-check">
+						{{ form.remember_me(class="form-check-input remember", id="remember")}}
+						<label class="form-check-label" for="remember">
+							Remember me
+						</label>
+					</div>
 
+					<div class="form-group">
+						{{ form.submit(class="btn btn-primary") }}
+							
+						{% if type=="register" %}
+						
+			              	<a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary"><i class="fab fa-google me-2"></i>Register with Google</a>
+
+						{% else %}
+	                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary">
+	                            <i class="fab fa-google me-2"></i>
+	                            Login with Google
+	                        </a>
+						{% endif %}
+						<a href="{{ url_for('.reset_password') }}">
+	                            Forgot your password?
+	                    </a>
+					</div>
+					
 					{% include '_errors.html' %}
-					{{ form.submit(class="btn btn-primary") }}
-                    <a href="{{ url_for(".reset_password") }}">
-                            Forgot your password?
-                    </a>
+					
 					{{ form.csrf_token }}
 				</form>
 			</div>
