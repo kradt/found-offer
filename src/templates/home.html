@@ -3,14 +3,6 @@
 {% from '_paginate.html' import render_pagination %}
 {% from '_vacancy_list.html' import generate_vacancy_list %}
 
-{% block auth %}
-    <li class="nav-item">
-        <a class="nav-link btn btn-danger" style="color:white" href="{{ url_for('auth_bp.logout') }}">
-            Log Out
-        </a>
-    </li>
-{% endblock %}
-
 {% block content %}
     <div class="container">
         <div class="content">
