@@ -18,7 +18,7 @@ def index():
 # About route
 @root_bp.route("/about")
 def about():
-	return render_template("base.html")
+	return render_template("about.html")
 
 
 # User Home page after login

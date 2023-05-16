@@ -13,46 +13,10 @@
 <body>
 
 <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('search_bp.find_work') }}">Job Search</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('root_bp.home_page') }}">Home <span
-                            class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('root_bp.about') }}">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Contact</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                {% block auth %}
-
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary" style="color:white"
-                           href="{{ url_for('auth_bp.register') }}">
-                            Sign Up
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth_bp.login') }}">
-                            Log In
-                        </a>
-                    </li>
-
-                {% endblock %}
-            </ul>
-
-        </div>
-    </nav>
+    {% from '_header.html' import generate_header %}
+    {% block header %}
+        {{ generate_header() }}
+    {% endblock %}
 </header>
 
 <div class="container mt-4">

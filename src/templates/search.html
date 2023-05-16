@@ -2,6 +2,11 @@
 
 {% from '_paginate.html' import render_pagination %}
 {% from '_vacancy_list.html' import generate_vacancy_list %}
+{% from '_header.html' import generate_header %}
+
+{% block header %}
+    {{ generate_header(show=False) }}
+{% endblock %}
 
 {% block content %}
     <div class="container-fluid mt-3 search">

@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 
+{% from '_header.html' import generate_header %}
+
+{% block header %}
+
+    {{ generate_header(show=False) }}
+
+{% endblock %}
+
 {% block head %}
     {{ super() }}
     <style>
