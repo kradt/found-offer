@@ -1,36 +1,36 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container add-vacancy">
+    <div class="container custom-form-control">
         <h1>Додати нову вакансію</h1>
-        <form action="#" method="post">
+        <form action="{{ url_for('root_bp.add_new_vacancy') }}" method="post">
             {{ form.csrf_token }}
             <div class="form-group">
                 <label for="jobTitle">Назва вакансії:</label>
-                {{ form.title }}
+                {{ form.title(class="form-control") }}
             </div>
             <div class="form-group">
                 <label for="company">Компанія:</label>
-                {{ form.company }}
+                {{ form.company(class="form-control") }}
             </div>
             <div class="form-group">
                 <label for="jobDescription">Опис вакансії:</label>
-                {{ form.description }}
+                {{ form.description(class="form-control") }}
             </div>
             <div class="form-group">
                 <label for="minSalary">Мінімальна зарплата:</label>
-                {{ form.salary_from(id="minSalary") }}
+                {{ form.salary_from(id="minSalary",class="form-control") }}
             </div>
             <div class="form-group">
                 <label for="maxSalary">Максимальна зарплата:</label>
-                {{ form.salary_to(id="maxSalary") }}
+                {{ form.salary_to(id="maxSalary",class="form-control") }}
             </div>
             <div class="form-group">
                 <label for="city">Місто:</label>
-                {{ form.city }}
+                {{ form.city(class="form-control") }}
             </div>
             {% include '_errors.html' %}
-            {{ form.submit }}
+            {{ form.submit(class="btn btn-primary") }}
         </form>
     </div>
 {% endblock %}

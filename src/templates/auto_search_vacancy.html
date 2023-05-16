@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
+    <div class="container custom-form-control">
         <h1>Опишіть вакансію яку б ви хотіли знайти</h1>
-        <form action="{{ url_for(".auto_search") }}" method="post">
+        <form action="{{ url_for('.auto_search') }}" method="post">
             {{ form.csrf_token }}
             <div class="form-group">
                 <label for="jobTitle">Назва вакансії:</label>

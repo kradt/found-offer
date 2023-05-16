@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-md-3" id="sidebar">
                 <h2>Filter</h2>
-                <form action="{{ url_for("search_bp.find_work") }}" id="search-form" method="GET">
+                <form action="{{ url_for('search_bp.find_work') }}" id="search-form" method="GET">
                     <div class="form-group">
                         <label for="job_title">Назва Роботи:</label>
                         {{ form.title(class="form-control", id="job_title") }}
@@ -37,7 +37,11 @@
                 <div class="about">
                     <div class="row" style="justify-content: space-around">
                         <div class="col-md-8">
-                            <h2>Search Results: {{ request.args.get("title") }}</h2>
+                            {% if request.args.get("title") %}
+                                <h2>Search Results: {{ request.args.get("title") }}</h2>
+                            {% else %}
+                                <h2>All Vacancies</h2>
+                            {% endif %}
                         </div>
                         <div class="col-md-4">
                             {# :param sort_by - 1 is Date, 2 is Salary #}

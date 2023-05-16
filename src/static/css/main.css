@@ -2,20 +2,20 @@ body {
     background-color: #333;
     padding: 0;
     margin: 0;
+    color:white;
 }
 
 .search {
     color: white;
 }
 
-.add-vacancy {
-    max-width: 600px;
-    margin: 20px auto;
+
+.custom-form-control{
     background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: black;
+    padding: 25px;
 }
+
 
 h1 {
     font-size: 24px;

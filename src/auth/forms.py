@@ -48,11 +48,10 @@ class RecoverPasswordForm(FlaskForm):
 	)
 	code = StringField(
 		"Code",
-		validators=[Length(min=6, max=6)],
 		render_kw={"placeholder": "Enter code"}
 	)
 	submit = SubmitField("Reset Password")
-	send_code = StringField("Send Code")
+	send_code = SubmitField("Send Code")
 
 
 # Form for write new user password
