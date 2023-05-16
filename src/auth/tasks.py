@@ -16,6 +16,6 @@ def send_message_to_email_for_confirm_him(send_data: dict, confirm_link):
 # Task for send code to email for reset password
 @shared_task()
 def send_code_to_email_for_reset_password(send_data: dict, code):
-	msg = make_message("RECOVER PASSWORD", send_data)
-	msg.body = f"Your code is {code}"
+	msg = make_message("!RECOVER PASSWORD!", send_data)
+	msg.html = render_template("confirm_code.html", code=code)
 	mail.send(msg)
