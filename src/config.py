@@ -24,9 +24,10 @@ class Config:
     GOOGLE_USER_INFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
     GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 
+
     CELERY = {
-        "broker_url": "redis://localhost:6379",
-        "result_backend": "redis://localhost:6379",
+        "broker_url": os.getenv("REDIS_URL"),
+        "result_backend": os.getenv("REDIS_URL"),
         "timezone": "UTC"
     }
 
