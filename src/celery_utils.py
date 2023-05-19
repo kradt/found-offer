@@ -4,12 +4,15 @@ from celery import Celery, Task
 
 
 def celery_init_app(app: Flask) -> Celery:
+    """
+    Function for init celery with flask context
+    """
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:
             with app.app_context():
                 return self.run(*args, **kwargs)
 
-    celery_app = Celery(app.name, task_cls=FlaskTask)
+    celery_app = Celery(app.name, task_cls=FlaskTask, include=["src.root.tasks"])
     celery_app.config_from_object(app.config["CELERY"])
     celery_app.conf.beat_schedule = {
         "parse_to_base_work_ua": {

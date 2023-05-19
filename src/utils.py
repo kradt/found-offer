@@ -6,6 +6,9 @@ import flask_login
 
 
 def confirm_required(func):
+    """
+    Decorator checks if user is confirmed 
+    """
     @wraps(func)
     def wrapper(*args, **kwargs):
         user = flask_login.current_user
@@ -17,7 +20,11 @@ def confirm_required(func):
     return wrapper
 
 
+
 def make_message(message, send_data):
+    """
+    Function for make message template for flask mail send
+    """
     msg = Message(
         message,
         sender=send_data["sender"],
