@@ -8,6 +8,9 @@ search_bp = Blueprint("search_bp", template_folder="templates", import_name=__na
 
 @search_bp.route("/", methods=["GET"])
 def find_work():
+    """
+    Route for search vacancies
+    """
     form = FilterForm(request.args, meta={'csrf': False})
 
     filter_dict = {}

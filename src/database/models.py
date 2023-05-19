@@ -8,6 +8,9 @@ from src import db, login_manager
 
 
 class VacancySearchPattern(db.EmbeddedDocument):
+	"""
+		Model for store search pattern in User Model
+	"""
 	id = ObjectIdField(
 		required=True,
 		default=ObjectId,
@@ -21,6 +24,9 @@ class VacancySearchPattern(db.EmbeddedDocument):
 
 
 class User(db.Document, UserMixin):
+	"""
+		User Model for manage users auth
+	"""
 	email = db.StringField(required=True, unique=True)
 	password = db.StringField()
 	confirmed = db.BooleanField(default=False)
@@ -34,6 +40,9 @@ class User(db.Document, UserMixin):
 
 
 class Vacancy(db.Document):
+	"""
+		Vacancy model for manage vacancies
+	"""
 	title = db.StringField(required=True)
 	city = db.StringField()
 	salary_from = db.FloatField()
@@ -50,4 +59,7 @@ class Vacancy(db.Document):
 
 @login_manager.user_loader
 def load_user(user_id):
+	"""
+	Flask login user loader for get access to restrict content
+	"""
 	return User.objects(id=user_id).get()

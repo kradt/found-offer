@@ -76,8 +76,6 @@ def confirmed_user_without_login(saved_user):
     saved_user.modify(confirmed=False)
 
 
-
-
 @pytest.fixture()
 def auto_search():
     return dict(title="Backend Developer", city="Київ", salary=32000)

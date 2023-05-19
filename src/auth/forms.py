@@ -3,8 +3,11 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 
-# Form for register user
+
 class RegisterForm(FlaskForm):
+	"""
+		Form for register user
+	"""
 	email = StringField(
 		"Email",
 		validators=[Length(min=5, max=100), Email(), DataRequired()],
@@ -24,8 +27,10 @@ class RegisterForm(FlaskForm):
 	submit = SubmitField("Register")
 
 
-# Form for login user
 class LoginForm(FlaskForm):
+	"""
+		Form for login user
+	"""
 	email = StringField(
 		"Email",
 		validators=[Length(min=5, max=100), Email(), DataRequired()],
@@ -40,8 +45,10 @@ class LoginForm(FlaskForm):
 	submit = SubmitField("Log In")
 
 
-# Form for confirm that user can recover password
 class RecoverPasswordForm(FlaskForm):
+	"""
+		Form for confirm that user can recover password
+	"""
 	email = StringField(
 		"Email",
 		validators=[Length(min=5, max=100), Email(), DataRequired()],
@@ -55,8 +62,10 @@ class RecoverPasswordForm(FlaskForm):
 	send_code = SubmitField("Send Code")
 
 
-# Form for write new user password
 class NewPasswordForm(FlaskForm):
+	"""
+		Form for write new user password
+	"""
 	password = PasswordField(
 		"Password",
 		validators=[Length(min=8, max=100), DataRequired()],

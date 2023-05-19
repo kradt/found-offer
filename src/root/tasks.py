@@ -29,8 +29,10 @@ def save_offers_to_base(offers: list) -> int:
 
 
 def write_offer_to_base(offers_engine: Iterator):
+    """
+    Function for manage inserting vacancies to base 
+    """
     logger.debug(f"{os.getpid()} was start")
-    mongoengine.connect(host=Config.MONGODB_SETTINGS["host"])
 
     total_sum_offers = 0
     offers_engine.set_default()
@@ -46,6 +48,9 @@ def write_offer_to_base(offers_engine: Iterator):
 
 @shared_task
 def parse_work_ua_to_base():
+    """
+    Task for start parsing WorkUA site
+    """
     parser = engines.WorkUA()
     write_offer_to_base(parser)
     logger.debug("Work UA processes were start!")
@@ -53,6 +58,9 @@ def parse_work_ua_to_base():
 
 @shared_task
 def parse_jobs_ua_to_base():
+    """
+    Task for start parsing JobsUA site
+    """
     parser = engines.JobsUA()
     write_offer_to_base(parser)
     logger.debug("Jobs UA processes were start!")
@@ -60,6 +68,9 @@ def parse_jobs_ua_to_base():
 
 @shared_task
 def remove_old_vacancies():
+    """
+    Task for remove vacancies which live more than one month
+    """
     month_ago = datetime.datetime.now() - datetime.timedelta(days=30)
     old_vacancies = models.Vacancy.objects(time_publish__lte=month_ago)
     count_of_del_vacancies = old_vacancies.count()
@@ -69,6 +80,9 @@ def remove_old_vacancies():
 
 @shared_task
 def find_user_vacancies():
+    """
+    Task for searching vacancies using user search pattern
+    """
     for user in models.User.objects():
         search_patterns = user.auto_search
         for search_pattern in search_patterns:

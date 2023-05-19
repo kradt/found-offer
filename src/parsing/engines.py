@@ -5,8 +5,11 @@ from requests_html import HTMLSession, Element
 from .models import OfferModel
 
 
-# Interface for realize iterator pattern
+
 class PageQuery:
+	"""
+		Interface for realize iterator pattern
+	"""
 	_url = ...
 	_offer_classname = ...
 	_offers_pattern = ...
@@ -51,8 +54,11 @@ class PageQuery:
 		return self._make_list_of_offers(raw_offers)
 
 
-# Class realize parser WorkUA
+
 class WorkUA(PageQuery):
+	"""
+		Class realize parser WorkUA
+	"""
 	_url = "https://www.work.ua/{}"
 	_offers_pattern = "jobs/?ss=1"
 	_per_page = 14
@@ -154,8 +160,11 @@ class WorkUA(PageQuery):
 		return int(count_of_pages)
 
 
-# Class realize parser JobsUA
+
 class JobsUA(PageQuery):
+	"""
+		Class realize parser JobsUA
+	"""
 	_url = "https://jobs.ua/{}"
 	_per_page = 20
 	_next_page_pattern = "/page-{}"

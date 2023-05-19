@@ -4,8 +4,10 @@ from wtforms.validators import DataRequired, Length, ValidationError
 from wtforms.widgets import NumberInput
 
 
-# Form for add new vacancy
 class NewVacancyForm(FlaskForm):
+    """
+        Form for add new vacancy
+    """
     title = StringField(
         "Title",
         validators=[DataRequired(), Length(min=5, max=100)],
@@ -43,8 +45,10 @@ class NewVacancyForm(FlaskForm):
             raise ValidationError("Salary to must be higher than salary from")
 
 
-# Form for add new auto search pattern
 class AutoSearchForm(FlaskForm):
+    """
+        Form for add new auto search pattern
+    """
     title = StringField(
         "Title",
         validators=[DataRequired(), Length(min=5, max=100)],
