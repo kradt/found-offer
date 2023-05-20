@@ -15,7 +15,7 @@ def confirm_required(func):
         if user.confirmed:
             return func(*args, **kwargs)
         else:
-            return abort(403, "Please confirm your account on mail")
+            abort(403, "Please confirm your account on mail")
 
     return wrapper
 

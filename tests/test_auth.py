@@ -60,7 +60,7 @@ def test_user_already_exist(client, user, saved_user):
 
 def test_user_unconfirmed(client, logined_user):
     with client:
-        response = client.get("/auth/new-password")
+        response = client.get("/auth/new-password", follow_redirects=True)
         assert response.status_code == 403
         logined_user.modify(confirmed=True)
         response = client.get("/auth/new-password")
@@ -95,9 +95,9 @@ def test_reset_password(client, confirmed_user_without_login):
                 data={"email": confirmed_user_without_login.email}
             )
             assert response.status_code == 200
-            message = outbox[-1].body
+            message = outbox[-1].html
             assert message
-            code = message.split()[-1]
+            code = message.split("<b>")[1].split("</b>")[0]
             assert code.isdigit()
             assert len(code) == 6
 
