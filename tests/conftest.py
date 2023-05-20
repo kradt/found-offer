@@ -1,6 +1,10 @@
 import pytest
+import os
+import sys
 from flask_login import login_user, logout_user
 from werkzeug.security import generate_password_hash
+
+sys.path.append(os.getcwd())
 
 from src import create_app
 from src.database import models
