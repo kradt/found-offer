@@ -5,7 +5,6 @@ from requests_html import HTMLSession, Element
 from .models import OfferModel
 
 
-
 class PageQuery:
 	"""
 		Interface for realize iterator pattern
@@ -52,7 +51,6 @@ class PageQuery:
 		page_html = self.session.get(necessary_url).html
 		raw_offers = page_html.find(self._offer_classname)
 		return self._make_list_of_offers(raw_offers)
-
 
 
 class WorkUA(PageQuery):
@@ -158,7 +156,6 @@ class WorkUA(PageQuery):
 		if pagination_block:
 			count_of_pages = pagination_block.find("a")[-2].text
 		return int(count_of_pages)
-
 
 
 class JobsUA(PageQuery):

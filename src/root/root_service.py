@@ -36,7 +36,6 @@ def get_user_vacancies(user_id: str) -> BaseQuerySet:
     return models.Vacancy.objects(user_id=user_id)
 
 
-
 def find_vacancy_by_id(vacancy_id: str) -> models.Vacancy:
     """
     Function for get vacancy by vacancy's id

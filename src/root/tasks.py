@@ -1,6 +1,5 @@
 import datetime
 import os
-import mongoengine
 from typing import Iterator
 from loguru import logger
 from celery import shared_task

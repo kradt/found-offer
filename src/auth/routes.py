@@ -15,7 +15,6 @@ from src import oauth_client, redis_client
 auth_bp = Blueprint("auth_bp", template_folder="templates", static_folder="static", import_name=__name__)
 
 
-
 @auth_bp.route("/google-callback")
 def google_callback():
 	"""
@@ -60,7 +59,6 @@ def google_callback():
 	return redirect(url_for("root_bp.home_page"))
 
 
-
 @auth_bp.route("/google-login")
 def google_login():
 	"""
@@ -86,7 +84,6 @@ def confirm_email(token):
 	user.modify(confirmed=True) if user else None
 
 	return redirect(url_for("root_bp.home_page"))
-
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -138,7 +135,6 @@ def logout():
 	"""
 	flask_login.logout_user()
 	return redirect(url_for("root_bp.index"))
-
 
 
 @auth_bp.route("/new-password", methods=["GET", "POST"])

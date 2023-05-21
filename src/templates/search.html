@@ -28,12 +28,10 @@
                     <button type="button" class="btn btn-secondary" data-toggle="collapse"
                             data-target="#advancedSearch">Advanced Search
                     </button>
-
                 </form>
             </div>
             <div class="col-md-9" id="search-results">
                 {% include '_errors.html' %}
-
                 <div class="about">
                     <div class="row" style="justify-content: space-around">
                         <div class="col-md-8">
@@ -47,14 +45,10 @@
                             {# :param sort_by - 1 is Date, 2 is Salary #}
                             {% set sort_by_value = request.args.get("sort_by") %}
                             <div class="row">
-
-
                                 <div class="col-md-4">
                                     Сортувати по:
                                 </div>
                                 <div class="col-md-8">
-
-
                                     <div class="dropdown">
                                         <a class="btn btn-primary dropdown-toggle" href="#" role="button"
                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
@@ -66,7 +60,6 @@
                                             {% endif %}
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-
                                             <!-- if argument page already in url replace him to new value-->
                                             {% if sort_by_value %}
                                                 {% set url_for_date = request.url.replace('sort_by=' + sort_by_value, 'sort_by=1') %}
@@ -85,15 +78,12 @@
                                             <a class="dropdown-item" href="{{ url_for_salary }}">
                                                 Зарплаті
                                             </a>
-
-
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <div class="about_pages">
                         <p>
                             Сторінка {{ vacancies.page }} з {{ vacancies.pages }}
@@ -132,5 +122,4 @@
             });
         });
     </script>
-
 {% endblock %}

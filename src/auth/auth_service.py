@@ -14,7 +14,6 @@ def generate_confirmation_token(email: str) -> str:
     return serializer.dumps(email, salt=current_app.config['SECURITY_PASSWORD_SALT'])
 
 
-
 def get_email_and_confirm_token(token: str, expiration: int = 3600) -> str | None:
     """
     Function deserialize user email and confirm token
@@ -47,7 +46,6 @@ def find_user_by_email(email: str) -> models.User | bool:
     """
     user = models.User.objects(email=email).first()
     return user if user else None
-
 
 
 def create_user(email: str, password: str = None, confirmed: bool = False) -> models.User:

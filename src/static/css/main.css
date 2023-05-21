@@ -7,7 +7,6 @@ body {
 .search {
     color: white;
 }
-
 .custom-form-control{
     background-color: #fff;
     color: black;
@@ -36,7 +35,6 @@ label {
 textarea {
     height: 100px;
 }
-
 button {
     display: block;
     width: 100%;

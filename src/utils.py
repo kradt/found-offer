@@ -4,7 +4,6 @@ from flask import abort
 import flask_login
 
 
-
 def confirm_required(func):
     """
     Decorator checks if user is confirmed 
@@ -18,7 +17,6 @@ def confirm_required(func):
             abort(403, "Please confirm your account on mail")
 
     return wrapper
-
 
 
 def make_message(message, send_data):

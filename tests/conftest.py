@@ -107,5 +107,4 @@ def saved_vacancy(confirmed_user, vacancy):
     vacancy_in_base = models.Vacancy(**vacancy, user_id=confirmed_user.id)
     vacancy_in_base.save()
     yield vacancy_in_base
-
     models.Vacancy.objects(**vacancy).delete()

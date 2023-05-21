@@ -61,7 +61,7 @@
                                 <h6 class="card-subtitle mb-2 text-muted">{{ pattern.city }}</h6>
                             </div>
                             <div class="card-footer text-muted">
-                                <a href="{{ url_for("root_bp.delete_search_pattern", pattern_id=pattern.id) }}"
+                                <a href="{{ url_for('root_bp.delete_search_pattern', pattern_id=pattern.id) }}"
                                    class="btn btn-danger">Delete</a>
                             </div>
                         </div>
