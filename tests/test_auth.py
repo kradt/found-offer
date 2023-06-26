@@ -1,8 +1,4 @@
 import re
-import os, sys
-
-sys.path.append(os.getcwd())
-
 from src.database import models
 from src import mail
 
