@@ -4,6 +4,30 @@ body {
     margin: 0;
     color:white;
 }
+
+.preserve-whitespace {
+    white-space: pre-wrap;
+}
+
+.vacancy-container {
+    margin: 20px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    color:black;
+    border-radius: 5px;
+}
+.job-title {
+    font-size: 24px;
+    font-weight: bold;
+
+}
+.job-publish-time {
+    font-size: 16px;
+    color: #999;
+}
+.company-info {
+    margin-top: 10px;
+}
 #submit{
     width: 100%;
 }

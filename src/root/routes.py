@@ -35,7 +35,7 @@ def home_page():
 	patterns = user.auto_search
 	current_page = int(request.args.get('page', 1))
 	items_per_page = 5
-	vacancies = root_service.get_user_vacancies(user.id).paginate(page=current_page, per_page=items_per_page)
+	vacancies = root_service.get_user_vacancies(user.id).order_by("-time_publish").paginate(page=current_page, per_page=items_per_page)
 	return render_template("home.html", vacancies=vacancies, user=user, patterns=patterns)
 
 

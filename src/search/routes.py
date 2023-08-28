@@ -38,3 +38,12 @@ def find_work():
         "search.html",
         form=form,
         vacancies=vacancies)
+
+
+@search_bp.route("/vacancy/<vacancy_id>", methods=["GET", "POST"])
+def show_vacancy(vacancy_id):
+	"""
+	Route for add new vacancy
+	"""
+	vacancy = models.Vacancy.objects(id=vacancy_id).first()
+	return render_template("vacancy.html", vacancy=vacancy)

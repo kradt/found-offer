@@ -1,0 +1,26 @@
+{% extends 'base_clear.html' %}
+{% block content %}
+    <div class="container vacancy-container">
+        <div class="row">
+            <div class="col-md-12 p-4">
+                <h1 class="job-title">
+                    {{ vacancy.title }}
+                </h1>
+                <span class="job-publish-time">
+                    <i class="far fa-clock"></i> {{  vacancy.time_publish.strftime('%Y-%m-%d') }} <!-- Замість цього введіть ваш час публікації -->
+                </span>
+                <div class="company-info">
+                    <p><strong>Компанія:</strong> {{ vacancy.company }}</p>
+                    <p><strong>Місто:</strong> {{vacancy.city }}</p>
+                    <p><strong>Зарплата:</strong> 
+                        {% if vacancy.salary_from or vacancy.salary_to %}
+                            {{ vacancy.salary_from | int }} - {{ vacancy.salary_to | int }} грн
+                    {% endif %}
+                    </p>
+                </div>
+                <h3>Опис вакансії</h3>
+                <pre style="font-family: Arial, sans-serif; font-size: 16px;">{{ vacancy.description }}</pre>
+            </div>
+        </div>
+    </div>
+{% endblock %}

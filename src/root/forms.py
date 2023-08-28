@@ -20,7 +20,7 @@ class NewVacancyForm(FlaskForm):
     )
     description = TextAreaField(
         "Description",
-        validators=[DataRequired(), Length(min=50, max=1000)],
+        validators=[DataRequired(), Length(min=50, max=10000)],
         render_kw={"placeholder": "Enter description\nDo not forget to attach your contacts "}
     )
     city = StringField(

@@ -1,16 +1,21 @@
 {% macro generate_vacancy_list(vacancies, native=False) %}
     {% for vacancy in vacancies %}
+        {% if vacancy.user_id %}
+            {% set link = url_for('search_bp.show_vacancy', vacancy_id=vacancy.id) %}
+        {% else %}
+            {% set link = vacancy.link %}
+        {% endif %}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title"><a href="#">{{ vacancy.title }}</a></h5>
+                <h5 class="card-title"><a href="{{ link }}">{{ vacancy.title }}</a></h5>
                 {% if vacancy.salary_from or vacancy.salary_to %}
                     <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
                         - {{ vacancy.salary_to | int }} грн</b></h6>
                 {% endif %}
                 <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
 
-                <p class="card-text" style="color:grey">{{ vacancy.description }}</p>
-                <a href="#" class="card-link">Apply</a>
+                <p class="card-text" style="color:grey">{{ vacancy.description[:300] }}...</p>
+                <a href="{{ link }}" class="card-link">Apply</a>
             </div>
             <div class="card-footer text-muted">
                 {{ vacancy.time_publish.strftime('%Y-%m-%d') }}
