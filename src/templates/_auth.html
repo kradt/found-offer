@@ -41,11 +41,12 @@
 					<div class="form-group">
 						{{ form.submit(class="btn btn-primary") }}
 						{% if type=="register" %}
-			              	<a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary"><i class="fab fa-google me-2"></i>Register with Google</a>
+			              	<a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary mt-1 w-100">
+								Register with <i class="fab fa-google me-2"></i>oogle
+							</a>
 						{% else %}
-	                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary">
-	                            <i class="fab fa-google me-2"></i>
-	                            Login with Google
+	                        <a href="{{ url_for('auth_bp.google_login') }}" class="btn btn-secondary mt-1 w-100">
+	                            Register with <i class="fab fa-google me-2"></i>oogle
 	                        </a>
 						{% endif %}
 						<a href="{{ url_for('.reset_password') }}">
