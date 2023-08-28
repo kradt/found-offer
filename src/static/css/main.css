@@ -4,6 +4,9 @@ body {
     margin: 0;
     color:white;
 }
+#submit{
+    width: 100%;
+}
 .search {
     color: white;
 }
@@ -36,7 +39,6 @@ textarea {
     height: 100px;
 }
 button {
-    display: block;
     width: 100%;
     padding: 10px;
     margin-top: 5px;

@@ -28,7 +28,7 @@ def find_work():
         sort_value = "-salary_from"
 
     vacancies = models.Vacancy.objects(**filter_dict).order_by(sort_value)
-    if not vacancies:
+    if not vacancies and filter_dict:
         flash("Вибачте, але по вашому запиту ще немає вакансій")
 
     current_page = int(request.args.get('page', 1))

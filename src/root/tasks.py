@@ -3,12 +3,11 @@ import os
 from typing import Iterator
 from loguru import logger
 from celery import shared_task
-from flask import render_template
+from flask import render_template, current_app
 
 from src import mail
 from src.parsing import engines
 from src.database import models
-from src.config import Config
 from src.utils import make_message
 
 
@@ -94,7 +93,7 @@ def find_user_vacancies():
                 search_patterns[search_patterns.index(search_pattern)].start_search = datetime.datetime.now()
                 user.update(auto_search=search_patterns)
                 send_data = {
-                    "sender": Config.MAIL_DEFAULT_SENDER,
+                    "sender": current_app.config["MAIL_DEFAULT_SENDER"],
                     "recipients": [user.email],
                 }
                 msg = make_message("Hello dear user", send_data)
