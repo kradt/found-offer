@@ -7,7 +7,7 @@
         {% endif %}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title"><a href="{{ link }}">{{ vacancy.title }}</a></h5>
+                <h5 class="card-title"><a target="_blank" href="{{ link }}">{{ vacancy.title }}</a></h5>
                 {% if vacancy.salary_from or vacancy.salary_to %}
                     <h6 class="card-title" style="color:black"><b>{{ vacancy.salary_from | int }}
                         - {{ vacancy.salary_to | int }} грн</b></h6>
@@ -15,7 +15,7 @@
                 <h6 class="card-subtitle mb-2 text-muted">{{ vacancy.company }} | {{ vacancy.city }}</h6>
 
                 <p class="card-text" style="color:grey">{{ vacancy.description[:300] }}...</p>
-                <a href="{{ link }}" class="card-link">Apply</a>
+                <a target="_blank" href="{{ link }}" class="card-link">Apply</a>
             </div>
             <div class="card-footer text-muted">
                 {{ vacancy.time_publish.strftime('%Y-%m-%d') }}

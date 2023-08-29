@@ -62,4 +62,4 @@ def load_user(user_id):
 	"""
 	Flask login user loader for get access to restrict content
 	"""
-	return User.objects(id=user_id).get()
+	return User.objects(id=user_id).first()

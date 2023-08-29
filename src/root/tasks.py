@@ -6,7 +6,8 @@ from celery import shared_task
 from flask import render_template, current_app
 
 from src import mail
-from src.parsing import engines
+from src.parsing.engines.jobsua import JobsUA
+from src.parsing.engines.workua import WorkUA
 from src.database import models
 from src.utils import make_message
 
@@ -20,6 +21,8 @@ def save_offers_to_base(offers: list) -> int:
         if not models.Vacancy.objects(
                 title=offer.title, city=offer.city,
                 salary_from=offer.salary_from, company=offer.company):
+            offer.title = offer.title.encode('utf-8').decode('utf-8')
+            offer.description = offer.description.encode('utf-8').decode('utf-8')
             models.Vacancy(**offer.dict()).save()
             added_to_base_offers += 1
 
@@ -49,7 +52,7 @@ def parse_work_ua_to_base():
     """
     Task for start parsing WorkUA site
     """
-    parser = engines.WorkUA()
+    parser = WorkUA()
     write_offer_to_base(parser)
     logger.debug("Work UA processes were start!")
 
@@ -59,7 +62,7 @@ def parse_jobs_ua_to_base():
     """
     Task for start parsing JobsUA site
     """
-    parser = engines.JobsUA()
+    parser = JobsUA()
     write_offer_to_base(parser)
     logger.debug("Jobs UA processes were start!")
 
