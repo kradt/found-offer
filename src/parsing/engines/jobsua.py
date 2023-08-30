@@ -2,7 +2,7 @@ import re
 import datetime
 from requests_html import Element
 
-from .models import OfferModel
+from ..models import OfferModel
 from .abc import PageQuery
 
 

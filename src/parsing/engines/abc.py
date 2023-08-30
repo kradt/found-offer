@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from requests_html import HTMLSession, Element
-from .models import OfferModel
+from ..models import OfferModel
 
 
 class PageQuery(ABC):

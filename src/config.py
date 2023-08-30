@@ -10,6 +10,8 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(15))
     SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT", "password_salt")
 
+    REDIS_URL = os.getenv("REDIS_URL")
+
     MAIL_PORT = 465
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_USE_SSL = True

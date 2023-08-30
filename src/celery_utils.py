@@ -21,7 +21,7 @@ def celery_init_app(app: Flask) -> Celery:
         },
         "parse_to_base_jobs_ua": {
             "task": "src.root.tasks.parse_jobs_ua_to_base",
-            "schedule": datetime.timedelta(minutes=1)
+            "schedule": datetime.timedelta(hours=24)
         },
         "remove_old_vacancies": {
             "task": "src.root.tasks.remove_old_vacancies",

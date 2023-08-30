@@ -1,5 +1,6 @@
 import datetime
 import os
+import string
 from typing import Iterator
 from loguru import logger
 from celery import shared_task
@@ -21,8 +22,9 @@ def save_offers_to_base(offers: list) -> int:
         if not models.Vacancy.objects(
                 title=offer.title, city=offer.city,
                 salary_from=offer.salary_from, company=offer.company):
-            offer.title = offer.title.encode('utf-8').decode('utf-8')
-            offer.description = offer.description.encode('utf-8').decode('utf-8')
+            if any(not char.isalpha() and not char.isascii() for char in offer.title):
+                if any(not char.isalpha() and not char.isascii() for char in offer.description):
+                    continue
             models.Vacancy(**offer.dict()).save()
             added_to_base_offers += 1
 
