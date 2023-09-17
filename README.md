@@ -67,3 +67,6 @@ REDIS_URL=redis://redis:6379
 
 `docker-compose up`
 
+# Приклад Використання
+https://vimeo.com/manage/videos/865273646
+
